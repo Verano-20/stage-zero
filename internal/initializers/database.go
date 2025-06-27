@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Verano-20/go-crud/internal/models"
+	"github.com/Verano-20/go-crud/internal/db"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -22,15 +22,15 @@ func InitializeDatabase() *gorm.DB {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		host, user, password, dbname, port)
 
+	// Run migrations
+	if err := db.RunMigrations(dsn); err != nil {
+		log.Fatal("Failed to run migrations:", err)
+	}
+
 	// Initialize database
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
-	}
-
-	// Auto migrate the schema
-	if err := db.AutoMigrate(&models.Simple{}); err != nil {
-		log.Fatal("Failed to migrate database:", err)
 	}
 
 	return db

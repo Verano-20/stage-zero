@@ -3,6 +3,7 @@
 A simple CRUD (Create, Read, Update, Delete) REST API built with Go, using:
 - [Gin](https://github.com/gin-gonic/gin) for the web framework
 - [GORM](https://gorm.io) as the ORM
+- [Goose](https://github.com/pressly/goose) for database migrations
 - PostgreSQL as the database
 
 ## Prerequisites
@@ -78,16 +79,11 @@ docker-compose up --build
 
 This will:
 - Build the Go application
-- Start PostgreSQL database with health checks
+- Start PostgreSQL database
 - Load environment variables from `.env.docker`
+- Run database migrations automatically
 - Create a persistent volume for the database
 - Expose the API on port 8080
-- Wait for PostgreSQL to be healthy before starting the application
-
-The application includes several reliability features:
-- Health checks to ensure PostgreSQL is ready before starting the app
-- Automatic restarts if services fail
-- Persistent volume for database data
 
 To stop the services:
 ```bash
@@ -99,19 +95,46 @@ To remove the persistent volume as well:
 docker-compose down -v
 ```
 
-### Connecting to the Database
+## Database Migrations
 
-You can connect to the PostgreSQL database using any PostgreSQL client (e.g., DBeaver, psql) with these credentials:
+This project uses [Goose](https://github.com/pressly/goose) for database migrations. Migrations are stored in `internal/db/migrations` and are automatically run when the application starts.
+
+Migration files follow this format:
+```sql
+-- +goose Up
+-- SQL to run when migrating up
+CREATE TABLE example (...);
+
+-- +goose Down
+-- SQL to run when migrating down
+DROP TABLE example;
+```
+
+## Project Structure
 
 ```
-Host: localhost
-Port: 5432
-Database: go_crud
-Username: postgres
-Password: postgres
+go-crud/
+├── cmd/
+│   └── api-server/
+│       └── main.go          # Application entry point
+├── internal/
+│   ├── handlers/           # HTTP request handlers
+│   │   └── simple.go
+│   ├── models/            # Database models
+│   │   └── simple.go
+│   ├── db/               # Database management
+│   │   ├── migrate.go    # Migration helper
+│   │   └── migrations/   # SQL migration files
+│   └── initializers/     # Application initialization code
+├── scripts/
+│   └── run-local.sh      # Script to run locally
+├── .env.local           # Local environment configuration
+├── .env.docker         # Docker environment configuration
+├── Dockerfile          # Docker build instructions
+├── docker-compose.yml  # Docker Compose configuration
+├── go.mod              # Go module file
+└── README.md          # This file
 ```
-
-Note: The database must be running (either locally or in Docker) before connecting.
 
 ## API Endpoints
 
@@ -126,29 +149,6 @@ The API provides the following endpoints:
 | GET | `/simple/:id` | Get a simple resource by ID |
 | PUT | `/simple/:id` | Update a simple resource |
 | DELETE | `/simple/:id` | Delete a simple resource |
-
-## Project Structure
-
-```
-go-crud/
-├── cmd/
-│   └── api-server/
-│       └── main.go          # Application entry point
-├── internal/
-│   ├── handlers/           # HTTP request handlers
-│   │   └── simple.go
-│   ├── models/            # Database models
-│   │   └── simple.go
-│   └── initializers/      # Application initialization code
-├── scripts/
-│   └── run-local.sh       # Script to run locally
-├── .env.local            # Local environment configuration
-├── .env.docker          # Docker environment configuration
-├── Dockerfile           # Docker build instructions
-├── docker-compose.yml   # Docker Compose configuration
-├── go.mod               # Go module file
-└── README.md           # This file
-```
 
 ## Contributing
 
