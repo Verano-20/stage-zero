@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+  migrate:
+    build: .
+    env_file:
+      - .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    command: [ "./migrate", "up" ]
+    restart: "no"
+
   app:
     build: .
     ports:
@@ -10,6 +20,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   db:

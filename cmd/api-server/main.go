@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	// Initialize database
 	db := initializers.InitializeDatabase()
 
 	// Initialize router
