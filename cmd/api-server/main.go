@@ -5,8 +5,16 @@ import (
 
 	"github.com/Verano-20/go-crud/internal/initializers"
 	"github.com/Verano-20/go-crud/internal/router"
+
+	_ "github.com/Verano-20/go-crud/docs"
 )
 
+// @title           Go-CRUD API
+// @version         1.0
+// @description     This is a CRUD API for a simple application.
+
+// @host      localhost:8080
+// @BasePath  /
 func main() {
 	db := initializers.InitializeDatabase()
 	router := router.InitializeRouter(db)

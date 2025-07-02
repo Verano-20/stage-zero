@@ -17,7 +17,15 @@ func NewSimpleHandler(db *gorm.DB) *SimpleHandler {
 	return &SimpleHandler{DB: db}
 }
 
-// Create a new Simple
+// Create godoc
+// @Summary Create a new Simple
+// @Description Create a new Simple
+// @Tags simple
+// @Accept json
+// @Produce json
+// @Param body body models.SimpleForm true "Simple object"
+// @Success 201 {object} models.Simple
+// @Router /simple [post]
 func (h *SimpleHandler) Create(c *gin.Context) {
 	var simple models.Simple
 	if err := c.ShouldBindJSON(&simple); err != nil {
@@ -33,7 +41,13 @@ func (h *SimpleHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, simple)
 }
 
-// Get all Simples
+// GetAll godoc
+// @Summary Get all Simples
+// @Description Get all Simples
+// @Tags simple
+// @Produce json
+// @Success 200 {array} models.Simple
+// @Router /simple [get]
 func (h *SimpleHandler) GetAll(c *gin.Context) {
 	var simples []models.Simple
 	if err := h.DB.Find(&simples).Error; err != nil {
@@ -44,7 +58,14 @@ func (h *SimpleHandler) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, simples)
 }
 
-// Get Simple by ID
+// GetByID godoc
+// @Summary Get Simple by ID
+// @Description Get Simple by ID
+// @Tags simple
+// @Param id path int true "Simple ID"
+// @Produce json
+// @Success 200 {object} models.Simple
+// @Router /simple/{id} [get]
 func (h *SimpleHandler) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	var simple models.Simple
@@ -57,7 +78,16 @@ func (h *SimpleHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusFound, simple)
 }
 
-// Update Simple
+// Update godoc
+// @Summary Update Simple
+// @Description Update Simple
+// @Tags simple
+// @Param id path int true "Simple ID"
+// @Accept json
+// @Produce json
+// @Param body body models.SimpleForm true "Simple object"
+// @Success 200 {object} models.Simple
+// @Router /simple/{id} [put]
 func (h *SimpleHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	var simple models.Simple
@@ -80,7 +110,14 @@ func (h *SimpleHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, simple)
 }
 
-// Delete Simple
+// Delete godoc
+// @Summary Delete Simple
+// @Description Delete Simple
+// @Tags simple
+// @Param id path int true "Simple ID"
+// @Produce json
+// @Success 204
+// @Router /simple/{id} [delete]
 func (h *SimpleHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	var simple models.Simple
