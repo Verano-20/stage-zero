@@ -13,7 +13,7 @@ type SimpleHandler struct {
 	DB *gorm.DB
 }
 
-func CreateSimpleHandler(db *gorm.DB) *SimpleHandler {
+func NewSimpleHandler(db *gorm.DB) *SimpleHandler {
 	return &SimpleHandler{DB: db}
 }
 

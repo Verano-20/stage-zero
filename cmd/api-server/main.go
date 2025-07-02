@@ -3,30 +3,13 @@ package main
 import (
 	"log"
 
-	"github.com/Verano-20/go-crud/internal/handlers"
 	"github.com/Verano-20/go-crud/internal/initializers"
-
-	"github.com/gin-gonic/gin"
+	"github.com/Verano-20/go-crud/internal/router"
 )
 
 func main() {
 	db := initializers.InitializeDatabase()
-
-	// Initialize router
-	router := gin.Default()
-
-	// Initialize handlers
-	simpleHandler := handlers.CreateSimpleHandler(db)
-
-	// Routes
-	simples := router.Group("/simple")
-	{
-		simples.POST("/", simpleHandler.Create)
-		simples.GET("/", simpleHandler.GetAll)
-		simples.GET("/:id", simpleHandler.GetByID)
-		simples.PUT("/:id", simpleHandler.Update)
-		simples.DELETE("/:id", simpleHandler.Delete)
-	}
+	router := router.InitializeRouter(db)
 
 	// Start server
 	if err := router.Run(":8080"); err != nil {
