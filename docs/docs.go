@@ -54,7 +54,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Simple"
+                                "$ref": "#/definitions/model.SimpleDTO"
                             }
                         }
                     }
@@ -79,7 +79,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SimpleForm"
+                            "$ref": "#/definitions/model.SimpleForm"
                         }
                     }
                 ],
@@ -87,7 +87,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Simple"
+                            "$ref": "#/definitions/model.Simple"
                         }
                     }
                 }
@@ -116,7 +116,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Simple"
+                            "$ref": "#/definitions/model.SimpleDTO"
                         }
                     }
                 }
@@ -147,7 +147,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SimpleForm"
+                            "$ref": "#/definitions/model.SimpleForm"
                         }
                     }
                 ],
@@ -155,7 +155,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Simple"
+                            "$ref": "#/definitions/model.SimpleDTO"
                         }
                     }
                 }
@@ -187,7 +187,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.Simple": {
+        "model.Simple": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -207,7 +207,24 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SimpleForm": {
+        "model.SimpleDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SimpleForm": {
             "type": "object",
             "properties": {
                 "name": {

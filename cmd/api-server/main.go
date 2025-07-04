@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/Verano-20/go-crud/internal/initializers"
+	"github.com/Verano-20/go-crud/internal/initializer"
 	"github.com/Verano-20/go-crud/internal/router"
 
 	_ "github.com/Verano-20/go-crud/docs"
@@ -16,7 +16,7 @@ import (
 // @host      localhost:8080
 // @BasePath  /
 func main() {
-	db := initializers.InitializeDatabase()
+	db := initializer.InitializeDatabase()
 	router := router.InitializeRouter(db)
 
 	// Start server

@@ -1,20 +1,22 @@
-package handlers
+package handler
 
 import (
 	"net/http"
+	"strconv"
 
-	"github.com/Verano-20/go-crud/internal/models"
+	"github.com/Verano-20/go-crud/internal/model"
+	"github.com/Verano-20/go-crud/internal/repository"
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type SimpleHandler struct {
-	DB *gorm.DB
+	SimpleRepository *repository.SimpleRepository
 }
 
 func NewSimpleHandler(db *gorm.DB) *SimpleHandler {
-	return &SimpleHandler{DB: db}
+	return &SimpleHandler{SimpleRepository: repository.NewSimpleRepository(db)}
 }
 
 // Create godoc
@@ -23,17 +25,18 @@ func NewSimpleHandler(db *gorm.DB) *SimpleHandler {
 // @Tags simple
 // @Accept json
 // @Produce json
-// @Param body body models.SimpleForm true "Simple object"
-// @Success 201 {object} models.Simple
+// @Param body body model.SimpleForm true "Simple object"
+// @Success 201 {object} model.Simple
 // @Router /simple [post]
 func (h *SimpleHandler) Create(c *gin.Context) {
-	var simple models.Simple
-	if err := c.ShouldBindJSON(&simple); err != nil {
+	var simpleForm model.SimpleForm
+	if err := c.ShouldBindJSON(&simpleForm); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.DB.Create(&simple).Error; err != nil {
+	simple, err := h.SimpleRepository.Create(simpleForm.ToModel())
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -46,16 +49,17 @@ func (h *SimpleHandler) Create(c *gin.Context) {
 // @Description Get all Simples
 // @Tags simple
 // @Produce json
-// @Success 200 {array} models.Simple
+// @Success 200 {array} model.SimpleDTO
 // @Router /simple [get]
 func (h *SimpleHandler) GetAll(c *gin.Context) {
-	var simples []models.Simple
-	if err := h.DB.Find(&simples).Error; err != nil {
+	var simples model.Simples
+	simples, err := h.SimpleRepository.GetAll()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, simples)
+	c.JSON(http.StatusOK, simples.ToDTOs())
 }
 
 // GetByID godoc
@@ -64,18 +68,22 @@ func (h *SimpleHandler) GetAll(c *gin.Context) {
 // @Tags simple
 // @Param id path int true "Simple ID"
 // @Produce json
-// @Success 200 {object} models.Simple
+// @Success 200 {object} model.SimpleDTO
 // @Router /simple/{id} [get]
 func (h *SimpleHandler) GetByID(c *gin.Context) {
-	id := c.Param("id")
-	var simple models.Simple
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
 
-	if err := h.DB.First(&simple, id).Error; err != nil {
+	simple, err := h.SimpleRepository.GetByID(uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found"})
 		return
 	}
 
-	c.JSON(http.StatusFound, simple)
+	c.JSON(http.StatusFound, simple.ToDTO())
 }
 
 // Update godoc
@@ -85,29 +93,39 @@ func (h *SimpleHandler) GetByID(c *gin.Context) {
 // @Param id path int true "Simple ID"
 // @Accept json
 // @Produce json
-// @Param body body models.SimpleForm true "Simple object"
-// @Success 200 {object} models.Simple
+// @Param body body model.SimpleForm true "Simple object"
+// @Success 200 {object} model.SimpleDTO
 // @Router /simple/{id} [put]
 func (h *SimpleHandler) Update(c *gin.Context) {
-	id := c.Param("id")
-	var simple models.Simple
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
 
-	if err := h.DB.First(&simple, id).Error; err != nil {
+	var simpleForm model.SimpleForm
+
+	_, err = h.SimpleRepository.GetByID(uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found"})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&simple); err != nil {
+	if err := c.ShouldBindJSON(&simpleForm); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.DB.Save(&simple).Error; err != nil {
+	simple := simpleForm.ToModel()
+	simple.ID = uint(id)
+
+	simple, err = h.SimpleRepository.Update(simple)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, simple)
+	c.JSON(http.StatusOK, simple.ToDTO())
 }
 
 // Delete godoc
@@ -119,15 +137,19 @@ func (h *SimpleHandler) Update(c *gin.Context) {
 // @Success 204
 // @Router /simple/{id} [delete]
 func (h *SimpleHandler) Delete(c *gin.Context) {
-	id := c.Param("id")
-	var simple models.Simple
-
-	if err := h.DB.First(&simple, id).Error; err != nil {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+	_, err = h.SimpleRepository.GetByID(uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found"})
 		return
 	}
 
-	if err := h.DB.Delete(&simple).Error; err != nil {
+	err = h.SimpleRepository.Delete(uint(id))
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

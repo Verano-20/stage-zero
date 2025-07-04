@@ -48,7 +48,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Simple"
+                                "$ref": "#/definitions/model.SimpleDTO"
                             }
                         }
                     }
@@ -73,7 +73,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SimpleForm"
+                            "$ref": "#/definitions/model.SimpleForm"
                         }
                     }
                 ],
@@ -81,7 +81,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Simple"
+                            "$ref": "#/definitions/model.Simple"
                         }
                     }
                 }
@@ -110,7 +110,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Simple"
+                            "$ref": "#/definitions/model.SimpleDTO"
                         }
                     }
                 }
@@ -141,7 +141,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SimpleForm"
+                            "$ref": "#/definitions/model.SimpleForm"
                         }
                     }
                 ],
@@ -149,7 +149,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Simple"
+                            "$ref": "#/definitions/model.SimpleDTO"
                         }
                     }
                 }
@@ -181,7 +181,7 @@
         }
     },
     "definitions": {
-        "models.Simple": {
+        "model.Simple": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -201,7 +201,24 @@
                 }
             }
         },
-        "models.SimpleForm": {
+        "model.SimpleDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SimpleForm": {
             "type": "object",
             "properties": {
                 "name": {

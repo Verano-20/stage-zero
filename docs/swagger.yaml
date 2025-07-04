@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  models.Simple:
+  model.Simple:
     properties:
       created_at:
         type: string
@@ -13,7 +13,18 @@ definitions:
       updated_at:
         type: string
     type: object
-  models.SimpleForm:
+  model.SimpleDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.SimpleForm:
     properties:
       name:
         type: string
@@ -50,7 +61,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Simple'
+              $ref: '#/definitions/model.SimpleDTO'
             type: array
       summary: Get all Simples
       tags:
@@ -65,14 +76,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/models.SimpleForm'
+          $ref: '#/definitions/model.SimpleForm'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Simple'
+            $ref: '#/definitions/model.Simple'
       summary: Create a new Simple
       tags:
       - simple
@@ -107,7 +118,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Simple'
+            $ref: '#/definitions/model.SimpleDTO'
       summary: Get Simple by ID
       tags:
       - simple
@@ -126,14 +137,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/models.SimpleForm'
+          $ref: '#/definitions/model.SimpleForm'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Simple'
+            $ref: '#/definitions/model.SimpleDTO'
       summary: Update Simple
       tags:
       - simple
