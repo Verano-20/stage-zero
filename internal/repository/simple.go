@@ -18,7 +18,6 @@ func (r *SimpleRepository) Create(simple *model.Simple) (*model.Simple, error) {
 		return nil, err
 	}
 
-	// TODO Does this return the simple with the ID?
 	return simple, nil
 }
 

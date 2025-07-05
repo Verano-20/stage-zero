@@ -1,4 +1,4 @@
-package handler
+package controller
 
 import (
 	"net/http"
@@ -11,12 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type SimpleHandler struct {
+type SimpleController struct {
 	SimpleRepository *repository.SimpleRepository
 }
 
-func NewSimpleHandler(db *gorm.DB) *SimpleHandler {
-	return &SimpleHandler{SimpleRepository: repository.NewSimpleRepository(db)}
+func NewSimpleController(db *gorm.DB) *SimpleController {
+	return &SimpleController{SimpleRepository: repository.NewSimpleRepository(db)}
 }
 
 // Create godoc
@@ -28,7 +28,7 @@ func NewSimpleHandler(db *gorm.DB) *SimpleHandler {
 // @Param body body model.SimpleForm true "Simple object"
 // @Success 201 {object} model.Simple
 // @Router /simple [post]
-func (h *SimpleHandler) Create(c *gin.Context) {
+func (h *SimpleController) Create(c *gin.Context) {
 	var simpleForm model.SimpleForm
 	if err := c.ShouldBindJSON(&simpleForm); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -51,7 +51,7 @@ func (h *SimpleHandler) Create(c *gin.Context) {
 // @Produce json
 // @Success 200 {array} model.SimpleDTO
 // @Router /simple [get]
-func (h *SimpleHandler) GetAll(c *gin.Context) {
+func (h *SimpleController) GetAll(c *gin.Context) {
 	var simples model.Simples
 	simples, err := h.SimpleRepository.GetAll()
 	if err != nil {
@@ -70,7 +70,7 @@ func (h *SimpleHandler) GetAll(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} model.SimpleDTO
 // @Router /simple/{id} [get]
-func (h *SimpleHandler) GetByID(c *gin.Context) {
+func (h *SimpleController) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
@@ -83,7 +83,7 @@ func (h *SimpleHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusFound, simple.ToDTO())
+	c.JSON(http.StatusOK, simple.ToDTO())
 }
 
 // Update godoc
@@ -96,7 +96,7 @@ func (h *SimpleHandler) GetByID(c *gin.Context) {
 // @Param body body model.SimpleForm true "Simple object"
 // @Success 200 {object} model.SimpleDTO
 // @Router /simple/{id} [put]
-func (h *SimpleHandler) Update(c *gin.Context) {
+func (h *SimpleController) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
@@ -104,22 +104,20 @@ func (h *SimpleHandler) Update(c *gin.Context) {
 	}
 
 	var simpleForm model.SimpleForm
-
-	_, err = h.SimpleRepository.GetByID(uint(id))
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found"})
-		return
-	}
-
 	if err := c.ShouldBindJSON(&simpleForm); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	simple := simpleForm.ToModel()
-	simple.ID = uint(id)
+	existingSimple, err := h.SimpleRepository.GetByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found"})
+		return
+	}
 
-	simple, err = h.SimpleRepository.Update(simple)
+	existingSimple.Name = simpleForm.Name
+
+	simple, err := h.SimpleRepository.Update(existingSimple)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -136,7 +134,7 @@ func (h *SimpleHandler) Update(c *gin.Context) {
 // @Produce json
 // @Success 204
 // @Router /simple/{id} [delete]
-func (h *SimpleHandler) Delete(c *gin.Context) {
+func (h *SimpleController) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})

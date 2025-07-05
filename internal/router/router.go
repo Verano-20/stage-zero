@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/Verano-20/go-crud/internal/handler"
+	controller "github.com/Verano-20/go-crud/internal/controller"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -12,17 +12,17 @@ func InitializeRouter(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.GET("/health", handler.GetHealth)
+	router.GET("/health", controller.GetHealth)
 
 	// Simple
-	simpleHandler := handler.NewSimpleHandler(db)
+	simpleController := controller.NewSimpleController(db)
 	simples := router.Group("/simple")
 	{
-		simples.POST("/", simpleHandler.Create)
-		simples.GET("/", simpleHandler.GetAll)
-		simples.GET("/:id", simpleHandler.GetByID)
-		simples.PUT("/:id", simpleHandler.Update)
-		simples.DELETE("/:id", simpleHandler.Delete)
+		simples.POST("/", simpleController.Create)
+		simples.GET("/", simpleController.GetAll)
+		simples.GET("/:id", simpleController.GetByID)
+		simples.PUT("/:id", simpleController.Update)
+		simples.DELETE("/:id", simpleController.Delete)
 	}
 
 	return router
