@@ -1,0 +1,122 @@
+{
+	"info": {
+		"_postman_id": "b23c303a-4dc5-4ab5-9e98-1b77d5f6c135",
+		"name": "Go-CRUD",
+		"description": "Postman suite for all endpoints in the Go-CRUD app API.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14035595"
+	},
+	"item": [
+		{
+			"name": "simple",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"postman1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/simple",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"simple"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/simple",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"simple"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/simple/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"simple",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"postman1.1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/simple/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"simple",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/simple/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"simple",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

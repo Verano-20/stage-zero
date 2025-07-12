@@ -41,7 +41,7 @@ func (h *SimpleController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, simple)
+	c.JSON(http.StatusCreated, simple.ToDTO())
 }
 
 // GetAll godoc
