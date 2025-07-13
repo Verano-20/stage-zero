@@ -13,24 +13,24 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserController struct {
+type AuthController struct {
 	UserRepository *repository.UserRepository
 }
 
-func NewUserController(db *gorm.DB) *UserController {
-	return &UserController{UserRepository: repository.NewUserRepository(db)}
+func NewAuthController(db *gorm.DB) *AuthController {
+	return &AuthController{UserRepository: repository.NewUserRepository(db)}
 }
 
 // SignUp godoc
 // @Summary Sign up a new user
 // @Description Create a new user with email and password
-// @Tags user
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param user body model.UserForm true "User email and password"
 // @Success 200 {object} model.UserDTO "User created successfully"
 // @Router /signup [post]
-func (c *UserController) SignUp(ctx *gin.Context) {
+func (c *AuthController) SignUp(ctx *gin.Context) {
 	var userForm model.UserForm
 	if err := ctx.ShouldBindJSON(&userForm); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -55,13 +55,13 @@ func (c *UserController) SignUp(ctx *gin.Context) {
 // Login godoc
 // @Summary Login a user
 // @Description Authenticate user with email and password
-// @Tags user
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param user body model.UserForm true "User email and password"
 // @Success 204
 // @Router /login [post]
-func (c *UserController) Login(ctx *gin.Context) {
+func (c *AuthController) Login(ctx *gin.Context) {
 	var userForm model.UserForm
 	if err := ctx.ShouldBindJSON(&userForm); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

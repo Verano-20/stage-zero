@@ -15,11 +15,11 @@ func InitializeRouter(db *gorm.DB) *gin.Engine {
 	router.GET("/health", controller.GetHealth)
 
 	// Auth
-	userController := controller.NewUserController(db)
-	users := router.Group("/auth")
+	authController := controller.NewAuthController(db)
+	auth := router.Group("/auth")
 	{
-		users.POST("/signup", userController.SignUp)
-		users.POST("/login", userController.Login)
+		auth.POST("/signup", authController.SignUp)
+		auth.POST("/login", authController.Login)
 	}
 
 	// Simple
