@@ -59,7 +59,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user body model.UserForm true "User email and password"
-// @Success 204
+// @Success 200
 // @Router /login [post]
 func (c *AuthController) Login(ctx *gin.Context) {
 	var userForm model.UserForm

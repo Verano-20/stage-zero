@@ -1,18 +1,5 @@
 basePath: /
 definitions:
-  model.Simple:
-    properties:
-      created_at:
-        type: string
-      deleted_at:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      updated_at:
-        type: string
-    type: object
   model.SimpleDTO:
     properties:
       created_at:
@@ -27,6 +14,24 @@ definitions:
   model.SimpleForm:
     properties:
       name:
+        type: string
+    type: object
+  model.UserDTO:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  model.UserForm:
+    properties:
+      email:
+        type: string
+      password:
         type: string
     type: object
 host: localhost:8080
@@ -51,6 +56,48 @@ paths:
       summary: Get health
       tags:
       - health
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: User email and password
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserForm'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Login a user
+      tags:
+      - auth
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with email and password
+      parameters:
+      - description: User email and password
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/model.UserDTO'
+      summary: Sign up a new user
+      tags:
+      - auth
   /simple:
     get:
       description: Get all Simples
@@ -83,7 +130,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.Simple'
+            $ref: '#/definitions/model.SimpleDTO'
       summary: Create a new Simple
       tags:
       - simple

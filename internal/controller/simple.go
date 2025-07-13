@@ -26,7 +26,7 @@ func NewSimpleController(db *gorm.DB) *SimpleController {
 // @Accept json
 // @Produce json
 // @Param body body model.SimpleForm true "Simple object"
-// @Success 201 {object} model.Simple
+// @Success 201 {object} model.SimpleDTO
 // @Router /simple [post]
 func (c *SimpleController) Create(ctx *gin.Context) {
 	var simpleForm model.SimpleForm
