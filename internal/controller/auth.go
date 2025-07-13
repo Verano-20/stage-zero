@@ -54,7 +54,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 		var pgErr *pgconn.PgError
 		// Check if the error is a unique constraint violation (SQLSTATE 23505)
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			ctx.JSON(http.StatusConflict, response.ErrorResponse{Error: "Email already exists"})
+			ctx.JSON(http.StatusConflict, response.ErrorResponse{Error: "User already exists"})
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to create user"})

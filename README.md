@@ -1,18 +1,32 @@
 # Go CRUD API
 
-A simple CRUD (Create, Read, Update, Delete) REST API built with Go, using:
-- [Gin](https://github.com/gin-gonic/gin) for the web framework
-- [GORM](https://gorm.io) as the ORM
-- [Goose](https://github.com/pressly/goose) for database migrations
-- [Swagger](https://swagger.io) for API documentation
-- PostgreSQL as the database
+A modern, production-ready CRUD (Create, Read, Update, Delete) REST API built with Go, featuring:
+- [Gin](https://github.com/gin-gonic/gin) web framework
+- [GORM](https://gorm.io) ORM with PostgreSQL
+- [Goose](https://github.com/pressly/goose) database migrations
+- [Swagger](https://swagger.io) API documentation
+- JWT authentication with bcrypt password hashing
+- Standardized JSON response format
+- Docker containerization
 
-This project is intended to be used as a start point for backend applications.
+This project serves as a robust foundation for backend applications requiring authentication and CRUD operations.
+
+## Features
+
+- 🔐 **JWT Authentication**: Secure user registration and login
+- 📊 **CRUD Operations**: Complete resource management
+- 🚀 **RESTful API**: Clean, intuitive endpoint design
+- 📖 **Auto-generated Documentation**: Swagger UI with interactive testing
+- 🔒 **Security**: Password hashing, input validation, error handling
+- 🐳 **Docker Ready**: Containerized deployment with Docker Compose
+- 🏗️ **Clean Architecture**: Layered structure with separation of concerns
+- 📋 **Standardized Responses**: Consistent JSON response format
+- 🔄 **Database Migrations**: Version-controlled schema changes
 
 ## Prerequisites
 
 - Go 1.24 or later
-- PostgreSQL installed and running
+- PostgreSQL 13+ installed and running
 - Git (optional)
 - Docker and Docker Compose (optional)
 
@@ -152,14 +166,19 @@ go-crud/
 │   ├── config/             # Configuration management
 │   │   └── config.go
 │   ├── controller/         # HTTP request handlers
-│   │   ├── health.go
-│   │   └── simple.go
+│   │   ├── auth.go         # Authentication endpoints
+│   │   ├── health.go       # Health check endpoint
+│   │   └── simple.go       # Simple resource CRUD
 │   ├── initializer/        # Application initialization
 │   │   └── database.go
 │   ├── model/             # Database models and DTOs
-│   │   └── simple.go
+│   │   ├── simple.go      # Example resource
+│   │   └── user.go        # User model for authentication
 │   ├── repository/        # Data access layer
-│   │   └── simple.go
+│   │   ├── simple.go      # Example repository
+│   │   └── user.go        # User repository
+│   ├── response/          # Standardized response types
+│   │   └── response.go
 │   └── router/            # Route definitions
 │       └── router.go
 ├── docs/                  # Swagger documentation
@@ -183,7 +202,9 @@ The API includes comprehensive documentation and testing tools:
 
 ### Swagger Documentation
 - **Swagger UI**: `http://localhost:8080/swagger/index.html`
-- The documentation is automatically generated using [swaggo/swag](https://github.com/swaggo/swag) annotations in the controller files
+- The documentation is automatically generated using [swaggo/swag](https://github.com/swaggo/swag) annotations
+- Interactive interface for testing all endpoints
+- Complete request/response schemas with examples
 
 ### Postman Collection
 - **Collection File**: `Go-CRUD.postman_collection.json`
@@ -199,29 +220,80 @@ The API includes comprehensive documentation and testing tools:
 
 ## API Endpoints
 
-### Health Check
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Check server health status |
+### System Health
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/health` | Check server health status | No |
+
+### Authentication
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/signup` | Create a new user account | No |
+| POST | `/login` | Authenticate user and get JWT token | No |
+
 
 ### Simple Resource
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/simple` | Create a new simple resource |
-| GET | `/simple` | Get all simple resources |
-| GET | `/simple/:id` | Get a simple resource by ID |
-| PUT | `/simple/:id` | Update a simple resource |
-| DELETE | `/simple/:id` | Delete a simple resource |
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/simple` | Create a new simple resource | No |
+| GET | `/simple` | Get all simple resources | No |
+| GET | `/simple/:id` | Get a simple resource by ID | No |
+| PUT | `/simple/:id` | Update a simple resource | No |
+| DELETE | `/simple/:id` | Delete a simple resource | No |
 
-### Example API Usage
+## Response Format
 
-You can test the API using either the provided Postman collection or curl commands:
+All API responses follow a consistent format:
+
+**Success Response:**
+```json
+{
+  "message": "Operation successful",
+  "data": {
+    "id": 1,
+    "name": "Example"
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": "Error message description"
+}
+```
+
+## API Usage Examples
+
+### Authentication
+
+**Sign up a new user:**
+```bash
+curl -X POST http://localhost:8080/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "securePassword123"
+  }'
+```
+
+**Login and get JWT token:**
+```bash
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "securePassword123"
+  }'
+```
+
+### Simple Resource Management
 
 **Create a simple resource:**
 ```bash
 curl -X POST http://localhost:8080/simple \
   -H "Content-Type: application/json" \
-  -d '{"name": "Example Name"}'
+  -d '{"name": "My Simple Resource"}'
 ```
 
 **Get all resources:**
@@ -238,7 +310,7 @@ curl http://localhost:8080/simple/1
 ```bash
 curl -X PUT http://localhost:8080/simple/1 \
   -H "Content-Type: application/json" \
-  -d '{"name": "Updated Name"}'
+  -d '{"name": "Updated Resource Name"}'
 ```
 
 **Delete a resource:**
@@ -246,21 +318,69 @@ curl -X PUT http://localhost:8080/simple/1 \
 curl -X DELETE http://localhost:8080/simple/1
 ```
 
-## Architecture
+**Check server health:**
+```bash
+curl http://localhost:8080/health
+```
 
-The application follows a clean architecture pattern with clear separation of concerns:
+## Development
+
+### Generating Swagger Documentation
+
+To regenerate the Swagger documentation after making changes to the API:
+
+```bash
+# Install swag if not already installed
+go install github.com/swaggo/swag/cmd/swag@latest
+
+# Generate documentation
+swag init -g ./cmd/api-server/main.go
+```
+
+### Code Structure Guidelines
 
 - **Config**: Configuration management
 - **Initializer**: Application startup and database connection
 - **Router**: Route definitions and middleware
 - **Controllers**: Handle HTTP requests and responses
-- **Repository**: Data access layer with database operations
-- **Models**: Data structures and business logic
+- **Repositories**: Data access layer
+- **Models**: Database entities and DTOs
+- **Responses**: Standardized API response formats
+
+## Security Features
+
+- **Password Hashing**: Uses bcrypt for secure password storage
+- **JWT Authentication**: Stateless authentication with configurable secret
+- **Input Validation**: Request validation and sanitization
+- **Error Handling**: Consistent error responses without sensitive information
+- **SQL Injection Prevention**: GORM provides built-in protection
+
+### Environment Variables
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `DB_HOST` | Database host | Yes | localhost |
+| `DB_USER` | Database user | Yes | postgres |
+| `DB_PASSWORD` | Database password | Yes | postgres |
+| `DB_NAME` | Database name | Yes | go_crud |
+| `DB_PORT` | Database port | No | 5432 |
+| `JWT_SECRET` | JWT signing secret | Yes | - |
 
 ## Contributing
 
-Feel free to submit issues and pull requests.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE). 
+This project is open source and available under the [MIT License](LICENSE).
+
+## Support
+
+For questions, issues, or contributions, please:
+- Open an issue on GitHub
+- Check the Swagger documentation at `/swagger/index.html`
+- Review the Postman collection for usage examples 
