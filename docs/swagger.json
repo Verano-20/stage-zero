@@ -21,12 +21,9 @@
                 "summary": "Get health",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Server is healthy and operational\" example({\"message\": \"OK\", \"data\": null})",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/response.ApiResponse"
                         }
                     }
                 }
@@ -34,7 +31,7 @@
         },
         "/login": {
             "post": {
-                "description": "Authenticate user with email and password",
+                "description": "Authenticate a user with email and password credentials. Returns a JWT token upon successful authentication that can be used for subsequent API calls.",
                 "consumes": [
                     "application/json"
                 ],
@@ -42,44 +39,13 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
-                "summary": "Login a user",
+                "summary": "Authenticate user and generate JWT token",
                 "parameters": [
                     {
-                        "description": "User email and password",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.UserForm"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/signup": {
-            "post": {
-                "description": "Create a new user with email and password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Sign up a new user",
-                "parameters": [
-                    {
-                        "description": "User email and password",
-                        "name": "user",
+                        "description": "User login credentials",
+                        "name": "credentials",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -89,9 +55,79 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "User created successfully",
+                        "description": "Authentication successful, returns JWT token\" example({\"message\": \"Login successful\", \"data\": {\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ApiResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format\" example({\"error\": \"Invalid request format\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid email or password\" example({\"error\": \"Invalid credentials\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during authentication\" example({\"error\": \"Failed to generate token\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "Create a new user with email and password. The email must be unique.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Sign up a new user",
+                "parameters": [
+                    {
+                        "description": "User details",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UserForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User account created successfully",
                         "schema": {
                             "$ref": "#/definitions/model.UserDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or validation failed\" example({\"error\": \"Invalid request format\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Email address already exists\" example({\"error\": \"Email already exists\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during user creation\" example({\"error\": \"Failed to create user\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -99,28 +135,31 @@
         },
         "/simple": {
             "get": {
-                "description": "Get all Simples",
+                "description": "Get all Simples. Returns an array of Simple objects. Returns an empty array if none exist.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "simple"
+                    "Simple"
                 ],
                 "summary": "Get all Simples",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Simples retrieved successfully\" example({\"message\": \"Simples retrieved successfully\", \"data\": [{\"id\": 1, \"name\": \"Simple 1\"}, {\"id\": 2, \"name\": \"Simple 2\"}]})",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.SimpleDTO"
-                            }
+                            "$ref": "#/definitions/response.ApiResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while retrieving Simples\" example({\"error\": \"Failed to retrieve Simples\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new Simple",
+                "description": "Create a new Simple with the provided details. The name field is required and must be a non-empty string.",
                 "consumes": [
                     "application/json"
                 ],
@@ -128,13 +167,13 @@
                     "application/json"
                 ],
                 "tags": [
-                    "simple"
+                    "Simple"
                 ],
                 "summary": "Create a new Simple",
                 "parameters": [
                     {
-                        "description": "Simple object",
-                        "name": "body",
+                        "description": "Simple details",
+                        "name": "simple",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -144,9 +183,21 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Simple created successfully\" example({\"message\": \"Simple created successfully\", \"data\": {\"id\": 1, \"name\": \"My Simple\"}})",
                         "schema": {
-                            "$ref": "#/definitions/model.SimpleDTO"
+                            "$ref": "#/definitions/response.ApiResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format\" example({\"error\": \"Invalid request format\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during resource creation\" example({\"error\": \"Failed to create Simple\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -154,12 +205,12 @@
         },
         "/simple/{id}": {
             "get": {
-                "description": "Get Simple by ID",
+                "description": "Find a Simple by its unique ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "simple"
+                    "Simple"
                 ],
                 "summary": "Get Simple by ID",
                 "parameters": [
@@ -169,19 +220,40 @@
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1,
+                        "description": "Simple ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Simple retrieved successfully\" example({\"message\": \"Simple retrieved successfully\", \"data\": {\"id\": 1, \"name\": \"My Simple\"}})",
                         "schema": {
-                            "$ref": "#/definitions/model.SimpleDTO"
+                            "$ref": "#/definitions/response.ApiResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID format or value\" example({\"error\": \"Invalid ID\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update Simple",
+                "description": "Update a Simple identified by its ID with new data. The ID must exist and the request body must contain valid data.",
                 "consumes": [
                     "application/json"
                 ],
@@ -189,20 +261,22 @@
                     "application/json"
                 ],
                 "tags": [
-                    "simple"
+                    "Simple"
                 ],
-                "summary": "Update Simple",
+                "summary": "Update an existing Simple",
                 "parameters": [
                     {
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Simple ID",
+                        "example": 1,
+                        "description": "Simple ID to update",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Simple object",
-                        "name": "body",
+                        "description": "Updated Simple details",
+                        "name": "simple",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -212,57 +286,81 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Simple updated successfully\" example({\"message\": \"Simple updated successfully\", \"data\": {\"id\": 1, \"name\": \"Updated Simple\"}})",
                         "schema": {
-                            "$ref": "#/definitions/model.SimpleDTO"
+                            "$ref": "#/definitions/response.ApiResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID or request body format\" example({\"error\": \"Invalid request format\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during update operation\" example({\"error\": \"Failed to update Simple\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete Simple",
+                "description": "Permanently delete a Simple identified by its ID. This operation cannot be undone.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "simple"
+                    "Simple"
                 ],
-                "summary": "Delete Simple",
+                "summary": "Delete a Simple",
                 "parameters": [
                     {
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Simple ID",
+                        "example": 1,
+                        "description": "Simple ID to delete",
                         "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "Simple deleted successfully\" example({\"message\": \"Simple deleted successfully\", \"data\": null})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ApiResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID format or value\" example({\"error\": \"Invalid ID\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during deletion\" example({\"error\": \"Failed to delete Simple\"})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "model.SimpleDTO": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
         "model.SimpleForm": {
             "type": "object",
             "properties": {
@@ -295,6 +393,23 @@
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ApiResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
                     "type": "string"
                 }
             }

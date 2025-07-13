@@ -1,16 +1,5 @@
 basePath: /
 definitions:
-  model.SimpleDTO:
-    properties:
-      created_at:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      updated_at:
-        type: string
-    type: object
   model.SimpleForm:
     properties:
       name:
@@ -34,6 +23,17 @@ definitions:
       password:
         type: string
     type: object
+  response.ApiResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -48,11 +48,10 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 'Server is healthy and operational" example({"message": "OK",
+            "data": null})'
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/response.ApiResponse'
       summary: Get health
       tags:
       - health
@@ -60,29 +59,48 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate user with email and password
+      description: Authenticate a user with email and password credentials. Returns
+        a JWT token upon successful authentication that can be used for subsequent
+        API calls.
       parameters:
-      - description: User email and password
+      - description: User login credentials
         in: body
-        name: user
+        name: credentials
         required: true
         schema:
           $ref: '#/definitions/model.UserForm'
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
-      summary: Login a user
+        "200":
+          description: 'Authentication successful, returns JWT token" example({"message":
+            "Login successful", "data": {"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}})'
+          schema:
+            $ref: '#/definitions/response.ApiResponse'
+        "400":
+          description: 'Invalid request format" example({"error": "Invalid request
+            format"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: 'Invalid email or password" example({"error": "Invalid credentials"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: 'Internal server error during authentication" example({"error":
+            "Failed to generate token"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Authenticate user and generate JWT token
       tags:
-      - auth
+      - Authentication
   /signup:
     post:
       consumes:
       - application/json
-      description: Create a new user with email and password
+      description: Create a new user with email and password. The email must be unique.
       parameters:
-      - description: User email and password
+      - description: User details
         in: body
         name: user
         required: true
@@ -91,36 +109,58 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: User created successfully
+        "201":
+          description: User account created successfully
           schema:
             $ref: '#/definitions/model.UserDTO'
+        "400":
+          description: 'Invalid request format or validation failed" example({"error":
+            "Invalid request format"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "409":
+          description: 'Email address already exists" example({"error": "Email already
+            exists"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: 'Internal server error during user creation" example({"error":
+            "Failed to create user"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
       summary: Sign up a new user
       tags:
-      - auth
+      - Authentication
   /simple:
     get:
-      description: Get all Simples
+      description: Get all Simples. Returns an array of Simple objects. Returns an
+        empty array if none exist.
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 'Simples retrieved successfully" example({"message": "Simples
+            retrieved successfully", "data": [{"id": 1, "name": "Simple 1"}, {"id":
+            2, "name": "Simple 2"}]})'
           schema:
-            items:
-              $ref: '#/definitions/model.SimpleDTO'
-            type: array
+            $ref: '#/definitions/response.ApiResponse'
+        "500":
+          description: 'Internal server error while retrieving Simples" example({"error":
+            "Failed to retrieve Simples"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
       summary: Get all Simples
       tags:
-      - simple
+      - Simple
     post:
       consumes:
       - application/json
-      description: Create a new Simple
+      description: Create a new Simple with the provided details. The name field is
+        required and must be a non-empty string.
       parameters:
-      - description: Simple object
+      - description: Simple details
         in: body
-        name: body
+        name: simple
         required: true
         schema:
           $ref: '#/definitions/model.SimpleForm'
@@ -128,34 +168,32 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: 'Simple created successfully" example({"message": "Simple created
+            successfully", "data": {"id": 1, "name": "My Simple"}})'
           schema:
-            $ref: '#/definitions/model.SimpleDTO'
+            $ref: '#/definitions/response.ApiResponse'
+        "400":
+          description: 'Invalid request format" example({"error": "Invalid request
+            format"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: 'Internal server error during resource creation" example({"error":
+            "Failed to create Simple"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
       summary: Create a new Simple
       tags:
-      - simple
+      - Simple
   /simple/{id}:
     delete:
-      description: Delete Simple
+      description: Permanently delete a Simple identified by its ID. This operation
+        cannot be undone.
       parameters:
-      - description: Simple ID
+      - description: Simple ID to delete
+        example: 1
         in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-      summary: Delete Simple
-      tags:
-      - simple
-    get:
-      description: Get Simple by ID
-      parameters:
-      - description: Simple ID
-        in: path
+        minimum: 1
         name: id
         required: true
         type: integer
@@ -163,25 +201,76 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 'Simple deleted successfully" example({"message": "Simple deleted
+            successfully", "data": null})'
           schema:
-            $ref: '#/definitions/model.SimpleDTO'
-      summary: Get Simple by ID
+            $ref: '#/definitions/response.ApiResponse'
+        "400":
+          description: 'Invalid ID format or value" example({"error": "Invalid ID"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: 'Simple not found" example({"error": "Simple not found"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: 'Internal server error during deletion" example({"error": "Failed
+            to delete Simple"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Delete a Simple
       tags:
-      - simple
-    put:
-      consumes:
-      - application/json
-      description: Update Simple
+      - Simple
+    get:
+      description: Find a Simple by its unique ID
       parameters:
       - description: Simple ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Simple object
+      - description: Simple ID
+        example: 1
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'Simple retrieved successfully" example({"message": "Simple
+            retrieved successfully", "data": {"id": 1, "name": "My Simple"}})'
+          schema:
+            $ref: '#/definitions/response.ApiResponse'
+        "400":
+          description: 'Invalid ID format or value" example({"error": "Invalid ID"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: 'Simple not found" example({"error": "Simple not found"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get Simple by ID
+      tags:
+      - Simple
+    put:
+      consumes:
+      - application/json
+      description: Update a Simple identified by its ID with new data. The ID must
+        exist and the request body must contain valid data.
+      parameters:
+      - description: Simple ID to update
+        example: 1
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      - description: Updated Simple details
         in: body
-        name: body
+        name: simple
         required: true
         schema:
           $ref: '#/definitions/model.SimpleForm'
@@ -189,10 +278,25 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 'Simple updated successfully" example({"message": "Simple updated
+            successfully", "data": {"id": 1, "name": "Updated Simple"}})'
           schema:
-            $ref: '#/definitions/model.SimpleDTO'
-      summary: Update Simple
+            $ref: '#/definitions/response.ApiResponse'
+        "400":
+          description: 'Invalid ID or request body format" example({"error": "Invalid
+            request format"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: 'Simple not found" example({"error": "Simple not found"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: 'Internal server error during update operation" example({"error":
+            "Failed to update Simple"})'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Update an existing Simple
       tags:
-      - simple
+      - Simple
 swagger: "2.0"
