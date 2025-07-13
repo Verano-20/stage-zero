@@ -11,6 +11,7 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	DBPort     string
+	JwtSecret  string
 }
 
 func NewConfig() *Config {
@@ -20,13 +21,8 @@ func NewConfig() *Config {
 		DBPassword: getEnvOrDefault("DB_PASSWORD", "postgres"),
 		DBName:     getEnvOrDefault("DB_NAME", "go_crud"),
 		DBPort:     getEnvOrDefault("DB_PORT", "5432"),
+		JwtSecret:  getEnvOrDefault("JWT_SECRET", ""),
 	}
-}
-
-func GetDBConnectionString() string {
-	config := NewConfig()
-	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort)
 }
 
 // getEnvOrDefault returns the value of an environment variable or a default value if not set
@@ -35,4 +31,21 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func GetDBConnectionString() string {
+	config := NewConfig()
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort)
+}
+
+func GetJwtSecret() []byte {
+	config := NewConfig()
+	if config.JwtSecret == "" {
+		panic("JWT_SECRET environment variable is not set. Please set a strong JWT secret.")
+	}
+	if len(config.JwtSecret) < 32 {
+		panic("JWT_SECRET must be at least 32 characters long for security.")
+	}
+	return []byte(config.JwtSecret)
 }

@@ -14,6 +14,14 @@ func InitializeRouter(db *gorm.DB) *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.GET("/health", controller.GetHealth)
 
+	// Auth
+	userController := controller.NewUserController(db)
+	users := router.Group("/auth")
+	{
+		users.POST("/signup", userController.SignUp)
+		users.POST("/login", userController.Login)
+	}
+
 	// Simple
 	simpleController := controller.NewSimpleController(db)
 	simples := router.Group("/simple")

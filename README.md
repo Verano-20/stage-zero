@@ -29,6 +29,9 @@ DB_PASSWORD=postgres
 DB_NAME=go_crud
 DB_PORT=5432
 
+# JWT Secret (generate using: openssl rand -base64 32)
+JWT_SECRET=your-generated-secret-here
+
 # PostgreSQL container variables
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
@@ -43,6 +46,9 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=go_crud
 DB_PORT=5432
+
+# JWT Secret (generate using: openssl rand -base64 32)
+JWT_SECRET=your-generated-secret-here
 ```
 
 ## Setup

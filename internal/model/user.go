@@ -7,12 +7,12 @@ import (
 )
 
 type User struct {
-	ID        uint           `json:"id"`
-	Email     string         `json:"email"`
-	Password  string         `json:"password"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	ID           uint           `json:"id"`
+	Email        string         `json:"email"`
+	PasswordHash string         `json:"password_hash"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `json:"deleted_at"`
 }
 
 type UserDTO struct {
@@ -40,7 +40,7 @@ func (user *User) ToDTO() *UserDTO {
 
 func (userForm *UserForm) ToModel(hashedPassword string) *User {
 	return &User{
-		Email:    userForm.Email,
-		Password: hashedPassword,
+		Email:        userForm.Email,
+		PasswordHash: hashedPassword,
 	}
 }
