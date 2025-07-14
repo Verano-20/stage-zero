@@ -35,7 +35,7 @@ func NewAuthController(db *gorm.DB) *AuthController {
 // @Failure 400 {object} response.ErrorResponse "Invalid request format or validation failed" example({"error": "Invalid request format"})
 // @Failure 409 {object} response.ErrorResponse "Email address already exists" example({"error": "Email already exists"})
 // @Failure 500 {object} response.ErrorResponse "Internal server error during user creation" example({"error": "Failed to create user"})
-// @Router /signup [post]
+// @Router /auth/signup [post]
 func (c *AuthController) SignUp(ctx *gin.Context) {
 	var userForm model.UserForm
 	if err := ctx.ShouldBindJSON(&userForm); err != nil {
@@ -75,7 +75,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 // @Failure 400 {object} response.ErrorResponse "Invalid request format" example({"error": "Invalid request format"})
 // @Failure 401 {object} response.ErrorResponse "Invalid email or password" example({"error": "Invalid credentials"})
 // @Failure 500 {object} response.ErrorResponse "Internal server error during authentication" example({"error": "Failed to generate token"})
-// @Router /login [post]
+// @Router /auth/login [post]
 func (c *AuthController) Login(ctx *gin.Context) {
 	var userForm model.UserForm
 	if err := ctx.ShouldBindJSON(&userForm); err != nil {

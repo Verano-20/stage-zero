@@ -41,21 +41,7 @@ info:
   title: Go-CRUD API
   version: "1.0"
 paths:
-  /health:
-    get:
-      description: Get health of the server
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 'Server is healthy and operational" example({"message": "OK",
-            "data": null})'
-          schema:
-            $ref: '#/definitions/response.ApiResponse'
-      summary: Get health
-      tags:
-      - health
-  /login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -94,7 +80,7 @@ paths:
       summary: Authenticate user and generate JWT token
       tags:
       - Authentication
-  /signup:
+  /auth/signup:
     post:
       consumes:
       - application/json
@@ -131,6 +117,20 @@ paths:
       summary: Sign up a new user
       tags:
       - Authentication
+  /health:
+    get:
+      description: Get health of the server
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'Server is healthy and operational" example({"message": "OK",
+            "data": null})'
+          schema:
+            $ref: '#/definitions/response.ApiResponse'
+      summary: Get health
+      tags:
+      - Health
   /simple:
     get:
       description: Get all Simples. Returns an array of Simple objects. Returns an

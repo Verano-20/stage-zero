@@ -15,27 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/health": {
-            "get": {
-                "description": "Get health of the server",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "health"
-                ],
-                "summary": "Get health",
-                "responses": {
-                    "200": {
-                        "description": "Server is healthy and operational\" example({\"message\": \"OK\", \"data\": null})",
-                        "schema": {
-                            "$ref": "#/definitions/response.ApiResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/login": {
+        "/auth/login": {
             "post": {
                 "description": "Authenticate a user with email and password credentials. Returns a JWT token upon successful authentication that can be used for subsequent API calls.",
                 "consumes": [
@@ -87,7 +67,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/signup": {
+        "/auth/signup": {
             "post": {
                 "description": "Create a new user with email and password. The email must be unique.",
                 "consumes": [
@@ -134,6 +114,26 @@ const docTemplate = `{
                         "description": "Internal server error during user creation\" example({\"error\": \"Failed to create user\"})",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Get health of the server",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Get health",
+                "responses": {
+                    "200": {
+                        "description": "Server is healthy and operational\" example({\"message\": \"OK\", \"data\": null})",
+                        "schema": {
+                            "$ref": "#/definitions/response.ApiResponse"
                         }
                     }
                 }
