@@ -10,7 +10,7 @@ import (
 // GetHealth godoc
 // @Summary Get health
 // @Description Get health of the server
-// @Tags health
+// @Tags Health
 // @Produce json
 // @Success 200 {object} response.ApiResponse "Server is healthy and operational" example({"message": "OK", "data": null})
 // @Router /health [get]

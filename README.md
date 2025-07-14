@@ -171,6 +171,8 @@ go-crud/
 │   │   └── simple.go       # Simple resource CRUD
 │   ├── initializer/        # Application initialization
 │   │   └── database.go
+│   ├── middleware/         # HTTP middleware
+│   │   └── auth.go         # JWT authentication middleware
 │   ├── model/             # Database models and DTOs
 │   │   ├── simple.go      # Example resource
 │   │   └── user.go        # User model for authentication
@@ -228,18 +230,17 @@ The API includes comprehensive documentation and testing tools:
 ### Authentication
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/signup` | Create a new user account | No |
-| POST | `/login` | Authenticate user and get JWT token | No |
-
+| POST | `/auth/signup` | Create a new user account | No |
+| POST | `/auth/login` | Authenticate user and get JWT token | No |
 
 ### Simple Resource
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/simple` | Create a new simple resource | No |
-| GET | `/simple` | Get all simple resources | No |
-| GET | `/simple/:id` | Get a simple resource by ID | No |
-| PUT | `/simple/:id` | Update a simple resource | No |
-| DELETE | `/simple/:id` | Delete a simple resource | No |
+| POST | `/simple` | Create a new simple resource | Yes |
+| GET | `/simple` | Get all simple resources | Yes |
+| GET | `/simple/:id` | Get a simple resource by ID | Yes |
+| PUT | `/simple/:id` | Update a simple resource | Yes |
+| DELETE | `/simple/:id` | Delete a simple resource | Yes |
 
 ## Response Format
 
@@ -269,7 +270,7 @@ All API responses follow a consistent format:
 
 **Sign up a new user:**
 ```bash
-curl -X POST http://localhost:8080/signup \
+curl -X POST http://localhost:8080/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -279,7 +280,7 @@ curl -X POST http://localhost:8080/signup \
 
 **Login and get JWT token:**
 ```bash
-curl -X POST http://localhost:8080/login \
+curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -287,35 +288,52 @@ curl -X POST http://localhost:8080/login \
   }'
 ```
 
+**Response:**
+```json
+{
+  "message": "Login successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
 ### Simple Resource Management
 
-**Create a simple resource:**
+**Create a simple resource (requires authentication):**
 ```bash
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
 curl -X POST http://localhost:8080/simple \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"name": "My Simple Resource"}'
 ```
 
-**Get all resources:**
+**Get all resources (requires authentication):**
 ```bash
-curl http://localhost:8080/simple
+curl -X GET http://localhost:8080/simple \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-**Get a specific resource:**
+**Get a specific resource (requires authentication):**
 ```bash
-curl http://localhost:8080/simple/1
+curl -X GET http://localhost:8080/simple/1 \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-**Update a resource:**
+**Update a resource (requires authentication):**
 ```bash
 curl -X PUT http://localhost:8080/simple/1 \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"name": "Updated Resource Name"}'
 ```
 
-**Delete a resource:**
+**Delete a resource (requires authentication):**
 ```bash
-curl -X DELETE http://localhost:8080/simple/1
+curl -X DELETE http://localhost:8080/simple/1 \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 **Check server health:**
@@ -343,6 +361,7 @@ swag init -g ./cmd/api-server/main.go
 - **Initializer**: Application startup and database connection
 - **Router**: Route definitions and middleware
 - **Controllers**: Handle HTTP requests and responses
+- **Middleware**: HTTP middleware for authentication, logging, etc.
 - **Repositories**: Data access layer
 - **Models**: Database entities and DTOs
 - **Responses**: Standardized API response formats
@@ -351,6 +370,8 @@ swag init -g ./cmd/api-server/main.go
 
 - **Password Hashing**: Uses bcrypt for secure password storage
 - **JWT Authentication**: Stateless authentication with configurable secret
+- **Token Validation**: Comprehensive JWT validation including expiration and signing method
+- **Bearer Token Format**: Standard Authorization header format support
 - **Input Validation**: Request validation and sanitization
 - **Error Handling**: Consistent error responses without sensitive information
 - **SQL Injection Prevention**: GORM provides built-in protection

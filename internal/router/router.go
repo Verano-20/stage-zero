@@ -1,7 +1,8 @@
 package router
 
 import (
-	controller "github.com/Verano-20/go-crud/internal/controller"
+	"github.com/Verano-20/go-crud/internal/controller"
+	"github.com/Verano-20/go-crud/internal/middleware"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -10,6 +11,7 @@ import (
 
 func InitializeRouter(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
+	authMiddleware := middleware.NewAuthMiddleware(db)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.GET("/health", controller.GetHealth)
@@ -24,7 +26,7 @@ func InitializeRouter(db *gorm.DB) *gin.Engine {
 
 	// Simple
 	simpleController := controller.NewSimpleController(db)
-	simples := router.Group("/simple")
+	simples := router.Group("/simple", authMiddleware.AuthenticateRequest)
 	{
 		simples.POST("/", simpleController.Create)
 		simples.GET("/", simpleController.GetAll)
