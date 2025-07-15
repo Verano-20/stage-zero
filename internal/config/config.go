@@ -6,22 +6,24 @@ import (
 )
 
 type Config struct {
-	DBHost     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBPort     string
-	JwtSecret  string
+	Environment string
+	DBHost      string
+	DBUser      string
+	DBPassword  string
+	DBName      string
+	DBPort      string
+	JwtSecret   string
 }
 
 func NewConfig() *Config {
 	return &Config{
-		DBHost:     getEnvOrDefault("DB_HOST", "localhost"),
-		DBUser:     getEnvOrDefault("DB_USER", "postgres"),
-		DBPassword: getEnvOrDefault("DB_PASSWORD", "postgres"),
-		DBName:     getEnvOrDefault("DB_NAME", "go_crud"),
-		DBPort:     getEnvOrDefault("DB_PORT", "5432"),
-		JwtSecret:  getEnvOrDefault("JWT_SECRET", ""),
+		Environment: getEnvOrDefault("ENVIRONMENT", "develop"),
+		DBHost:      getEnvOrDefault("DB_HOST", "localhost"),
+		DBUser:      getEnvOrDefault("DB_USER", "postgres"),
+		DBPassword:  getEnvOrDefault("DB_PASSWORD", "postgres"),
+		DBName:      getEnvOrDefault("DB_NAME", "go_crud"),
+		DBPort:      getEnvOrDefault("DB_PORT", "5432"),
+		JwtSecret:   getEnvOrDefault("JWT_SECRET", ""),
 	}
 }
 
@@ -31,6 +33,11 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func GetEnvironment() string {
+	config := NewConfig()
+	return config.Environment
 }
 
 func GetDBConnectionString() string {

@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"go.uber.org/zap/zapcore"
 	"gorm.io/gorm"
 )
 
@@ -43,4 +44,24 @@ func (userForm *UserForm) ToModel(hashedPassword string) *User {
 		Email:        userForm.Email,
 		PasswordHash: hashedPassword,
 	}
+}
+
+func (user *User) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+	enc.AddUint("id", user.ID)
+	enc.AddString("email", user.Email)
+	enc.AddTime("created_at", user.CreatedAt)
+	enc.AddTime("updated_at", user.UpdatedAt)
+	enc.AddTime("deleted_at", user.DeletedAt.Time)
+	return nil
+}
+
+func (userForm *UserForm) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+	enc.AddString("email", userForm.Email)
+	if userForm.Password != "" {
+		enc.AddString("password", "[PROVIDED]")
+		enc.AddInt("password_length", len(userForm.Password))
+	} else {
+		enc.AddString("password", "[NOT PROVIDED]")
+	}
+	return nil
 }

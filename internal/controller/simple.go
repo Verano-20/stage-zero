@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/repository"
 	"github.com/Verano-20/go-crud/internal/response"
-	"gorm.io/gorm"
-
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type SimpleController struct {
@@ -32,17 +33,27 @@ func NewSimpleController(db *gorm.DB) *SimpleController {
 // @Failure 500 {object} response.ErrorResponse "Internal server error during resource creation" example({"error": "Failed to create Simple"})
 // @Router /simple [post]
 func (c *SimpleController) Create(ctx *gin.Context) {
+	log := logger.GetFromContext(ctx)
+
 	var simpleForm model.SimpleForm
 	if err := ctx.ShouldBindJSON(&simpleForm); err != nil {
+		log.Warn("Invalid create request format", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid request format"})
 		return
 	}
 
+	log.Debug("Creating Simple...", zap.Object("simple", &simpleForm))
+
 	simple, err := c.SimpleRepository.Create(simpleForm.ToModel())
 	if err != nil {
+		log.Error("Failed to create Simple",
+			zap.Object("simple", &simpleForm),
+			zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to create Simple"})
 		return
 	}
+
+	log.Debug("Simple created successfully", zap.Object("simple", simple))
 
 	ctx.JSON(http.StatusCreated, response.ApiResponse{Message: "Simple created successfully", Data: simple.ToDTO()})
 }
@@ -56,12 +67,19 @@ func (c *SimpleController) Create(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Internal server error while retrieving Simples" example({"error": "Failed to retrieve Simples"})
 // @Router /simple [get]
 func (c *SimpleController) GetAll(ctx *gin.Context) {
+	log := logger.GetFromContext(ctx)
+
+	log.Debug("Retrieving all Simples")
+
 	var simples model.Simples
 	simples, err := c.SimpleRepository.GetAll()
 	if err != nil {
+		log.Error("Failed to retrieve Simples", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to retrieve Simples"})
 		return
 	}
+
+	log.Debug("Simples retrieved successfully", zap.Int("count", len(simples)))
 
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simples retrieved successfully", Data: simples.ToDTOs()})
 }
@@ -78,17 +96,26 @@ func (c *SimpleController) GetAll(ctx *gin.Context) {
 // @Failure 404 {object} response.ErrorResponse "Simple not found" example({"error": "Simple not found"})
 // @Router /simple/{id} [get]
 func (c *SimpleController) GetByID(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	log := logger.GetFromContext(ctx)
+
+	idParam := ctx.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
+		log.Warn("Invalid ID format for get by id", zap.String("id_param", idParam), zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid ID"})
 		return
 	}
 
+	log.Debug("Retrieving Simple by ID", zap.Uint64("id", id))
+
 	simple, err := c.SimpleRepository.GetByID(uint(id))
 	if err != nil {
+		log.Warn("Simple not found", zap.Uint64("id", id), zap.Error(err))
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
 	}
+
+	log.Debug("Simple retrieved successfully", zap.Object("simple", simple))
 
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simple retrieved successfully", Data: simple.ToDTO()})
 }
@@ -107,31 +134,46 @@ func (c *SimpleController) GetByID(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Internal server error during update operation" example({"error": "Failed to update Simple"})
 // @Router /simple/{id} [put]
 func (c *SimpleController) Update(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	log := logger.GetFromContext(ctx)
+
+	idParam := ctx.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
+		log.Warn("Invalid ID format for update", zap.String("id_param", idParam), zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid ID"})
 		return
 	}
 
 	var simpleForm model.SimpleForm
 	if err := ctx.ShouldBindJSON(&simpleForm); err != nil {
+		log.Warn("Invalid update request format", zap.Uint64("id", id), zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid request format"})
 		return
 	}
 
 	existingSimple, err := c.SimpleRepository.GetByID(uint(id))
 	if err != nil {
+		log.Warn("Simple not found for update", zap.Uint64("id", id), zap.Error(err))
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
 	}
 
-	existingSimple.Name = simpleForm.Name
+	log.Debug("Updating Simple",
+		zap.Object("existing", existingSimple),
+		zap.Object("update", &simpleForm))
 
+	existingSimple.Name = simpleForm.Name
 	simple, err := c.SimpleRepository.Update(existingSimple)
 	if err != nil {
+		log.Error("Failed to update Simple",
+			zap.Object("existing", existingSimple),
+			zap.Object("update", &simpleForm),
+			zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to update Simple"})
 		return
 	}
+
+	log.Debug("Simple updated successfully", zap.Object("updated", simple))
 
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simple updated successfully", Data: simple.ToDTO()})
 }
@@ -148,22 +190,35 @@ func (c *SimpleController) Update(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Internal server error during deletion" example({"error": "Failed to delete Simple"})
 // @Router /simple/{id} [delete]
 func (c *SimpleController) Delete(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	log := logger.GetFromContext(ctx)
+
+	idParam := ctx.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
+		log.Warn("Invalid ID format for delete", zap.String("id_param", idParam), zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid ID"})
 		return
 	}
-	_, err = c.SimpleRepository.GetByID(uint(id))
+
+	existingSimple, err := c.SimpleRepository.GetByID(uint(id))
 	if err != nil {
+		log.Warn("Simple not found for deletion", zap.Uint64("id", id), zap.Error(err))
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
 	}
 
+	log.Debug("Deleting Simple", zap.Object("simple", existingSimple))
+
 	err = c.SimpleRepository.Delete(uint(id))
 	if err != nil {
+		log.Error("Failed to delete Simple",
+			zap.Object("simple", existingSimple),
+			zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to delete Simple"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simple deleted successfully"})
+	log.Debug("Simple deleted successfully", zap.Object("simple", existingSimple))
+
+	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simple deleted successfully", Data: nil})
 }

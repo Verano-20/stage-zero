@@ -10,7 +10,10 @@ import (
 )
 
 func InitializeRouter(db *gorm.DB) *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
+	router.Use(middleware.LoggingMiddleware())
+
 	authMiddleware := middleware.NewAuthMiddleware(db)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

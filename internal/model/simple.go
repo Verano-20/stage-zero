@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"go.uber.org/zap/zapcore"
 	"gorm.io/gorm"
 )
 
@@ -53,4 +54,17 @@ func (simples Simples) ToDTOs() []*SimpleDTO {
 // Explicitly tell GORM this is a read-only model
 func (Simple) TableName() string {
 	return "simples"
+}
+
+func (s *Simple) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+	enc.AddUint("id", s.ID)
+	enc.AddString("name", s.Name)
+	enc.AddTime("created_at", s.CreatedAt)
+	enc.AddTime("updated_at", s.UpdatedAt)
+	return nil
+}
+
+func (s *SimpleForm) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+	enc.AddString("name", s.Name)
+	return nil
 }
