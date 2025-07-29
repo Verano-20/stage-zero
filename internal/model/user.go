@@ -51,7 +51,11 @@ func (user *User) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("email", user.Email)
 	enc.AddTime("created_at", user.CreatedAt)
 	enc.AddTime("updated_at", user.UpdatedAt)
-	enc.AddTime("deleted_at", user.DeletedAt.Time)
+	if user.DeletedAt.Valid {
+		enc.AddTime("deleted_at", user.DeletedAt.Time)
+	} else {
+		enc.AddString("deleted_at", "null")
+	}
 	return nil
 }
 
