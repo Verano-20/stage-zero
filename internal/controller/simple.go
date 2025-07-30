@@ -6,19 +6,19 @@ import (
 
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/internal/repository"
 	"github.com/Verano-20/go-crud/internal/response"
+	"github.com/Verano-20/go-crud/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type SimpleController struct {
-	SimpleRepository *repository.SimpleRepository
+	SimpleService *service.SimpleService
 }
 
 func NewSimpleController(db *gorm.DB) *SimpleController {
-	return &SimpleController{SimpleRepository: repository.NewSimpleRepository(db)}
+	return &SimpleController{SimpleService: service.NewSimpleService(db)}
 }
 
 // Create godoc
@@ -42,18 +42,11 @@ func (c *SimpleController) Create(ctx *gin.Context) {
 		return
 	}
 
-	log.Debug("Creating Simple...", zap.Object("simple", &simpleForm))
-
-	simple, err := c.SimpleRepository.Create(simpleForm.ToModel())
+	simple, err := c.SimpleService.CreateSimple(log, simpleForm)
 	if err != nil {
-		log.Error("Failed to create Simple",
-			zap.Object("simple", &simpleForm),
-			zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to create Simple"})
 		return
 	}
-
-	log.Debug("Simple created successfully", zap.Object("simple", simple))
 
 	ctx.JSON(http.StatusCreated, response.ApiResponse{Message: "Simple created successfully", Data: simple.ToDTO()})
 }
@@ -69,17 +62,11 @@ func (c *SimpleController) Create(ctx *gin.Context) {
 func (c *SimpleController) GetAll(ctx *gin.Context) {
 	log := logger.GetFromContext(ctx)
 
-	log.Debug("Retrieving all Simples")
-
-	var simples model.Simples
-	simples, err := c.SimpleRepository.GetAll()
+	simples, err := c.SimpleService.GetAllSimples(log)
 	if err != nil {
-		log.Error("Failed to retrieve Simples", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to retrieve Simples"})
 		return
 	}
-
-	log.Debug("Simples retrieved successfully", zap.Int("count", len(simples)))
 
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simples retrieved successfully", Data: simples.ToDTOs()})
 }
@@ -106,16 +93,11 @@ func (c *SimpleController) GetByID(ctx *gin.Context) {
 		return
 	}
 
-	log.Debug("Retrieving Simple by ID", zap.Uint64("id", id))
-
-	simple, err := c.SimpleRepository.GetByID(uint(id))
+	simple, err := c.SimpleService.GetSimpleByID(log, id)
 	if err != nil {
-		log.Warn("Simple not found", zap.Uint64("id", id), zap.Error(err))
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
 	}
-
-	log.Debug("Simple retrieved successfully", zap.Object("simple", simple))
 
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simple retrieved successfully", Data: simple.ToDTO()})
 }
@@ -151,29 +133,17 @@ func (c *SimpleController) Update(ctx *gin.Context) {
 		return
 	}
 
-	existingSimple, err := c.SimpleRepository.GetByID(uint(id))
+	existingSimple, err := c.SimpleService.GetSimpleByID(log, id)
 	if err != nil {
-		log.Warn("Simple not found for update", zap.Uint64("id", id), zap.Error(err))
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
 	}
 
-	log.Debug("Updating Simple",
-		zap.Object("existing", existingSimple),
-		zap.Object("update", &simpleForm))
-
-	existingSimple.Name = simpleForm.Name
-	simple, err := c.SimpleRepository.Update(existingSimple)
+	simple, err := c.SimpleService.UpdateSimple(log, existingSimple, simpleForm)
 	if err != nil {
-		log.Error("Failed to update Simple",
-			zap.Object("existing", existingSimple),
-			zap.Object("update", &simpleForm),
-			zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to update Simple"})
 		return
 	}
-
-	log.Debug("Simple updated successfully", zap.Object("updated", simple))
 
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simple updated successfully", Data: simple.ToDTO()})
 }
@@ -200,25 +170,17 @@ func (c *SimpleController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	existingSimple, err := c.SimpleRepository.GetByID(uint(id))
+	existingSimple, err := c.SimpleService.GetSimpleByID(log, id)
 	if err != nil {
-		log.Warn("Simple not found for deletion", zap.Uint64("id", id), zap.Error(err))
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
 	}
 
-	log.Debug("Deleting Simple", zap.Object("simple", existingSimple))
-
-	err = c.SimpleRepository.Delete(uint(id))
+	err = c.SimpleService.DeleteSimple(log, existingSimple)
 	if err != nil {
-		log.Error("Failed to delete Simple",
-			zap.Object("simple", existingSimple),
-			zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to delete Simple"})
 		return
 	}
-
-	log.Debug("Simple deleted successfully", zap.Object("simple", existingSimple))
 
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Simple deleted successfully", Data: nil})
 }
