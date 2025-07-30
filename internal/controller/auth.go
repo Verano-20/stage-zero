@@ -3,27 +3,24 @@ package controller
 import (
 	"errors"
 	"net/http"
-	"time"
 
-	"github.com/Verano-20/go-crud/internal/config"
+	"github.com/Verano-20/go-crud/internal/err"
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/internal/repository"
 	"github.com/Verano-20/go-crud/internal/response"
+	"github.com/Verano-20/go-crud/internal/service"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/jackc/pgx/v5/pgconn"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type AuthController struct {
-	UserRepository *repository.UserRepository
+	UserService *service.UserService
+	AuthService *service.AuthService
 }
 
 func NewAuthController(db *gorm.DB) *AuthController {
-	return &AuthController{UserRepository: repository.NewUserRepository(db)}
+	return &AuthController{UserService: service.NewUserService(db), AuthService: service.NewAuthService(db)}
 }
 
 // SignUp godoc
@@ -42,36 +39,28 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 	log := logger.GetFromContext(ctx)
 
 	var userForm model.UserForm
-	if err := ctx.ShouldBindJSON(&userForm); err != nil {
-		log.Warn("Invalid signup request format", zap.Error(err))
+	if formErr := ctx.ShouldBindJSON(&userForm); formErr != nil {
+		log.Warn("Invalid signup request format", zap.Error(formErr))
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid request format"})
 		return
 	}
 
-	log.Debug("Processing User signup...", zap.Object("user", &userForm))
-
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(userForm.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Error("Failed to hash password", zap.Object("user", &userForm), zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to process password"})
-		return
-	}
-
-	user, err := c.UserRepository.Create(userForm.ToModel(string(passwordHash)))
-	if err != nil {
-		var pgErr *pgconn.PgError
-		// Check if the error is a unique constraint violation (SQLSTATE 23505)
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			log.Warn("User signup failed - email already in use", zap.Object("user", &userForm), zap.Error(err))
-			ctx.JSON(http.StatusConflict, response.ErrorResponse{Error: "User already exists"})
-			return
+	user, createErr := c.UserService.CreateUser(log, userForm)
+	if createErr != nil {
+		var apiError *err.ApiError
+		if errors.As(createErr, &apiError) {
+			switch apiError.Type {
+			case err.ErrorTypePasswordHash:
+				ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to process password"})
+				return
+			case err.ErrorTypeEmailExists:
+				ctx.JSON(http.StatusConflict, response.ErrorResponse{Error: "User already exists"})
+				return
+			}
 		}
-		log.Error("Failed to create User in database", zap.Object("user", &userForm), zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to create User"})
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to create user"})
 		return
 	}
-
-	log.Debug("User signup successful", zap.Object("user", user))
 
 	ctx.JSON(http.StatusCreated, user.ToDTO())
 }
@@ -98,35 +87,17 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	log.Debug("Processing User login...", zap.Object("user", &userForm))
-
-	user, err := c.UserRepository.GetByEmail(userForm.Email)
+	user, err := c.AuthService.ValidateUserCredentials(log, userForm)
 	if err != nil {
-		log.Warn("Login failed - User not found", zap.Object("user", &userForm), zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "Invalid credentials"})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(userForm.Password)); err != nil {
-		log.Warn("Login failed - invalid password", zap.Object("user", &userForm), zap.Error(err))
-		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "Invalid credentials"})
-		return
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.ID,
-		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	tokenString, err := token.SignedString(config.GetJwtSecret())
+	tokenString, err := c.AuthService.GenerateTokenString(log, user)
 	if err != nil {
-		log.Error("Failed to generate JWT token", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to generate token"})
 		return
 	}
-
-	log.Debug("User login successful", zap.Object("user", user))
 
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Login successful", Data: map[string]string{"token": tokenString}})
 }
