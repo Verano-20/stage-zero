@@ -4,8 +4,10 @@ import (
 	"errors"
 
 	"github.com/Verano-20/go-crud/internal/err"
+	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/repository"
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgconn"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -20,7 +22,9 @@ func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{UserRepository: repository.NewUserRepository(db)}
 }
 
-func (s *UserService) CreateUser(log *zap.Logger, userForm model.UserForm) (user *model.User, createErr error) {
+func (s *UserService) CreateUser(ctx *gin.Context, userForm model.UserForm) (user *model.User, createErr error) {
+	log := logger.GetFromContext(ctx)
+
 	log.Debug("Creating User...", zap.Object("user", &userForm))
 
 	passwordHash, hashErr := bcrypt.GenerateFromPassword([]byte(userForm.Password), bcrypt.DefaultCost)
@@ -45,7 +49,9 @@ func (s *UserService) CreateUser(log *zap.Logger, userForm model.UserForm) (user
 	return user, nil
 }
 
-func (s *UserService) GetUserByEmail(log *zap.Logger, email string) (user *model.User, err error) {
+func (s *UserService) GetUserByEmail(ctx *gin.Context, email string) (user *model.User, err error) {
+	log := logger.GetFromContext(ctx)
+
 	log.Debug("Getting User by email...", zap.String("email", email))
 
 	user, err = s.UserRepository.GetByEmail(email)

@@ -42,7 +42,7 @@ func (c *SimpleController) Create(ctx *gin.Context) {
 		return
 	}
 
-	simple, err := c.SimpleService.CreateSimple(log, simpleForm)
+	simple, err := c.SimpleService.CreateSimple(ctx, simpleForm)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to create Simple"})
 		return
@@ -60,9 +60,7 @@ func (c *SimpleController) Create(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Internal server error while retrieving Simples" example({"error": "Failed to retrieve Simples"})
 // @Router /simple [get]
 func (c *SimpleController) GetAll(ctx *gin.Context) {
-	log := logger.GetFromContext(ctx)
-
-	simples, err := c.SimpleService.GetAllSimples(log)
+	simples, err := c.SimpleService.GetAllSimples(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to retrieve Simples"})
 		return
@@ -93,7 +91,7 @@ func (c *SimpleController) GetByID(ctx *gin.Context) {
 		return
 	}
 
-	simple, err := c.SimpleService.GetSimpleByID(log, id)
+	simple, err := c.SimpleService.GetSimpleByID(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
@@ -133,13 +131,13 @@ func (c *SimpleController) Update(ctx *gin.Context) {
 		return
 	}
 
-	existingSimple, err := c.SimpleService.GetSimpleByID(log, id)
+	existingSimple, err := c.SimpleService.GetSimpleByID(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
 	}
 
-	simple, err := c.SimpleService.UpdateSimple(log, existingSimple, simpleForm)
+	simple, err := c.SimpleService.UpdateSimple(ctx, existingSimple, simpleForm)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to update Simple"})
 		return
@@ -170,13 +168,13 @@ func (c *SimpleController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	existingSimple, err := c.SimpleService.GetSimpleByID(log, id)
+	existingSimple, err := c.SimpleService.GetSimpleByID(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, response.ErrorResponse{Error: "Simple not found"})
 		return
 	}
 
-	err = c.SimpleService.DeleteSimple(log, existingSimple)
+	err = c.SimpleService.DeleteSimple(ctx, existingSimple)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to delete Simple"})
 		return

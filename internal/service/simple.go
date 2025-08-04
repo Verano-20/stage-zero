@@ -1,8 +1,10 @@
 package service
 
 import (
+	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/repository"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -15,7 +17,9 @@ func NewSimpleService(db *gorm.DB) *SimpleService {
 	return &SimpleService{SimpleRepository: repository.NewSimpleRepository(db)}
 }
 
-func (s *SimpleService) CreateSimple(log *zap.Logger, simpleForm model.SimpleForm) (*model.Simple, error) {
+func (s *SimpleService) CreateSimple(ctx *gin.Context, simpleForm model.SimpleForm) (*model.Simple, error) {
+	log := logger.GetFromContext(ctx)
+
 	log.Debug("Creating Simple...", zap.Object("simple", &simpleForm))
 
 	simple, err := s.SimpleRepository.Create(simpleForm.ToModel())
@@ -30,7 +34,9 @@ func (s *SimpleService) CreateSimple(log *zap.Logger, simpleForm model.SimpleFor
 	return simple, nil
 }
 
-func (s *SimpleService) GetAllSimples(log *zap.Logger) (model.Simples, error) {
+func (s *SimpleService) GetAllSimples(ctx *gin.Context) (model.Simples, error) {
+	log := logger.GetFromContext(ctx)
+
 	log.Debug("Retrieving all Simples")
 
 	simples, err := s.SimpleRepository.GetAll()
@@ -43,7 +49,9 @@ func (s *SimpleService) GetAllSimples(log *zap.Logger) (model.Simples, error) {
 	return simples, nil
 }
 
-func (s *SimpleService) GetSimpleByID(log *zap.Logger, id uint64) (*model.Simple, error) {
+func (s *SimpleService) GetSimpleByID(ctx *gin.Context, id uint64) (*model.Simple, error) {
+	log := logger.GetFromContext(ctx)
+
 	log.Debug("Retrieving Simple by ID", zap.Uint64("id", id))
 
 	simple, err := s.SimpleRepository.GetByID(uint(id))
@@ -56,7 +64,9 @@ func (s *SimpleService) GetSimpleByID(log *zap.Logger, id uint64) (*model.Simple
 	return simple, nil
 }
 
-func (s *SimpleService) UpdateSimple(log *zap.Logger, existingSimple *model.Simple, simpleForm model.SimpleForm) (*model.Simple, error) {
+func (s *SimpleService) UpdateSimple(ctx *gin.Context, existingSimple *model.Simple, simpleForm model.SimpleForm) (*model.Simple, error) {
+	log := logger.GetFromContext(ctx)
+
 	log.Debug("Updating Simple",
 		zap.Object("existing", existingSimple),
 		zap.Object("update", &simpleForm))
@@ -76,7 +86,9 @@ func (s *SimpleService) UpdateSimple(log *zap.Logger, existingSimple *model.Simp
 	return simple, nil
 }
 
-func (s *SimpleService) DeleteSimple(log *zap.Logger, existingSimple *model.Simple) error {
+func (s *SimpleService) DeleteSimple(ctx *gin.Context, existingSimple *model.Simple) error {
+	log := logger.GetFromContext(ctx)
+
 	log.Debug("Deleting Simple", zap.Object("simple", existingSimple))
 
 	err := s.SimpleRepository.Delete(existingSimple.ID)

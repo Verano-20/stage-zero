@@ -7,34 +7,35 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var Logger *zap.Logger
+var globalLogger *zap.Logger
 
-func Init() {
+func InitLogger() {
 	var err error
 
-	env := config.GetEnvironment()
+	config := config.Get()
+	env := config.Environment
 
 	if env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 
-		config := zap.NewProductionConfig()
-		config.EncoderConfig.TimeKey = "timestamp"
-		config.EncoderConfig.MessageKey = "message"
-		config.EncoderConfig.LevelKey = "level"
-		config.EncoderConfig.CallerKey = "caller"
+		zapConfig := zap.NewProductionConfig()
+		zapConfig.EncoderConfig.TimeKey = "timestamp"
+		zapConfig.EncoderConfig.MessageKey = "message"
+		zapConfig.EncoderConfig.LevelKey = "level"
+		zapConfig.EncoderConfig.CallerKey = "caller"
 
-		Logger, err = config.Build(
+		globalLogger, err = zapConfig.Build(
 			zap.AddCaller(),
 			zap.AddStacktrace(zapcore.ErrorLevel),
 		)
 	} else {
 		gin.SetMode(gin.DebugMode)
 
-		config := zap.NewDevelopmentConfig()
-		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+		zapConfig := zap.NewDevelopmentConfig()
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
-		Logger, err = config.Build(
+		globalLogger, err = zapConfig.Build(
 			zap.AddCaller(),
 			zap.AddStacktrace(zapcore.ErrorLevel),
 		)
@@ -44,12 +45,14 @@ func Init() {
 		panic("Failed to initialize logger: " + err.Error())
 	}
 
-	zap.ReplaceGlobals(Logger)
+	zap.ReplaceGlobals(globalLogger)
 }
 
-// Get returns the global logger instance
 func Get() *zap.Logger {
-	return Logger
+	if globalLogger == nil {
+		panic("Logger not initialized")
+	}
+	return globalLogger
 }
 
 func GetFromContext(ctx *gin.Context) *zap.Logger {
@@ -63,7 +66,7 @@ func GetFromContext(ctx *gin.Context) *zap.Logger {
 
 // Sync flushes any buffered log entries
 func Sync() {
-	if Logger != nil {
-		Logger.Sync()
+	if globalLogger != nil {
+		globalLogger.Sync()
 	}
 }

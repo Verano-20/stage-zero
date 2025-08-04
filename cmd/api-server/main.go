@@ -1,17 +1,22 @@
 package main
 
 import (
-	"github.com/Verano-20/go-crud/internal/initializer"
+	"fmt"
+
+	"github.com/Verano-20/go-crud/internal/config"
+	"github.com/Verano-20/go-crud/internal/database"
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/router"
+	"github.com/Verano-20/go-crud/internal/telemetry"
 	"go.uber.org/zap"
 
 	_ "github.com/Verano-20/go-crud/docs"
 )
 
-const (
-	port = "8080"
-)
+func init() {
+	config.InitConfig()
+	logger.InitLogger()
+}
 
 // @title           Go-CRUD API
 // @version         1.0
@@ -20,22 +25,23 @@ const (
 // @host      localhost:8080
 // @BasePath  /
 func main() {
-	logger.Init()
-	defer logger.Sync()
+	config := config.Get()
 	log := logger.Get()
+	defer logger.Sync()
 
-	log.Info("Starting Go-CRUD API", zap.String("version", "1.0"), zap.String("port", port))
+	log.Info(fmt.Sprintf("Starting %s", config.ServiceName),
+		zap.String("service_name", config.ServiceName),
+		zap.String("service_version", config.ServiceVersion),
+		zap.String("port", config.ServicePort),
+	)
 
-	log.Info("Initializing database connection...")
-	db := initializer.InitializeDatabase()
-	log.Info("Database connection established")
+	telemetry.InitTelemetry()
+	db := database.InitDatabase()
+	router := router.InitRouter(db)
 
-	log.Info("Initializing routes...")
-	router := router.InitializeRouter(db)
-	log.Info("Routes configured")
-
-	log.Info("Server starting", zap.String("address", ":"+port))
-	if err := router.Run(":" + port); err != nil {
+	address := ":" + config.ServicePort
+	log.Info("Server starting", zap.String("address", address))
+	if err := router.Run(address); err != nil {
 		log.Fatal("Failed to start server", zap.Error(err))
 	}
 }

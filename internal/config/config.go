@@ -5,49 +5,81 @@ import (
 	"os"
 )
 
+var globalConfig *Config
+
 type Config struct {
-	Environment string
-	DBHost      string
-	DBUser      string
-	DBPassword  string
-	DBName      string
-	DBPort      string
-	JwtSecret   string
+	ServiceName    string
+	ServiceVersion string
+	ServicePort    string
+	Environment    string
+	JwtSecret      string
+	Database       DatabaseConfig
+	Telemetry      TelemetryConfig
 }
 
-func NewConfig() *Config {
-	return &Config{
-		Environment: getEnvOrDefault("ENVIRONMENT", "develop"),
-		DBHost:      getEnvOrDefault("DB_HOST", "localhost"),
-		DBUser:      getEnvOrDefault("DB_USER", "postgres"),
-		DBPassword:  getEnvOrDefault("DB_PASSWORD", "postgres"),
-		DBName:      getEnvOrDefault("DB_NAME", "go_crud"),
-		DBPort:      getEnvOrDefault("DB_PORT", "5432"),
-		JwtSecret:   getEnvOrDefault("JWT_SECRET", ""),
+type DatabaseConfig struct {
+	Host     string
+	User     string
+	Password string
+	Name     string
+	Port     string
+}
+
+type TelemetryConfig struct {
+	EnableStdoutTrace  bool
+	EnableOTLPTrace    bool
+	OTLPTraceEndpoint  string
+	EnablePrometheus   bool
+	PrometheusEndpoint string
+}
+
+func InitConfig() {
+	config := &Config{
+		ServiceName:    getEnvOrDefault("SERVICE_NAME", "go-crud-api"),
+		ServiceVersion: getEnvOrDefault("SERVICE_VERSION", "1.0.0"),
+		ServicePort:    getEnvOrDefault("SERVICE_PORT", "8080"),
+		Environment:    getEnvOrDefault("ENVIRONMENT", "develop"),
+		JwtSecret:      getEnvOrDefault("JWT_SECRET", ""),
+		Database:       *initDatabaseConfig(),
+		Telemetry:      *initTelemetryConfig(),
+	}
+
+	globalConfig = config
+}
+
+func initDatabaseConfig() *DatabaseConfig {
+	return &DatabaseConfig{
+		Host:     getEnvOrDefault("DB_HOST", "localhost"),
+		User:     getEnvOrDefault("DB_USER", "postgres"),
+		Password: getEnvOrDefault("DB_PASSWORD", "postgres"),
+		Name:     getEnvOrDefault("DB_NAME", "go_crud"),
+		Port:     getEnvOrDefault("DB_PORT", "5432"),
 	}
 }
 
-// getEnvOrDefault returns the value of an environment variable or a default value if not set
-func getEnvOrDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
+func initTelemetryConfig() *TelemetryConfig {
+	return &TelemetryConfig{
+		EnableStdoutTrace:  getEnvOrDefault("ENABLE_STDOUT_TRACE", "true") == "true",
+		EnableOTLPTrace:    getEnvOrDefault("ENABLE_OTLP_TRACE", "false") == "true",
+		OTLPTraceEndpoint:  getEnvOrDefault("OTLP_TRACE_ENDPOINT", "http://localhost:4318"),
+		EnablePrometheus:   getEnvOrDefault("ENABLE_PROMETHEUS", "true") == "true",
+		PrometheusEndpoint: getEnvOrDefault("PROMETHEUS_ENDPOINT", "localhost:2223"),
 	}
-	return defaultValue
 }
 
-func GetEnvironment() string {
-	config := NewConfig()
-	return config.Environment
+func Get() *Config {
+	if globalConfig == nil {
+		panic("Config not initialized")
+	}
+	return globalConfig
 }
 
-func GetDBConnectionString() string {
-	config := NewConfig()
+func (config *Config) GetDBConnectionString() string {
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort)
+		config.Database.Host, config.Database.User, config.Database.Password, config.Database.Name, config.Database.Port)
 }
 
-func GetJwtSecret() []byte {
-	config := NewConfig()
+func (config *Config) GetJwtSecret() []byte {
 	if config.JwtSecret == "" {
 		panic("JWT_SECRET environment variable is not set. Please set a strong JWT secret.")
 	}
@@ -55,4 +87,11 @@ func GetJwtSecret() []byte {
 		panic("JWT_SECRET must be at least 32 characters long for security.")
 	}
 	return []byte(config.JwtSecret)
+}
+
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }

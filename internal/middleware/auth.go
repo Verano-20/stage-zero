@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/config"
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/repository"
 	"github.com/Verano-20/go-crud/internal/response"
@@ -17,11 +16,15 @@ import (
 )
 
 type AuthMiddleware struct {
+	jwtSecret      []byte
 	userRepository *repository.UserRepository
 }
 
-func NewAuthMiddleware(db *gorm.DB) *AuthMiddleware {
-	return &AuthMiddleware{userRepository: repository.NewUserRepository(db)}
+func NewAuthMiddleware(jwtSecret []byte, db *gorm.DB) *AuthMiddleware {
+	return &AuthMiddleware{
+		jwtSecret:      jwtSecret,
+		userRepository: repository.NewUserRepository(db),
+	}
 }
 
 func (m *AuthMiddleware) AuthenticateRequest(ctx *gin.Context) {
@@ -29,7 +32,7 @@ func (m *AuthMiddleware) AuthenticateRequest(ctx *gin.Context) {
 
 	log.Debug("Authentcating request...")
 
-	token, err := m.validateToken(ctx, log)
+	token, err := m.validateToken(ctx)
 	if err != nil {
 		log.Warn("Token validation failed", zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: err.Error()})
@@ -37,7 +40,7 @@ func (m *AuthMiddleware) AuthenticateRequest(ctx *gin.Context) {
 		return
 	}
 
-	if err := m.validateClaims(ctx, token, log); err != nil {
+	if err := m.validateClaims(ctx, token); err != nil {
 		log.Warn("Token claims validation failed", zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: err.Error()})
 		ctx.Abort()
@@ -48,7 +51,9 @@ func (m *AuthMiddleware) AuthenticateRequest(ctx *gin.Context) {
 	ctx.Next()
 }
 
-func (m *AuthMiddleware) validateToken(ctx *gin.Context, log *zap.Logger) (*jwt.Token, error) {
+func (m *AuthMiddleware) validateToken(ctx *gin.Context) (*jwt.Token, error) {
+	log := logger.GetFromContext(ctx)
+
 	authHeader := ctx.GetHeader("Authorization")
 	if authHeader == "" {
 		log.Warn("Missing authorization header")
@@ -70,7 +75,7 @@ func (m *AuthMiddleware) validateToken(ctx *gin.Context, log *zap.Logger) (*jwt.
 				zap.String("method", token.Method.Alg()))
 			return nil, jwt.NewValidationError("invalid signing method", jwt.ValidationErrorSignatureInvalid)
 		}
-		return []byte(config.GetJwtSecret()), nil
+		return m.jwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
@@ -82,7 +87,9 @@ func (m *AuthMiddleware) validateToken(ctx *gin.Context, log *zap.Logger) (*jwt.
 	return token, nil
 }
 
-func (m *AuthMiddleware) validateClaims(ctx *gin.Context, token *jwt.Token, log *zap.Logger) error {
+func (m *AuthMiddleware) validateClaims(ctx *gin.Context, token *jwt.Token) error {
+	log := logger.GetFromContext(ctx)
+
 	log.Debug("Validating JWT token claims...")
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {

@@ -45,7 +45,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	user, createErr := c.UserService.CreateUser(log, userForm)
+	user, createErr := c.UserService.CreateUser(ctx, userForm)
 	if createErr != nil {
 		var apiError *err.ApiError
 		if errors.As(createErr, &apiError) {
@@ -87,13 +87,13 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.AuthService.ValidateUserCredentials(log, userForm)
+	user, err := c.AuthService.ValidateUserCredentials(ctx, userForm)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "Invalid credentials"})
 		return
 	}
 
-	tokenString, err := c.AuthService.GenerateTokenString(log, user)
+	tokenString, err := c.AuthService.GenerateTokenString(ctx, user)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to generate token"})
 		return
