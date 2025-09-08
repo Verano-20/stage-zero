@@ -9,8 +9,9 @@ import (
 	"github.com/Verano-20/go-crud/internal/logger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/exporters/prometheus"
+	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
@@ -29,6 +30,8 @@ type TelemetryProvider struct {
 	Meter          metric.Meter
 	shutdownFuncs  []func(context.Context) error
 }
+
+var globalProvider *TelemetryProvider
 
 func InitTelemetry() {
 	config := config.Get()
@@ -58,21 +61,14 @@ func InitTelemetry() {
 		propagation.Baggage{},
 	))
 
-	defer func() {
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := tp.Shutdown(shutdownCtx); err != nil {
-			log.Error("Error shutting down telemetry", zap.Error(err))
-		}
-	}()
-
-	log.Info("Telemetry initialized")
+	globalProvider = tp
+	log.Info("Telemetry initialized successfully")
 }
 
 func (tp *TelemetryProvider) setupTracing(config *config.Config, resource *resource.Resource) error {
 	var exporters []sdktrace.SpanExporter
 
-	// Stdout exporter can be used for development
+	// Stdout exporter for development
 	if config.Telemetry.EnableStdoutTrace {
 		stdoutExporter, err := stdouttrace.New(
 			stdouttrace.WithPrettyPrint(),
@@ -83,12 +79,16 @@ func (tp *TelemetryProvider) setupTracing(config *config.Config, resource *resou
 		exporters = append(exporters, stdoutExporter)
 	}
 
-	if config.Telemetry.EnableOTLPTrace {
-		otlpExporter, err := otlptracehttp.New(
-			context.Background(),
-			otlptracehttp.WithEndpoint(config.Telemetry.OTLPTraceEndpoint),
-			otlptracehttp.WithInsecure(),
-		)
+	// OTLP exporter for production/cloud
+	if config.Telemetry.EnableOTLP {
+		var otlpOptions []otlptracehttp.Option
+		otlpOptions = append(otlpOptions, otlptracehttp.WithEndpoint(config.Telemetry.OTLPEndpoint))
+
+		if config.Telemetry.OTLPInsecure {
+			otlpOptions = append(otlpOptions, otlptracehttp.WithInsecure())
+		}
+
+		otlpExporter, err := otlptracehttp.New(context.Background(), otlpOptions...)
 		if err != nil {
 			return fmt.Errorf("failed to create OTLP trace exporter: %w", err)
 		}
@@ -96,7 +96,6 @@ func (tp *TelemetryProvider) setupTracing(config *config.Config, resource *resou
 		tp.shutdownFuncs = append(tp.shutdownFuncs, otlpExporter.Shutdown)
 	}
 
-	// Batch span processor for each exporter
 	var processors []sdktrace.SpanProcessor
 	for _, exporter := range exporters {
 		processor := sdktrace.NewBatchSpanProcessor(exporter)
@@ -127,15 +126,34 @@ func (tp *TelemetryProvider) setupTracing(config *config.Config, resource *resou
 func (tp *TelemetryProvider) setupMetrics(config *config.Config, resource *resource.Resource) error {
 	var readers []sdkmetric.Reader
 
-	if config.Telemetry.EnablePrometheus {
-		prometheusExporter, err := prometheus.New()
+	// Stdout exporter for development
+	if config.Telemetry.EnableStdoutTrace { // Use same flag for simplicity
+		stdoutExporter, err := stdoutmetric.New()
 		if err != nil {
-			return fmt.Errorf("failed to create prometheus exporter: %w", err)
+			return fmt.Errorf("failed to create stdout metric exporter: %w", err)
 		}
-		readers = append(readers, prometheusExporter)
+		reader := sdkmetric.NewPeriodicReader(stdoutExporter, sdkmetric.WithInterval(30*time.Second)) // TODO: config
+		readers = append(readers, reader)
 	}
 
-	// Add other readers here as needed
+	// OTLP exporter for production/cloud
+	if config.Telemetry.EnableOTLP {
+		var otlpOptions []otlpmetrichttp.Option
+		otlpOptions = append(otlpOptions, otlpmetrichttp.WithEndpoint(config.Telemetry.OTLPEndpoint))
+
+		if config.Telemetry.OTLPInsecure {
+			otlpOptions = append(otlpOptions, otlpmetrichttp.WithInsecure())
+		}
+
+		otlpExporter, err := otlpmetrichttp.New(context.Background(), otlpOptions...)
+		if err != nil {
+			return fmt.Errorf("failed to create OTLP metric exporter: %w", err)
+		}
+
+		reader := sdkmetric.NewPeriodicReader(otlpExporter, sdkmetric.WithInterval(30*time.Second)) // TODO: config
+		readers = append(readers, reader)
+		tp.shutdownFuncs = append(tp.shutdownFuncs, otlpExporter.Shutdown)
+	}
 
 	meterOptions := []sdkmetric.Option{
 		sdkmetric.WithResource(resource),
@@ -157,6 +175,7 @@ func (tp *TelemetryProvider) setupMetrics(config *config.Config, resource *resou
 
 func (tp *TelemetryProvider) Shutdown(ctx context.Context) error {
 	log := logger.Get()
+	log.Info("Shutting down Telemetry...")
 
 	for _, shutdown := range tp.shutdownFuncs {
 		if err := shutdown(ctx); err != nil {
@@ -176,4 +195,13 @@ func newResource(config *config.Config) (*resource.Resource, error) {
 			semconv.DeploymentEnvironment(config.Environment),
 			attribute.String("service.instance.id", fmt.Sprintf("%s-%d", config.ServiceName, time.Now().Unix())),
 		))
+}
+
+func Shutdown() error {
+	if globalProvider != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		return globalProvider.Shutdown(ctx)
+	}
+	return nil
 }

@@ -26,11 +26,10 @@ type DatabaseConfig struct {
 }
 
 type TelemetryConfig struct {
-	EnableStdoutTrace  bool
-	EnableOTLPTrace    bool
-	OTLPTraceEndpoint  string
-	EnablePrometheus   bool
-	PrometheusEndpoint string
+	EnableStdoutTrace bool
+	EnableOTLP        bool
+	OTLPEndpoint      string
+	OTLPInsecure      bool
 }
 
 func InitConfig() {
@@ -59,11 +58,10 @@ func initDatabaseConfig() *DatabaseConfig {
 
 func initTelemetryConfig() *TelemetryConfig {
 	return &TelemetryConfig{
-		EnableStdoutTrace:  getEnvOrDefault("ENABLE_STDOUT_TRACE", "true") == "true",
-		EnableOTLPTrace:    getEnvOrDefault("ENABLE_OTLP_TRACE", "false") == "true",
-		OTLPTraceEndpoint:  getEnvOrDefault("OTLP_TRACE_ENDPOINT", "http://localhost:4318"),
-		EnablePrometheus:   getEnvOrDefault("ENABLE_PROMETHEUS", "true") == "true",
-		PrometheusEndpoint: getEnvOrDefault("PROMETHEUS_ENDPOINT", "localhost:2223"),
+		EnableStdoutTrace: getEnvOrDefault("ENABLE_STDOUT_TRACE", "true") == "true",
+		EnableOTLP:        getEnvOrDefault("ENABLE_OTLP", "true") == "true",
+		OTLPEndpoint:      getEnvOrDefault("OTLP_ENDPOINT", "http://localhost:4318"),
+		OTLPInsecure:      getEnvOrDefault("OTLP_INSECURE", "true") == "true",
 	}
 }
 

@@ -44,4 +44,6 @@ func main() {
 	if err := router.Run(address); err != nil {
 		log.Fatal("Failed to start server", zap.Error(err))
 	}
+
+	// TODO: Add graceful shutdown
 }
