@@ -18,7 +18,7 @@ import (
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
@@ -28,6 +28,7 @@ type TelemetryProvider struct {
 	MeterProvider  *sdkmetric.MeterProvider
 	Tracer         trace.Tracer
 	Meter          metric.Meter
+	AppMetrics     *AppMetrics
 	shutdownFuncs  []func(context.Context) error
 }
 
@@ -78,7 +79,7 @@ func InitTelemetry() {
 func newOtelResource() (*resource.Resource, error) {
 	config := config.Get()
 	return resource.Merge(resource.Default(),
-		resource.NewWithAttributes(semconv.SchemaURL,
+		resource.NewSchemaless(
 			semconv.ServiceName(config.ServiceName),
 			semconv.ServiceVersion(config.ServiceVersion),
 			semconv.DeploymentEnvironment(config.Environment),

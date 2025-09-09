@@ -67,7 +67,7 @@ func initTelemetryConfig() *TelemetryConfig {
 	return &TelemetryConfig{
 		EnableStdout:   getEnvOrDefault("ENABLE_STDOUT", "true") == "true",
 		EnableOTLP:     getEnvOrDefault("ENABLE_OTLP", "true") == "true",
-		OTLPEndpoint:   getEnvOrDefault("OTLP_ENDPOINT", "http://localhost:4318"),
+		OTLPEndpoint:   getEnvOrDefault("OTLP_ENDPOINT", "localhost:4318"),
 		OTLPInsecure:   getEnvOrDefault("OTLP_INSECURE", "true") == "true",
 		MetricInterval: metricInterval,
 	}

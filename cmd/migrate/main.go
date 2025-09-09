@@ -38,8 +38,8 @@ func main() {
 
 	command := args[0]
 
-	// Get database connection string
-	dsn := config.GetDBConnectionString()
+	config.InitConfig()
+	dsn := config.Get().GetDBConnectionString()
 
 	db, err := goose.OpenDBWithDriver(dialect, dsn)
 	if err != nil {
