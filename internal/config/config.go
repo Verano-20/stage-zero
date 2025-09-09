@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 var globalConfig *Config
@@ -26,10 +27,11 @@ type DatabaseConfig struct {
 }
 
 type TelemetryConfig struct {
-	EnableStdoutTrace bool
-	EnableOTLP        bool
-	OTLPEndpoint      string
-	OTLPInsecure      bool
+	EnableStdout   bool
+	EnableOTLP     bool
+	OTLPEndpoint   string
+	OTLPInsecure   bool
+	MetricInterval time.Duration
 }
 
 func InitConfig() {
@@ -57,11 +59,17 @@ func initDatabaseConfig() *DatabaseConfig {
 }
 
 func initTelemetryConfig() *TelemetryConfig {
+	metricInterval, err := time.ParseDuration(getEnvOrDefault("METRIC_INTERVAL", "30s"))
+	if err != nil {
+		panic("Invalid METRIC_INTERVAL: " + err.Error())
+	}
+
 	return &TelemetryConfig{
-		EnableStdoutTrace: getEnvOrDefault("ENABLE_STDOUT_TRACE", "true") == "true",
-		EnableOTLP:        getEnvOrDefault("ENABLE_OTLP", "true") == "true",
-		OTLPEndpoint:      getEnvOrDefault("OTLP_ENDPOINT", "http://localhost:4318"),
-		OTLPInsecure:      getEnvOrDefault("OTLP_INSECURE", "true") == "true",
+		EnableStdout:   getEnvOrDefault("ENABLE_STDOUT", "true") == "true",
+		EnableOTLP:     getEnvOrDefault("ENABLE_OTLP", "true") == "true",
+		OTLPEndpoint:   getEnvOrDefault("OTLP_ENDPOINT", "http://localhost:4318"),
+		OTLPInsecure:   getEnvOrDefault("OTLP_INSECURE", "true") == "true",
+		MetricInterval: metricInterval,
 	}
 }
 

@@ -34,26 +34,16 @@ type TelemetryProvider struct {
 var globalProvider *TelemetryProvider
 
 func InitTelemetry() {
-	config := config.Get()
 	log := logger.Get()
-
 	log.Info("Initializing Telemetry...")
 
-	resource, err := newResource(config)
-	if err != nil {
-		log.Fatal("Failed to create telemetry resource", zap.Error(err))
-	}
-
-	tp := &TelemetryProvider{
+	globalProvider = &TelemetryProvider{
 		shutdownFuncs: make([]func(context.Context) error, 0),
 	}
 
-	if err := tp.setupTracing(config, resource); err != nil {
-		log.Fatal("Failed to setup tracing", zap.Error(err))
-	}
-
-	if err := tp.setupMetrics(config, resource); err != nil {
-		log.Fatal("Failed to setup metrics", zap.Error(err))
+	otelResource, err := newOtelResource()
+	if err != nil {
+		log.Fatal("Failed to create OpenTelemetry resource", zap.Error(err))
 	}
 
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
@@ -61,133 +51,32 @@ func InitTelemetry() {
 		propagation.Baggage{},
 	))
 
-	globalProvider = tp
+	var traceExporters []sdktrace.SpanExporter
+	var metricReaders []sdkmetric.Reader
+
+	if err := initStdout(&traceExporters, &metricReaders); err != nil {
+		log.Fatal("Failed to initialize stdout telemetry", zap.Error(err))
+	}
+	if err := initOTLP(&traceExporters, &metricReaders); err != nil {
+		log.Fatal("Failed to initialize OTLP telemetry", zap.Error(err))
+	}
+
+	// TODO: enable no exporters or readers
+	if len(traceExporters) == 0 {
+		log.Fatal("No trace exporters configured")
+	}
+	if len(metricReaders) == 0 {
+		log.Fatal("No metric readers configured")
+	}
+
+	initTracerProvider(otelResource, &traceExporters)
+	initMeterProvider(otelResource, &metricReaders)
+
 	log.Info("Telemetry initialized successfully")
 }
 
-func (tp *TelemetryProvider) setupTracing(config *config.Config, resource *resource.Resource) error {
-	var exporters []sdktrace.SpanExporter
-
-	// Stdout exporter for development
-	if config.Telemetry.EnableStdoutTrace {
-		stdoutExporter, err := stdouttrace.New(
-			stdouttrace.WithPrettyPrint(),
-		)
-		if err != nil {
-			return fmt.Errorf("failed to create stdout trace exporter: %w", err)
-		}
-		exporters = append(exporters, stdoutExporter)
-	}
-
-	// OTLP exporter for production/cloud
-	if config.Telemetry.EnableOTLP {
-		var otlpOptions []otlptracehttp.Option
-		otlpOptions = append(otlpOptions, otlptracehttp.WithEndpoint(config.Telemetry.OTLPEndpoint))
-
-		if config.Telemetry.OTLPInsecure {
-			otlpOptions = append(otlpOptions, otlptracehttp.WithInsecure())
-		}
-
-		otlpExporter, err := otlptracehttp.New(context.Background(), otlpOptions...)
-		if err != nil {
-			return fmt.Errorf("failed to create OTLP trace exporter: %w", err)
-		}
-		exporters = append(exporters, otlpExporter)
-		tp.shutdownFuncs = append(tp.shutdownFuncs, otlpExporter.Shutdown)
-	}
-
-	var processors []sdktrace.SpanProcessor
-	for _, exporter := range exporters {
-		processor := sdktrace.NewBatchSpanProcessor(exporter)
-		processors = append(processors, processor)
-		tp.shutdownFuncs = append(tp.shutdownFuncs, processor.Shutdown)
-	}
-
-	tracerOptions := []sdktrace.TracerProviderOption{
-		sdktrace.WithResource(resource),
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	}
-	for _, processor := range processors {
-		tracerOptions = append(tracerOptions, sdktrace.WithSpanProcessor(processor))
-	}
-
-	tp.TracerProvider = sdktrace.NewTracerProvider(tracerOptions...)
-
-	// Set global tracer provider
-	otel.SetTracerProvider(tp.TracerProvider)
-
-	tp.Tracer = tp.TracerProvider.Tracer(config.ServiceName)
-	tp.shutdownFuncs = append(tp.shutdownFuncs, tp.TracerProvider.Shutdown)
-
-	return nil
-}
-
-// TODO: Add actual metrics
-func (tp *TelemetryProvider) setupMetrics(config *config.Config, resource *resource.Resource) error {
-	var readers []sdkmetric.Reader
-
-	// Stdout exporter for development
-	if config.Telemetry.EnableStdoutTrace { // Use same flag for simplicity
-		stdoutExporter, err := stdoutmetric.New()
-		if err != nil {
-			return fmt.Errorf("failed to create stdout metric exporter: %w", err)
-		}
-		reader := sdkmetric.NewPeriodicReader(stdoutExporter, sdkmetric.WithInterval(30*time.Second)) // TODO: config
-		readers = append(readers, reader)
-	}
-
-	// OTLP exporter for production/cloud
-	if config.Telemetry.EnableOTLP {
-		var otlpOptions []otlpmetrichttp.Option
-		otlpOptions = append(otlpOptions, otlpmetrichttp.WithEndpoint(config.Telemetry.OTLPEndpoint))
-
-		if config.Telemetry.OTLPInsecure {
-			otlpOptions = append(otlpOptions, otlpmetrichttp.WithInsecure())
-		}
-
-		otlpExporter, err := otlpmetrichttp.New(context.Background(), otlpOptions...)
-		if err != nil {
-			return fmt.Errorf("failed to create OTLP metric exporter: %w", err)
-		}
-
-		reader := sdkmetric.NewPeriodicReader(otlpExporter, sdkmetric.WithInterval(30*time.Second)) // TODO: config
-		readers = append(readers, reader)
-		tp.shutdownFuncs = append(tp.shutdownFuncs, otlpExporter.Shutdown)
-	}
-
-	meterOptions := []sdkmetric.Option{
-		sdkmetric.WithResource(resource),
-	}
-	for _, reader := range readers {
-		meterOptions = append(meterOptions, sdkmetric.WithReader(reader))
-	}
-
-	tp.MeterProvider = sdkmetric.NewMeterProvider(meterOptions...)
-
-	// Set global meter provider
-	otel.SetMeterProvider(tp.MeterProvider)
-
-	tp.Meter = tp.MeterProvider.Meter(config.ServiceName)
-	tp.shutdownFuncs = append(tp.shutdownFuncs, tp.MeterProvider.Shutdown)
-
-	return nil
-}
-
-func (tp *TelemetryProvider) Shutdown(ctx context.Context) error {
-	log := logger.Get()
-	log.Info("Shutting down Telemetry...")
-
-	for _, shutdown := range tp.shutdownFuncs {
-		if err := shutdown(ctx); err != nil {
-			log.Error("Error during telemetry shutdown", zap.Error(err))
-		}
-	}
-
-	log.Info("Telemetry shutdown completed")
-	return nil
-}
-
-func newResource(config *config.Config) (*resource.Resource, error) {
+func newOtelResource() (*resource.Resource, error) {
+	config := config.Get()
 	return resource.Merge(resource.Default(),
 		resource.NewWithAttributes(semconv.SchemaURL,
 			semconv.ServiceName(config.ServiceName),
@@ -197,11 +86,136 @@ func newResource(config *config.Config) (*resource.Resource, error) {
 		))
 }
 
-func Shutdown() error {
-	if globalProvider != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		return globalProvider.Shutdown(ctx)
+func initStdout(traceExporters *[]sdktrace.SpanExporter, metricReaders *[]sdkmetric.Reader) error {
+	log := logger.Get()
+	config := config.Get()
+
+	if !config.Telemetry.EnableStdout {
+		log.Info("Stdout telemetry not enabled, skipping...")
+		return nil
 	}
+
+	log.Info("Initializing stdout telemetry...")
+
+	stdoutTraceExporter, err := stdouttrace.New(
+		stdouttrace.WithPrettyPrint(),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create stdout trace exporter: %w", err)
+	}
+	*traceExporters = append(*traceExporters, stdoutTraceExporter)
+
+	stdoutMetricReader, err := stdoutmetric.New(
+		stdoutmetric.WithPrettyPrint(),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create stdout metric exporter: %w", err)
+	}
+	metricReader := sdkmetric.NewPeriodicReader(stdoutMetricReader, sdkmetric.WithInterval(config.Telemetry.MetricInterval))
+	*metricReaders = append(*metricReaders, metricReader)
+
+	return nil
+}
+
+func initOTLP(traceExporters *[]sdktrace.SpanExporter, metricReaders *[]sdkmetric.Reader) error {
+	log := logger.Get()
+	config := config.Get()
+
+	if !config.Telemetry.EnableOTLP {
+		log.Info("OTLP telemetry not enabled, skipping...")
+		return nil
+	}
+
+	log.Info("Initializing OTLP telemetry...")
+
+	var otlpTraceOptions []otlptracehttp.Option
+	var otlpMetricOptions []otlpmetrichttp.Option
+
+	otlpTraceOptions = append(otlpTraceOptions, otlptracehttp.WithEndpoint(config.Telemetry.OTLPEndpoint))
+	otlpMetricOptions = append(otlpMetricOptions, otlpmetrichttp.WithEndpoint(config.Telemetry.OTLPEndpoint))
+
+	if config.Telemetry.OTLPInsecure {
+		otlpTraceOptions = append(otlpTraceOptions, otlptracehttp.WithInsecure())
+		otlpMetricOptions = append(otlpMetricOptions, otlpmetrichttp.WithInsecure())
+	}
+
+	otlpTraceExporter, err := otlptracehttp.New(context.Background(), otlpTraceOptions...)
+	if err != nil {
+		return fmt.Errorf("failed to create OTLP trace exporter: %w", err)
+	}
+	*traceExporters = append(*traceExporters, otlpTraceExporter)
+	globalProvider.shutdownFuncs = append(globalProvider.shutdownFuncs, otlpTraceExporter.Shutdown)
+
+	otlpMetricExporter, err := otlpmetrichttp.New(context.Background(), otlpMetricOptions...)
+	if err != nil {
+		return fmt.Errorf("failed to create OTLP metric exporter: %w", err)
+	}
+	globalProvider.shutdownFuncs = append(globalProvider.shutdownFuncs, otlpMetricExporter.Shutdown)
+	metricReader := sdkmetric.NewPeriodicReader(otlpMetricExporter, sdkmetric.WithInterval(config.Telemetry.MetricInterval))
+	*metricReaders = append(*metricReaders, metricReader)
+
+	return nil
+}
+
+func initTracerProvider(otelResource *resource.Resource, traceExporters *[]sdktrace.SpanExporter) {
+	config := config.Get()
+
+	var traceProcessors []sdktrace.SpanProcessor
+	for _, exporter := range *traceExporters {
+		processor := sdktrace.NewBatchSpanProcessor(exporter)
+		traceProcessors = append(traceProcessors, processor)
+		globalProvider.shutdownFuncs = append(globalProvider.shutdownFuncs, processor.Shutdown)
+	}
+
+	tracerOptions := []sdktrace.TracerProviderOption{
+		sdktrace.WithResource(otelResource),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()), // TODO: config for sample rate
+	}
+	for _, processor := range traceProcessors {
+		tracerOptions = append(tracerOptions, sdktrace.WithSpanProcessor(processor))
+	}
+
+	globalProvider.TracerProvider = sdktrace.NewTracerProvider(tracerOptions...)
+	globalProvider.Tracer = globalProvider.TracerProvider.Tracer(config.ServiceName)
+	globalProvider.shutdownFuncs = append(globalProvider.shutdownFuncs, globalProvider.TracerProvider.Shutdown)
+
+	otel.SetTracerProvider(globalProvider.TracerProvider)
+}
+
+func initMeterProvider(otelResource *resource.Resource, metricReaders *[]sdkmetric.Reader) {
+	config := config.Get()
+
+	meterOptions := []sdkmetric.Option{
+		sdkmetric.WithResource(otelResource),
+	}
+	for _, reader := range *metricReaders {
+		meterOptions = append(meterOptions, sdkmetric.WithReader(reader))
+	}
+
+	globalProvider.MeterProvider = sdkmetric.NewMeterProvider(meterOptions...)
+	globalProvider.Meter = globalProvider.MeterProvider.Meter(config.ServiceName)
+	globalProvider.shutdownFuncs = append(globalProvider.shutdownFuncs, globalProvider.MeterProvider.Shutdown)
+
+	otel.SetMeterProvider(globalProvider.MeterProvider)
+}
+
+func Shutdown() error {
+	log := logger.Get()
+	log.Info("Shutting down Telemetry...")
+
+	if globalProvider == nil {
+		log.Warn("Telemetry not initialized, skipping shutdown")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	for _, shutdown := range globalProvider.shutdownFuncs {
+		if err := shutdown(ctx); err != nil {
+			return fmt.Errorf("error during telemetry shutdown: %w", err)
+		}
+	}
+
+	log.Info("Telemetry shutdown completed")
 	return nil
 }
