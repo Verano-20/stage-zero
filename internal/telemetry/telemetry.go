@@ -199,23 +199,22 @@ func initMeterProvider(otelResource *resource.Resource, metricReaders *[]sdkmetr
 	otel.SetMeterProvider(globalProvider.MeterProvider)
 }
 
-func Shutdown() error {
+func Shutdown() {
 	log := logger.Get()
 	log.Info("Shutting down Telemetry...")
 
 	if globalProvider == nil {
 		log.Warn("Telemetry not initialized, skipping shutdown")
-		return nil
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	for _, shutdown := range globalProvider.shutdownFuncs {
 		if err := shutdown(ctx); err != nil {
-			return fmt.Errorf("error during telemetry shutdown: %w", err)
+			log.Error("Error during telemetry shutdown", zap.Error(err))
 		}
 	}
 
 	log.Info("Telemetry shutdown completed")
-	return nil
 }

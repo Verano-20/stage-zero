@@ -28,3 +28,15 @@ func InitDatabase() *gorm.DB {
 	log.Info("Database connection established")
 	return db
 }
+
+func Shutdown(db *gorm.DB) {
+	log := logger.Get()
+	log.Info("Closing database connection...")
+	if sqlDB, err := db.DB(); err == nil {
+		if err := sqlDB.Close(); err != nil {
+			log.Error("Failed to close database connection", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to get underlying database connection", zap.Error(err))
+	}
+}
