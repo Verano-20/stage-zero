@@ -131,6 +131,7 @@ func NewAppMetrics(meter metric.Meter) (*AppMetrics, error) {
 	return metrics, nil
 }
 
+// HTTP metrics methods
 func (m *AppMetrics) RecordHTTPRequest(ctx context.Context, method, path, status string, duration float64) {
 	attrs := []attribute.KeyValue{
 		attribute.String("method", method),
@@ -146,6 +147,7 @@ func (m *AppMetrics) RecordActiveHTTPRequest(ctx context.Context, delta int64) {
 	m.HTTPRequestsActive.Add(ctx, delta)
 }
 
+// Database metrics methods
 func (m *AppMetrics) RecordDBQuery(ctx context.Context, operation string, duration float64) {
 	attrs := []attribute.KeyValue{
 		attribute.String("operation", operation),
@@ -159,6 +161,7 @@ func (m *AppMetrics) RecordActiveDBConnection(ctx context.Context, delta int64) 
 	m.DBConnectionsActive.Add(ctx, delta)
 }
 
+// Auth metrics methods
 func (m *AppMetrics) RecordAuthAttempt(ctx context.Context, success bool, method string) {
 	attrs := []attribute.KeyValue{
 		attribute.String("method", method),
@@ -171,6 +174,7 @@ func (m *AppMetrics) RecordAuthAttempt(ctx context.Context, success bool, method
 	}
 }
 
+// Business metrics methods
 func (m *AppMetrics) UpdateUserCount(ctx context.Context, count int64) {
 	m.UsersTotal.Add(ctx, count)
 }

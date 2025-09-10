@@ -6,8 +6,6 @@ import (
 
 	"github.com/Verano-20/go-crud/internal/telemetry"
 	"github.com/gin-gonic/gin"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric"
 )
 
 func MetricsMiddleware() gin.HandlerFunc {
@@ -33,15 +31,7 @@ func MetricsMiddleware() gin.HandlerFunc {
 		duration := time.Since(start).Seconds()
 		status := strconv.Itoa(c.Writer.Status())
 
-		attrs := []attribute.KeyValue{
-			attribute.String("method", method),
-			attribute.String("path", path),
-			attribute.String("status", status),
-		}
-
-		metrics.HTTPRequestsTotal.Add(ctx, 1, metric.WithAttributes(attrs...))
-		metrics.HTTPRequestDuration.Record(ctx, duration, metric.WithAttributes(attrs...))
-
+		metrics.RecordHTTPRequest(ctx, method, path, status, duration)
 		metrics.RecordActiveHTTPRequest(ctx, -1)
 	}
 }
