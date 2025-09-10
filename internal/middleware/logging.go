@@ -29,7 +29,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 
 		ctx.Next()
 
-		latency := time.Since(start)
+		duration := time.Since(start)
 		status := ctx.Writer.Status()
 
 		logLevel := zap.InfoLevel
@@ -45,7 +45,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 
 		log.Log(logLevel, message,
 			zap.Int("status", status),
-			zap.Duration("latency", latency),
+			zap.Duration("duration", duration),
 		)
 	}
 }

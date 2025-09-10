@@ -22,6 +22,7 @@ func InitRouter(db *gorm.DB) *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(otelgin.Middleware(config.ServiceName))
 	router.Use(middleware.LoggingMiddleware())
+	router.Use(middleware.MetricsMiddleware())
 
 	authMiddleware := middleware.NewAuthMiddleware(config.GetJwtSecret(), db)
 
