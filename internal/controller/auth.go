@@ -16,11 +16,16 @@ import (
 
 type AuthController struct {
 	UserService *service.UserService
-	AuthService *service.AuthService
+	AuthService service.AuthServiceInterface
 }
 
 func NewAuthController(db *gorm.DB) *AuthController {
-	return &AuthController{UserService: service.NewUserService(db), AuthService: service.NewAuthService(db)}
+	authService := service.NewAuthService(db)
+	authServiceWithMetrics := service.NewAuthServiceWithMetrics(authService)
+	return &AuthController{
+		UserService: service.NewUserService(db),
+		AuthService: authServiceWithMetrics,
+	}
 }
 
 // SignUp godoc

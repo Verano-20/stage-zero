@@ -71,7 +71,9 @@ func InitTelemetry() {
 	}
 
 	initTracerProvider(otelResource, &traceExporters)
-	initMeterProvider(otelResource, &metricReaders)
+	if err := initMeterProvider(otelResource, &metricReaders); err != nil {
+		log.Fatal("Failed to initialize meter provider", zap.Error(err))
+	}
 
 	log.Info("Telemetry initialized successfully")
 }
@@ -183,7 +185,7 @@ func initTracerProvider(otelResource *resource.Resource, traceExporters *[]sdktr
 	otel.SetTracerProvider(globalProvider.TracerProvider)
 }
 
-func initMeterProvider(otelResource *resource.Resource, metricReaders *[]sdkmetric.Reader) {
+func initMeterProvider(otelResource *resource.Resource, metricReaders *[]sdkmetric.Reader) error {
 	config := config.Get()
 
 	meterOptions := []sdkmetric.Option{
@@ -197,7 +199,15 @@ func initMeterProvider(otelResource *resource.Resource, metricReaders *[]sdkmetr
 	globalProvider.Meter = globalProvider.MeterProvider.Meter(config.ServiceName)
 	globalProvider.shutdownFuncs = append(globalProvider.shutdownFuncs, globalProvider.MeterProvider.Shutdown)
 
+	appMetrics, err := NewAppMetrics(globalProvider.Meter)
+	if err != nil {
+		return fmt.Errorf("failed to create application metrics: %w", err)
+	}
+	globalProvider.AppMetrics = appMetrics
+
 	otel.SetMeterProvider(globalProvider.MeterProvider)
+
+	return nil
 }
 
 func Shutdown() {
@@ -218,4 +228,11 @@ func Shutdown() {
 	}
 
 	log.Info("Telemetry shutdown completed")
+}
+
+func GetMetrics() *AppMetrics {
+	if globalProvider == nil || globalProvider.AppMetrics == nil {
+		return nil
+	}
+	return globalProvider.AppMetrics
 }
