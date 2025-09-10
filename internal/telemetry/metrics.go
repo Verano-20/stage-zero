@@ -7,8 +7,6 @@ import (
 	"go.opentelemetry.io/otel/metric"
 )
 
-// TODO: Use this shit somewhere
-
 type AppMetrics struct {
 	// HTTP metrics
 	HTTPRequestsTotal   metric.Int64Counter

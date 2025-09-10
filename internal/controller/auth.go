@@ -9,6 +9,7 @@ import (
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/response"
 	"github.com/Verano-20/go-crud/internal/service"
+	"github.com/Verano-20/go-crud/internal/telemetry"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -16,16 +17,11 @@ import (
 
 type AuthController struct {
 	UserService *service.UserService
-	AuthService service.AuthServiceInterface
+	AuthService *service.AuthService
 }
 
 func NewAuthController(db *gorm.DB) *AuthController {
-	authService := service.NewAuthService(db)
-	authServiceWithMetrics := service.NewAuthServiceWithMetrics(authService)
-	return &AuthController{
-		UserService: service.NewUserService(db),
-		AuthService: authServiceWithMetrics,
-	}
+	return &AuthController{UserService: service.NewUserService(db), AuthService: service.NewAuthService(db)}
 }
 
 // SignUp godoc
@@ -41,6 +37,7 @@ func NewAuthController(db *gorm.DB) *AuthController {
 // @Failure 500 {object} response.ErrorResponse "Internal server error during user creation" example({"error": "Failed to create user"})
 // @Router /auth/signup [post]
 func (c *AuthController) SignUp(ctx *gin.Context) {
+	metrics := telemetry.GetMetrics()
 	log := logger.GetFromContext(ctx)
 
 	var userForm model.UserForm
@@ -52,6 +49,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 
 	user, createErr := c.UserService.CreateUser(ctx, userForm)
 	if createErr != nil {
+		metrics.RecordAuthAttempt(ctx, false, "signup")
 		var apiError *err.ApiError
 		if errors.As(createErr, &apiError) {
 			switch apiError.Type {
@@ -67,6 +65,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 		return
 	}
 
+	metrics.RecordAuthAttempt(ctx, true, "signup")
 	ctx.JSON(http.StatusCreated, user.ToDTO())
 }
 
@@ -83,6 +82,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "Internal server error during authentication" example({"error": "Failed to generate token"})
 // @Router /auth/login [post]
 func (c *AuthController) Login(ctx *gin.Context) {
+	metrics := telemetry.GetMetrics()
 	log := logger.GetFromContext(ctx)
 
 	var userForm model.UserForm
@@ -94,6 +94,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 
 	user, err := c.AuthService.ValidateUserCredentials(ctx, userForm)
 	if err != nil {
+		metrics.RecordAuthAttempt(ctx, false, "login")
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "Invalid credentials"})
 		return
 	}
@@ -104,5 +105,6 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
+	metrics.RecordAuthAttempt(ctx, true, "login")
 	ctx.JSON(http.StatusOK, response.ApiResponse{Message: "Login successful", Data: map[string]string{"token": tokenString}})
 }

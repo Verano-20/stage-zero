@@ -232,7 +232,7 @@ func Shutdown() {
 
 func GetMetrics() *AppMetrics {
 	if globalProvider == nil || globalProvider.AppMetrics == nil {
-		return nil
+		panic("Metrics not initialized")
 	}
 	return globalProvider.AppMetrics
 }
