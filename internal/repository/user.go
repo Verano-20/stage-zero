@@ -1,7 +1,11 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/Verano-20/go-crud/internal/model"
+	"github.com/Verano-20/go-crud/internal/telemetry"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -13,11 +17,15 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) Create(user *model.User) (*model.User, error) {
+func (r *UserRepository) Create(ctx *gin.Context, user *model.User) (*model.User, error) {
+	metrics := telemetry.GetMetrics()
+	start := time.Now()
+
 	if err := r.db.Create(&user).Error; err != nil {
 		return nil, err
 	}
 
+	metrics.RecordDBQuery(ctx, "create", time.Since(start).Seconds())
 	return user, nil
 }
 

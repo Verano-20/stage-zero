@@ -33,7 +33,7 @@ func (s *UserService) CreateUser(ctx *gin.Context, userForm model.UserForm) (use
 		return nil, err.NewPasswordHashError(hashErr)
 	}
 
-	user, dbErr := s.UserRepository.Create(userForm.ToModel(string(passwordHash)))
+	user, dbErr := s.UserRepository.Create(ctx, userForm.ToModel(string(passwordHash)))
 	if dbErr != nil {
 		var pgErr *pgconn.PgError
 		// Check if the error is a unique constraint violation (SQLSTATE 23505)
