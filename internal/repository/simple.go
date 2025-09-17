@@ -26,6 +26,7 @@ func (r *SimpleRepository) Create(ctx *gin.Context, simple *model.Simple) (*mode
 	}
 
 	metrics.RecordDBQuery(ctx, "create_simple", time.Since(start).Seconds())
+	metrics.UpdateSimpleCount(ctx, 1)
 	return simple, nil
 }
 
@@ -76,5 +77,6 @@ func (r *SimpleRepository) Delete(ctx *gin.Context, id uint) error {
 	}
 
 	metrics.RecordDBQuery(ctx, "delete_simple", time.Since(start).Seconds())
+	metrics.UpdateSimpleCount(ctx, -1)
 	return nil
 }

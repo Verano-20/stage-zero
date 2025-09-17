@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: 'go-crud-dashboards'
+    orgId: 1
+    folder: 'Go CRUD App'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 5
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards

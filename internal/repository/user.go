@@ -26,6 +26,7 @@ func (r *UserRepository) Create(ctx *gin.Context, user *model.User) (*model.User
 	}
 
 	metrics.RecordDBQuery(ctx, "create_user", time.Since(start).Seconds())
+	metrics.UpdateUserCount(ctx, 1)
 	return user, nil
 }
 

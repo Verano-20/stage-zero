@@ -14,7 +14,7 @@ type AppMetrics struct {
 	HTTPRequestsActive  metric.Int64UpDownCounter
 
 	// Database metrics
-	DBConnectionsActive metric.Int64UpDownCounter
+	DBConnectionsActive metric.Int64UpDownCounter // TODO: use
 	DBQueriesTotal      metric.Int64Counter
 	DBQueryDuration     metric.Float64Histogram
 
