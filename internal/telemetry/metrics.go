@@ -2,6 +2,7 @@ package telemetry
 
 import (
 	"context"
+	"database/sql"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
@@ -14,9 +15,11 @@ type AppMetrics struct {
 	HTTPRequestsActive  metric.Int64UpDownCounter
 
 	// Database metrics
-	DBConnectionsActive metric.Int64UpDownCounter // TODO: use
-	DBQueriesTotal      metric.Int64Counter
-	DBQueryDuration     metric.Float64Histogram
+	DBConnectionsOpen  metric.Int64Gauge
+	DBConnectionsInUse metric.Int64Gauge
+	DBConnectionsIdle  metric.Int64Gauge
+	DBQueriesTotal     metric.Int64Counter
+	DBQueryDuration    metric.Float64Histogram
 
 	// Auth metrics
 	AuthAttemptsTotal metric.Int64Counter
@@ -61,10 +64,27 @@ func NewAppMetrics(meter metric.Meter) (*AppMetrics, error) {
 		return nil, err
 	}
 
-	// Database metrics
-	metrics.DBConnectionsActive, err = meter.Int64UpDownCounter(
-		"db_connections_active",
-		metric.WithDescription("Number of active database connections"),
+	metrics.DBConnectionsOpen, err = meter.Int64Gauge(
+		"db_connections_open",
+		metric.WithDescription("Total number of open database connections"),
+		metric.WithUnit("1"),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	metrics.DBConnectionsInUse, err = meter.Int64Gauge(
+		"db_connections_in_use",
+		metric.WithDescription("Number of database connections currently in use"),
+		metric.WithUnit("1"),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	metrics.DBConnectionsIdle, err = meter.Int64Gauge(
+		"db_connections_idle",
+		metric.WithDescription("Number of idle database connections"),
 		metric.WithUnit("1"),
 	)
 	if err != nil {
@@ -157,8 +177,10 @@ func (m *AppMetrics) RecordDBQuery(ctx context.Context, operation string, durati
 	m.DBQueryDuration.Record(ctx, duration, metric.WithAttributes(attrs...))
 }
 
-func (m *AppMetrics) RecordActiveDBConnection(ctx context.Context, delta int64) {
-	m.DBConnectionsActive.Add(ctx, delta)
+func (m *AppMetrics) RecordDBConnectionStats(ctx context.Context, stats sql.DBStats) {
+	m.DBConnectionsOpen.Record(ctx, int64(stats.OpenConnections))
+	m.DBConnectionsInUse.Record(ctx, int64(stats.InUse))
+	m.DBConnectionsIdle.Record(ctx, int64(stats.Idle))
 }
 
 // Auth metrics methods

@@ -16,6 +16,19 @@
   "version": 1,
   "panels": [
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "panels": [],
+      "title": "🌐 HTTP Metrics",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -78,7 +91,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 1
       },
       "id": 1,
       "options": {
@@ -171,7 +184,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 0
+        "y": 1
       },
       "id": 2,
       "options": {
@@ -274,7 +287,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "id": 3,
       "options": {
@@ -303,6 +316,19 @@
       ],
       "title": "Active HTTP Requests",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 101,
+      "panels": [],
+      "title": "🗄️ Database Metrics",
+      "type": "row"
     },
     {
       "datasource": {
@@ -366,8 +392,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 8
+        "x": 0,
+        "y": 18
       },
       "id": 4,
       "options": {
@@ -388,10 +414,30 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "db_connections_active{job=\"otel-collector\"}",
+          "expr": "db_connections_open_ratio{job=\"otel-collector\"}",
           "interval": "",
-          "legendFormat": "Active DB Connections",
+          "legendFormat": "Total Open Connections",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "db_connections_in_use_ratio{job=\"otel-collector\"}",
+          "interval": "",
+          "legendFormat": "Connections In Use",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "db_connections_idle_ratio{job=\"otel-collector\"}",
+          "interval": "",
+          "legendFormat": "Idle Connections",
+          "refId": "C"
         }
       ],
       "title": "Database Connections",
@@ -459,8 +505,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 16
+        "x": 12,
+        "y": 18
       },
       "id": 5,
       "options": {
@@ -552,8 +598,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 16
+        "x": 0,
+        "y": 26
       },
       "id": 6,
       "options": {
@@ -648,6 +694,122 @@
               }
             ]
           },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "db_connections_open_ratio{job=\"otel-collector\"} - db_connections_in_use_ratio{job=\"otel-collector\"}",
+          "interval": "",
+          "legendFormat": "Available Connections",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "25 - db_connections_open_ratio{job=\"otel-collector\"}",
+          "interval": "",
+          "legendFormat": "Unused Pool Capacity",
+          "refId": "B"
+        }
+      ],
+      "title": "Database Connection Pool Utilization",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "id": 102,
+      "panels": [],
+      "title": "📊 Other Metrics",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
           "unit": "reqps"
         },
         "overrides": []
@@ -656,7 +818,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 35
       },
       "id": 7,
       "options": {
@@ -759,7 +921,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 35
       },
       "id": 8,
       "options": {
