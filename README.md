@@ -20,14 +20,11 @@ This project serves as a robust foundation for backend applications requiring au
 
 ## Features
 
-- 🔐 **JWT Authentication**: Secure user registration and login
-- 📊 **CRUD Operations**: Complete resource management
-- 🚀 **RESTful API**: Clean, intuitive endpoint design
+- 🚀 **RESTful CRUD API**: Clean, intuitive endpoint design for complete resource management
 - 📖 **Auto-generated Documentation**: Swagger UI with interactive testing
-- 🔒 **Security**: Password hashing, input validation, error handling
+- 🔐 **JWT Authentication**: Secure user registration and login
 - 🐳 **Docker Ready**: Containerized deployment with Docker Compose
-- 🏗️ **Clean Architecture**: Layered structure with separation of concerns
-- 📋 **Standardized Responses**: Consistent JSON response format
+- 📈 **Complete Observability**: Metrics, traces, and logs with Grafana dashboards
 - 🔄 **Database Migrations**: Version-controlled schema changes
 
 ## Prerequisites
@@ -347,6 +344,50 @@ curl -X DELETE http://localhost:8080/simple/1 \
 ```bash
 curl http://localhost:8080/health
 ```
+
+## Observability
+
+This application includes enterprise-grade observability with **metrics**, **traces**, and **logs** using OpenTelemetry and Grafana.
+
+### Architecture
+```
+Go App ────┬─→ OpenTelemetry Collector ├→ Prometheus → Grafana
+           │                          └→ Tempo ────┘
+           └─→ JSON Logs → Promtail → Loki ──────────┘
+```
+
+### Quick Start
+
+1. **Add telemetry configuration** to your `.env.docker`:
+```bash
+# Telemetry Configuration
+ENABLE_STDOUT=false
+ENABLE_OTLP=true
+OTLP_ENDPOINT=http://otel-collector:4318
+OTLP_INSECURE=true
+METRIC_INTERVAL=30s
+```
+
+2. **Start the complete observability stack**:
+```bash
+docker-compose up -d
+```
+
+3. **Access Grafana dashboards**: http://localhost:3000 (admin/admin)
+
+### Pre-configured Dashboards
+
+- **Application Overview**: HTTP metrics, database performance, auth statistics
+- **Distributed Tracing**: Request flows, service maps, error traces  
+- **Structured Logs**: Live logs, error filtering, trace correlation
+
+### Available Metrics
+
+The application automatically exports:
+- **HTTP**: Request rates, duration, active requests
+- **Database**: Connection pools, query performance
+- **Authentication**: Login attempts, failures
+- **Business**: User counts, entity counts
 
 ## Development
 

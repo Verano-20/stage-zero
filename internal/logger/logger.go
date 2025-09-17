@@ -1,8 +1,11 @@
 package logger
 
 import (
+	"context"
+
 	"github.com/Verano-20/go-crud/internal/config"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -19,25 +22,43 @@ func InitLogger() {
 		gin.SetMode(gin.ReleaseMode)
 
 		zapConfig := zap.NewProductionConfig()
-		zapConfig.EncoderConfig.TimeKey = "timestamp"
-		zapConfig.EncoderConfig.MessageKey = "message"
+		zapConfig.EncoderConfig.TimeKey = "time"
+		zapConfig.EncoderConfig.MessageKey = "msg"
 		zapConfig.EncoderConfig.LevelKey = "level"
 		zapConfig.EncoderConfig.CallerKey = "caller"
+		zapConfig.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
 
+		// Add service info to all logs
 		globalLogger, err = zapConfig.Build(
 			zap.AddCaller(),
 			zap.AddStacktrace(zapcore.ErrorLevel),
+			zap.Fields(
+				zap.String("service", config.ServiceName),
+				zap.String("version", config.ServiceVersion),
+				zap.String("environment", config.Environment),
+			),
 		)
 	} else {
 		gin.SetMode(gin.DebugMode)
 
 		zapConfig := zap.NewDevelopmentConfig()
-		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-		zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+		// Use JSON encoding for better Loki parsing even in dev
+		zapConfig.Encoding = "json"
+		zapConfig.EncoderConfig.TimeKey = "time"
+		zapConfig.EncoderConfig.MessageKey = "msg"
+		zapConfig.EncoderConfig.LevelKey = "level"
+		zapConfig.EncoderConfig.CallerKey = "caller"
+		zapConfig.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.LowercaseLevelEncoder
 
 		globalLogger, err = zapConfig.Build(
 			zap.AddCaller(),
 			zap.AddStacktrace(zapcore.ErrorLevel),
+			zap.Fields(
+				zap.String("service", config.ServiceName),
+				zap.String("version", config.ServiceVersion),
+				zap.String("environment", config.Environment),
+			),
 		)
 	}
 
@@ -62,6 +83,26 @@ func GetFromContext(ctx *gin.Context) *zap.Logger {
 		}
 	}
 	return zap.L() // fallback to global logger
+}
+
+// WithTraceContext adds trace and span IDs to the logger for correlation
+func WithTraceContext(ctx context.Context, logger *zap.Logger) *zap.Logger {
+	span := trace.SpanFromContext(ctx)
+	if !span.IsRecording() {
+		return logger
+	}
+
+	spanContext := span.SpanContext()
+	return logger.With(
+		zap.String("trace_id", spanContext.TraceID().String()),
+		zap.String("span_id", spanContext.SpanID().String()),
+	)
+}
+
+// GetWithTrace gets logger with trace context from gin context
+func GetWithTrace(ctx *gin.Context) *zap.Logger {
+	logger := GetFromContext(ctx)
+	return WithTraceContext(ctx.Request.Context(), logger)
 }
 
 // Sync flushes any buffered log entries

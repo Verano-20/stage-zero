@@ -9,8 +9,8 @@ import (
 	"github.com/Verano-20/go-crud/internal/logger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/metric"
@@ -131,25 +131,25 @@ func initOTLP(traceExporters *[]sdktrace.SpanExporter, metricReaders *[]sdkmetri
 
 	log.Info("Initializing OTLP telemetry...")
 
-	var otlpTraceOptions []otlptracehttp.Option
-	var otlpMetricOptions []otlpmetrichttp.Option
+	var otlpTraceOptions []otlptracegrpc.Option
+	var otlpMetricOptions []otlpmetricgrpc.Option
 
-	otlpTraceOptions = append(otlpTraceOptions, otlptracehttp.WithEndpoint(config.Telemetry.OTLPEndpoint))
-	otlpMetricOptions = append(otlpMetricOptions, otlpmetrichttp.WithEndpoint(config.Telemetry.OTLPEndpoint))
+	otlpTraceOptions = append(otlpTraceOptions, otlptracegrpc.WithEndpoint(config.Telemetry.OTLPEndpoint))
+	otlpMetricOptions = append(otlpMetricOptions, otlpmetricgrpc.WithEndpoint(config.Telemetry.OTLPEndpoint))
 
 	if config.Telemetry.OTLPInsecure {
-		otlpTraceOptions = append(otlpTraceOptions, otlptracehttp.WithInsecure())
-		otlpMetricOptions = append(otlpMetricOptions, otlpmetrichttp.WithInsecure())
+		otlpTraceOptions = append(otlpTraceOptions, otlptracegrpc.WithInsecure())
+		otlpMetricOptions = append(otlpMetricOptions, otlpmetricgrpc.WithInsecure())
 	}
 
-	otlpTraceExporter, err := otlptracehttp.New(context.Background(), otlpTraceOptions...)
+	otlpTraceExporter, err := otlptracegrpc.New(context.Background(), otlpTraceOptions...)
 	if err != nil {
 		return fmt.Errorf("failed to create OTLP trace exporter: %w", err)
 	}
 	*traceExporters = append(*traceExporters, otlpTraceExporter)
 	globalProvider.shutdownFuncs = append(globalProvider.shutdownFuncs, otlpTraceExporter.Shutdown)
 
-	otlpMetricExporter, err := otlpmetrichttp.New(context.Background(), otlpMetricOptions...)
+	otlpMetricExporter, err := otlpmetricgrpc.New(context.Background(), otlpMetricOptions...)
 	if err != nil {
 		return fmt.Errorf("failed to create OTLP metric exporter: %w", err)
 	}
