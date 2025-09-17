@@ -54,7 +54,7 @@ func (s *UserService) GetUserByEmail(ctx *gin.Context, email string) (user *mode
 
 	log.Debug("Getting User by email...", zap.String("email", email))
 
-	user, err = s.UserRepository.GetByEmail(email)
+	user, err = s.UserRepository.GetByEmail(ctx, email)
 	if err != nil {
 		log.Error("Failed to find User with email", zap.String("email", email), zap.Error(err))
 		return nil, err

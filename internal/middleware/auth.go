@@ -112,7 +112,7 @@ func (m *AuthMiddleware) validateClaims(ctx *gin.Context, token *jwt.Token) erro
 	}
 
 	userID := uint(claims["sub"].(float64))
-	user, err := m.userRepository.GetByID(userID)
+	user, err := m.userRepository.GetByID(ctx, userID)
 	if err != nil {
 		log.Warn("User not found during token validation",
 			zap.Uint("user_id", userID),
