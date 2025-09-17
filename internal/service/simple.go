@@ -22,7 +22,7 @@ func (s *SimpleService) CreateSimple(ctx *gin.Context, simpleForm model.SimpleFo
 
 	log.Debug("Creating Simple...", zap.Object("simple", &simpleForm))
 
-	simple, err := s.SimpleRepository.Create(simpleForm.ToModel())
+	simple, err := s.SimpleRepository.Create(ctx, simpleForm.ToModel())
 	if err != nil {
 		log.Error("Failed to create Simple",
 			zap.Object("simple", &simpleForm),
@@ -39,7 +39,7 @@ func (s *SimpleService) GetAllSimples(ctx *gin.Context) (model.Simples, error) {
 
 	log.Debug("Retrieving all Simples")
 
-	simples, err := s.SimpleRepository.GetAll()
+	simples, err := s.SimpleRepository.GetAll(ctx)
 	if err != nil {
 		log.Error("Failed to retrieve Simples", zap.Error(err))
 		return nil, err
@@ -54,7 +54,7 @@ func (s *SimpleService) GetSimpleByID(ctx *gin.Context, id uint64) (*model.Simpl
 
 	log.Debug("Retrieving Simple by ID", zap.Uint64("id", id))
 
-	simple, err := s.SimpleRepository.GetByID(uint(id))
+	simple, err := s.SimpleRepository.GetByID(ctx, uint(id))
 	if err != nil {
 		log.Warn("Simple not found", zap.Uint64("id", id), zap.Error(err))
 		return nil, err
@@ -73,7 +73,7 @@ func (s *SimpleService) UpdateSimple(ctx *gin.Context, existingSimple *model.Sim
 
 	existingSimple.Name = simpleForm.Name
 
-	simple, err := s.SimpleRepository.Update(existingSimple)
+	simple, err := s.SimpleRepository.Update(ctx, existingSimple)
 	if err != nil {
 		log.Error("Failed to update Simple",
 			zap.Object("existing", existingSimple),
@@ -91,7 +91,7 @@ func (s *SimpleService) DeleteSimple(ctx *gin.Context, existingSimple *model.Sim
 
 	log.Debug("Deleting Simple", zap.Object("simple", existingSimple))
 
-	err := s.SimpleRepository.Delete(existingSimple.ID)
+	err := s.SimpleRepository.Delete(ctx, existingSimple.ID)
 	if err != nil {
 		log.Error("Failed to delete Simple",
 			zap.Object("simple", existingSimple),

@@ -25,7 +25,7 @@ func (r *UserRepository) Create(ctx *gin.Context, user *model.User) (*model.User
 		return nil, err
 	}
 
-	metrics.RecordDBQuery(ctx, "create", time.Since(start).Seconds())
+	metrics.RecordDBQuery(ctx, "create_user", time.Since(start).Seconds())
 	return user, nil
 }
 
@@ -38,7 +38,7 @@ func (r *UserRepository) GetByID(ctx *gin.Context, id uint) (*model.User, error)
 		return nil, err
 	}
 
-	metrics.RecordDBQuery(ctx, "get_by_id", time.Since(start).Seconds())
+	metrics.RecordDBQuery(ctx, "get_user_by_id", time.Since(start).Seconds())
 	return user, nil
 }
 
@@ -51,6 +51,6 @@ func (r *UserRepository) GetByEmail(ctx *gin.Context, email string) (*model.User
 		return nil, err
 	}
 
-	metrics.RecordDBQuery(ctx, "get_by_email", time.Since(start).Seconds())
+	metrics.RecordDBQuery(ctx, "get_user_by_email", time.Since(start).Seconds())
 	return user, nil
 }
