@@ -205,7 +205,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"otel-collector\"}[5m]))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"otel-collector\"}[5m])) by (le))",
           "interval": "",
           "legendFormat": "95th percentile",
           "refId": "A"
@@ -215,7 +215,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"otel-collector\"}[5m]))",
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"otel-collector\"}[5m])) by (le))",
           "interval": "",
           "legendFormat": "50th percentile",
           "refId": "B"
@@ -308,7 +308,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "http_requests_active{job=\"otel-collector\"}",
+          "expr": "sum(http_requests_active{job=\"otel-collector\"})",
           "interval": "",
           "legendFormat": "Active HTTP Requests",
           "refId": "A"
@@ -414,7 +414,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "db_connections_open_ratio{job=\"otel-collector\"}",
+          "expr": "sum(db_connections_open_ratio{job=\"otel-collector\"})",
           "interval": "",
           "legendFormat": "Total Open Connections",
           "refId": "A"
@@ -424,7 +424,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "db_connections_in_use_ratio{job=\"otel-collector\"}",
+          "expr": "sum(db_connections_in_use_ratio{job=\"otel-collector\"})",
           "interval": "",
           "legendFormat": "Connections In Use",
           "refId": "B"
@@ -434,7 +434,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "db_connections_idle_ratio{job=\"otel-collector\"}",
+          "expr": "sum(db_connections_idle_ratio{job=\"otel-collector\"})",
           "interval": "",
           "legendFormat": "Idle Connections",
           "refId": "C"
@@ -620,7 +620,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, rate(db_query_duration_seconds_bucket{job=\"otel-collector\"}[5m]))",
+          "expr": "histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket{job=\"otel-collector\"}[5m])) by (le))",
           "interval": "",
           "legendFormat": "95th percentile",
           "refId": "A"
@@ -630,7 +630,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.50, rate(db_query_duration_seconds_bucket{job=\"otel-collector\"}[5m]))",
+          "expr": "histogram_quantile(0.50, sum(rate(db_query_duration_seconds_bucket{job=\"otel-collector\"}[5m])) by (le))",
           "interval": "",
           "legendFormat": "50th percentile",
           "refId": "B"
@@ -723,7 +723,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "db_connections_open_ratio{job=\"otel-collector\"} - db_connections_in_use_ratio{job=\"otel-collector\"}",
+          "expr": "sum(db_connections_open_ratio{job=\"otel-collector\"}) - sum(db_connections_in_use_ratio{job=\"otel-collector\"})",
           "interval": "",
           "legendFormat": "Available Connections",
           "refId": "A"
@@ -733,7 +733,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "25 - db_connections_open_ratio{job=\"otel-collector\"}",
+          "expr": "25 - sum(db_connections_open_ratio{job=\"otel-collector\"})",
           "interval": "",
           "legendFormat": "Unused Pool Capacity",
           "refId": "B"
