@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b23c303a-4dc5-4ab5-9e98-1b77d5f6c135",
+		"_postman_id": "3949a2dd-2f6f-4b91-b84b-8a21086864d9",
 		"name": "Go-CRUD",
 		"description": "Postman suite for all endpoints in the Go-CRUD app API.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -176,6 +176,44 @@
 					"response": []
 				}
 			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": ""
 		}
 	]
 }
