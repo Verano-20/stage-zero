@@ -18,11 +18,50 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
+  "id": 6,
   "links": [],
   "panels": [
     {
       "datasource": {
+        "default": false,
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 15,
+        "x": 0,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "expr": "{compose_service=\"app\", level = \"error\"}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Error Logs",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "default": false,
         "type": "loki",
         "uid": "loki"
       },
@@ -33,17 +72,20 @@
           },
           "custom": {
             "axisBorderShow": false,
+            "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
-              "vis": false
+              "vis": false,
+              "viz": false
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
@@ -82,8 +124,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 0,
+        "w": 9,
+        "x": 15,
         "y": 0
       },
       "id": 1,
@@ -105,7 +147,9 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "rate({service=\"go-crud-api\"}[5m])",
+          "editorMode": "code",
+          "expr": "sum by (compose_service) (rate({compose_service=\"app\"}[5m]))",
+          "queryType": "range",
           "refId": "A"
         }
       ],
@@ -114,133 +158,12 @@
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "error"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "warn"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "yellow"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 2,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
-          "expr": "sum by (level) (rate({service=\"go-crud-api\"} |= \"level\" | json | level != \"\" [5m]))",
-          "refId": "A"
-        }
-      ],
-      "title": "Log Levels",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
+        "default": false,
         "type": "loki",
         "uid": "loki"
       },
       "gridPos": {
-        "h": 12,
+        "h": 10,
         "w": 24,
         "x": 0,
         "y": 8
@@ -252,8 +175,8 @@
         "prettifyLogMessage": false,
         "showCommonLabels": false,
         "showLabels": false,
-        "showTime": false,
-        "sortOrder": "Descending",
+        "showTime": true,
+        "sortOrder": "Ascending",
         "wrapLogMessage": false
       },
       "targets": [
@@ -262,58 +185,26 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{service=\"go-crud-api\"} |= \"\"",
+          "editorMode": "code",
+          "expr": "{compose_service=\"app\"} |= \"\"",
+          "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Application Logs",
+      "title": "Logs - Go CRUD",
       "type": "logs"
     },
     {
       "datasource": {
+        "default": false,
         "type": "loki",
         "uid": "loki"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 10,
+        "w": 24,
         "x": 0,
-        "y": 20
-      },
-      "id": 4,
-      "options": {
-        "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showLabels": false,
-        "showTime": false,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
-          "expr": "{service=\"go-crud-api\"} |= \"error\" or {service=\"go-crud-api\"} |= \"ERROR\"",
-          "refId": "A"
-        }
-      ],
-      "title": "Error Logs",
-      "type": "logs"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 20
+        "y": 18
       },
       "id": 5,
       "options": {
@@ -323,7 +214,7 @@
         "showCommonLabels": false,
         "showLabels": false,
         "showTime": false,
-        "sortOrder": "Descending",
+        "sortOrder": "Ascending",
         "wrapLogMessage": false
       },
       "targets": [
@@ -332,7 +223,9 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{container=\"go-crud-db-1\"} |= \"\"",
+          "editorMode": "code",
+          "expr": "{compose_service=\"db\"} |= \"\"",
+          "queryType": "range",
           "refId": "A"
         }
       ],
@@ -343,7 +236,6 @@
   "refresh": "5s",
   "schemaVersion": 39,
   "tags": [
-    "go-crud",
     "logs"
   ],
   "templating": {
@@ -355,8 +247,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Go CRUD Application Logs",
-  "uid": "go-crud-logs",
-  "version": 1,
+  "title": "Logs",
+  "uid": "logs",
+  "version": 2,
   "weekStart": ""
 }

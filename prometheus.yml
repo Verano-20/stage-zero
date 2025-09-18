@@ -27,6 +27,12 @@ scrape_configs:
       - targets: ['grafana:3000']
     metrics_path: /metrics
 
+  # Loki log aggregator
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+    metrics_path: /metrics
+
   # Prometheus itself
   - job_name: 'prometheus'
     static_configs:

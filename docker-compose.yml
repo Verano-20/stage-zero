@@ -41,6 +41,9 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    labels:
+      logging: "promtail"
+      service: "go-crud-db"
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.111.0
@@ -89,6 +92,9 @@ services:
       - ./loki.yaml:/etc/loki/local-config.yaml
       - loki_data:/loki
     restart: unless-stopped
+    labels:
+      logging: "promtail"
+      service: "loki"
 
   promtail:
     image: grafana/promtail:3.2.0

@@ -337,7 +337,6 @@
   "refresh": "5s",
   "schemaVersion": 39,
   "tags": [
-    "go-crud",
     "tracing"
   ],
   "templating": {
@@ -349,8 +348,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Go CRUD Application Tracing",
-  "uid": "go-crud-tracing",
+  "title": "Tracing",
+  "uid": "tracing",
   "version": 1,
   "weekStart": ""
 }

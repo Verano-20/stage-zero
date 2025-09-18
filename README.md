@@ -12,7 +12,7 @@ A modern, production-ready CRUD (Create, Read, Update, Delete) REST API built wi
 This project serves as a robust foundation for backend applications requiring authentication and CRUD operations.
 
 ## TODO
-- Finish telemetry implementation
+- Finalise stack & trace dashboards
 - Add unit tests
 - Add Playwright test suite (or other)
 - Ensure goroutines are used where appropriate
