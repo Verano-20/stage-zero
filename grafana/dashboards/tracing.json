@@ -332,6 +332,36 @@
       ],
       "title": "Error Traces",
       "type": "traces"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 6,
+      "options": {
+        "query": "{service.name=\"go-crud-api\"}",
+        "queryType": "search",
+        "serviceName": "go-crud-api"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "tempo"
+          },
+          "query": "{service.name=\"go-crud-api\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "All Traces",
+      "type": "traces"
     }
   ],
   "refresh": "5s",

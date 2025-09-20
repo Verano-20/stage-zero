@@ -18,9 +18,19 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
   "links": [],
   "panels": [
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 104,
+      "title": "Panel Title",
+      "type": "timeseries"
+    },
     {
       "collapsed": false,
       "datasource": {
@@ -31,7 +41,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 8
       },
       "id": 100,
       "panels": [],
@@ -123,7 +133,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 1
+        "y": 9
       },
       "id": 2,
       "options": {
@@ -246,7 +256,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 1
+        "y": 9
       },
       "id": 1,
       "options": {
@@ -288,7 +298,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 17
       },
       "id": 101,
       "panels": [],
@@ -380,7 +390,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 10
+        "y": 18
       },
       "id": 6,
       "options": {
@@ -503,7 +513,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 10
+        "y": 18
       },
       "id": 5,
       "options": {
@@ -602,7 +612,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 26
       },
       "id": 7,
       "options": {
@@ -709,7 +719,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 26
       },
       "id": 4,
       "options": {
@@ -769,7 +779,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 34
       },
       "id": 102,
       "panels": [],
@@ -853,7 +863,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 27
+        "y": 35
       },
       "id": 103,
       "options": {
@@ -903,45 +913,10 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "editable": true,
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -973,16 +948,7 @@
                 "readOnly": true
               }
             },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
+            "properties": []
           }
         ]
       },
@@ -990,21 +956,25 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 35
       },
       "id": 8,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
+      "pluginVersion": "11.2.0",
       "targets": [
         {
           "datasource": {
@@ -1023,20 +993,22 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "editorMode": "code",
           "expr": "simples_total{job=\"otel-collector\"}",
           "interval": "",
           "legendFormat": "Simples",
+          "range": true,
           "refId": "B"
         }
       ],
       "title": "Business Metrics",
-      "type": "timeseries"
+      "type": "gauge"
     }
   ],
   "refresh": "5s",
   "schemaVersion": 39,
   "tags": [
-    "overview"
+    "metrics"
   ],
   "templating": {
     "list": []
@@ -1047,8 +1019,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Overview",
-  "uid": "overview",
-  "version": 12,
+  "title": "Metrics",
+  "uid": "metrics",
+  "version": 1,
   "weekStart": ""
 }
