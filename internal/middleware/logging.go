@@ -5,23 +5,36 @@ import (
 
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		start := time.Now()
-		path := ctx.Request.URL.Path
 		method := ctx.Request.Method
+		path := ctx.Request.URL.Path
 		clientIP := ctx.ClientIP()
 		userAgent := ctx.Request.UserAgent()
 
-		log := logger.Get().With(
+		logFields := []zap.Field{
 			zap.String("method", method),
 			zap.String("path", path),
 			zap.String("client_ip", clientIP),
 			zap.String("user_agent", userAgent),
-		)
+		}
+
+		span := trace.SpanFromContext(ctx.Request.Context())
+		spanContext := span.SpanContext()
+
+		if spanContext.IsValid() {
+			logFields = append(logFields,
+				zap.String("trace_id", spanContext.TraceID().String()),
+				zap.String("span_id", spanContext.SpanID().String()),
+			)
+		}
+
+		log := logger.Get().With(logFields...)
 
 		ctx.Set("logger", log)
 

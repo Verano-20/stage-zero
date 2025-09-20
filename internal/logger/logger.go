@@ -1,11 +1,8 @@
 package logger
 
 import (
-	"context"
-
 	"github.com/Verano-20/go-crud/internal/config"
 	"github.com/gin-gonic/gin"
-	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -83,26 +80,6 @@ func GetFromContext(ctx *gin.Context) *zap.Logger {
 		}
 	}
 	return zap.L() // fallback to global logger
-}
-
-// WithTraceContext adds trace and span IDs to the logger for correlation
-func WithTraceContext(ctx context.Context, logger *zap.Logger) *zap.Logger {
-	span := trace.SpanFromContext(ctx)
-	if !span.IsRecording() {
-		return logger
-	}
-
-	spanContext := span.SpanContext()
-	return logger.With(
-		zap.String("trace_id", spanContext.TraceID().String()),
-		zap.String("span_id", spanContext.SpanID().String()),
-	)
-}
-
-// GetWithTrace gets logger with trace context from gin context
-func GetWithTrace(ctx *gin.Context) *zap.Logger {
-	logger := GetFromContext(ctx)
-	return WithTraceContext(ctx.Request.Context(), logger)
 }
 
 // Sync flushes any buffered log entries

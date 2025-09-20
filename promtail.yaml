@@ -37,10 +37,22 @@ scrape_configs:
             path: path
             status: status
             duration: duration
+            trace_id: trace_id
+            span_id: span_id
+            client_ip: client_ip
+            user_agent: user_agent
       - labels:
           level:
           service:
           compose_service:
+          method:
+          path:
+          client_ip:
+          user_agent:
+          status:
+          duration:
+          trace_id:
+          span_id:
       - timestamp:
           source: timestamp
           format: RFC3339
