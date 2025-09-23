@@ -15,7 +15,7 @@ import (
 )
 
 type UserService struct {
-	UserRepository *repository.UserRepository
+	UserRepository repository.UserRepository
 }
 
 func NewUserService(db *gorm.DB) *UserService {

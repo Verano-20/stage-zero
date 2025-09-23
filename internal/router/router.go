@@ -5,6 +5,7 @@ import (
 	"github.com/Verano-20/go-crud/internal/controller"
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/middleware"
+	"github.com/Verano-20/go-crud/internal/repository"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -24,7 +25,7 @@ func InitRouter(db *gorm.DB) *gin.Engine {
 	router.Use(middleware.LoggingMiddleware())
 	router.Use(middleware.MetricsMiddleware())
 
-	authMiddleware := middleware.NewAuthMiddleware(config.GetJwtSecret(), db)
+	authMiddleware := middleware.NewAuthMiddleware(config.GetJwtSecret(), repository.NewUserRepository(db))
 
 	router.GET("/health", controller.GetHealth)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

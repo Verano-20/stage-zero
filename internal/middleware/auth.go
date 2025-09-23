@@ -12,18 +12,23 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 type AuthMiddleware struct {
 	jwtSecret      []byte
-	userRepository *repository.UserRepository
+	userRepository repository.UserRepository
 }
 
-func NewAuthMiddleware(jwtSecret []byte, db *gorm.DB) *AuthMiddleware {
+var validSigningMethods = []string{
+	jwt.SigningMethodHS256.Alg(),
+	jwt.SigningMethodHS384.Alg(),
+	jwt.SigningMethodHS512.Alg(),
+}
+
+func NewAuthMiddleware(jwtSecret []byte, userRepository repository.UserRepository) *AuthMiddleware {
 	return &AuthMiddleware{
 		jwtSecret:      jwtSecret,
-		userRepository: repository.NewUserRepository(db),
+		userRepository: userRepository,
 	}
 }
 
@@ -69,16 +74,20 @@ func (m *AuthMiddleware) validateToken(ctx *gin.Context) (*jwt.Token, error) {
 	tokenString := tokenParts[1]
 	log.Debug("Parsing JWT token...")
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.Warn("Invalid JWT signing method",
-				zap.String("method", token.Method.Alg()))
-			return nil, jwt.NewValidationError("invalid signing method", jwt.ValidationErrorSignatureInvalid)
-		}
+	parser := jwt.NewParser(
+		jwt.WithValidMethods(validSigningMethods),
+	)
+
+	token, err := parser.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return m.jwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
+		if err.Error() == "Token is expired" {
+			log.Warn("JWT token expired", zap.Error(err))
+			return nil, errors.New("token expired")
+		}
+
 		log.Warn("JWT token parsing failed", zap.Error(err))
 		return nil, errors.New("invalid token")
 	}
@@ -97,18 +106,10 @@ func (m *AuthMiddleware) validateClaims(ctx *gin.Context, token *jwt.Token) erro
 		return errors.New("invalid token claims")
 	}
 
-	if claims["exp"] == nil || claims["sub"] == nil {
+	if claims["sub"] == nil {
 		log.Warn("Missing required JWT claims",
-			zap.Bool("has_exp", claims["exp"] != nil),
 			zap.Bool("has_sub", claims["sub"] != nil))
 		return errors.New("invalid token claims")
-	}
-
-	if claims["exp"].(float64) < float64(time.Now().Unix()) {
-		log.Warn("JWT token expired",
-			zap.Float64("exp", claims["exp"].(float64)),
-			zap.Int64("now", time.Now().Unix()))
-		return errors.New("token expired")
 	}
 
 	userID := uint(claims["sub"].(float64))

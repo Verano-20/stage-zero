@@ -9,15 +9,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepository struct {
+type UserRepository interface {
+	Create(ctx *gin.Context, user *model.User) (*model.User, error)
+	GetByID(ctx *gin.Context, id uint) (*model.User, error)
+	GetByEmail(ctx *gin.Context, email string) (*model.User, error)
+}
+
+type userRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{db: db}
+var _ UserRepository = &userRepository{}
+
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return &userRepository{db: db}
 }
 
-func (r *UserRepository) Create(ctx *gin.Context, user *model.User) (*model.User, error) {
+func (r userRepository) Create(ctx *gin.Context, user *model.User) (*model.User, error) {
 	metrics := telemetry.GetMetrics()
 	start := time.Now()
 
@@ -30,7 +38,7 @@ func (r *UserRepository) Create(ctx *gin.Context, user *model.User) (*model.User
 	return user, nil
 }
 
-func (r *UserRepository) GetByID(ctx *gin.Context, id uint) (*model.User, error) {
+func (r userRepository) GetByID(ctx *gin.Context, id uint) (*model.User, error) {
 	metrics := telemetry.GetMetrics()
 	start := time.Now()
 
@@ -43,7 +51,7 @@ func (r *UserRepository) GetByID(ctx *gin.Context, id uint) (*model.User, error)
 	return user, nil
 }
 
-func (r *UserRepository) GetByEmail(ctx *gin.Context, email string) (*model.User, error) {
+func (r userRepository) GetByEmail(ctx *gin.Context, email string) (*model.User, error) {
 	metrics := telemetry.GetMetrics()
 	start := time.Now()
 
