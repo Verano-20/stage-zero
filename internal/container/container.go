@@ -24,21 +24,26 @@ type Container struct {
 	SimpleController *controller.SimpleController
 }
 
-func NewContainer(db *gorm.DB) *Container {
-	userRepo := repository.NewUserRepository(db)
-	simpleRepo := repository.NewSimpleRepository(db)
+func NewContainerWithDB(db *gorm.DB) *Container {
+	userRepository := repository.NewUserRepository(db)
+	simpleRepository := repository.NewSimpleRepository(db)
 
-	userService := service.NewUserService(userRepo)
+	container := NewContainerWithInterfaces(userRepository, simpleRepository)
+	container.DB = db
+	return container
+}
+
+func NewContainerWithInterfaces(userRepository repository.UserRepository, simpleRepository repository.SimpleRepository) *Container {
+	userService := service.NewUserService(userRepository)
 	authService := service.NewAuthService(userService)
-	simpleService := service.NewSimpleService(simpleRepo)
+	simpleService := service.NewSimpleService(simpleRepository)
 
 	authController := controller.NewAuthController(userService, authService)
 	simpleController := controller.NewSimpleController(simpleService)
 
 	return &Container{
-		DB:               db,
-		UserRepository:   userRepo,
-		SimpleRepository: simpleRepo,
+		UserRepository:   userRepository,
+		SimpleRepository: simpleRepository,
 		UserService:      userService,
 		AuthService:      authService,
 		SimpleService:    simpleService,

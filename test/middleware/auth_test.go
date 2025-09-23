@@ -8,16 +8,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Verano-20/go-crud/internal/middleware"
 	"github.com/Verano-20/go-crud/internal/model"
-	mocks "github.com/Verano-20/go-crud/test/mocks/repository"
+	"github.com/Verano-20/go-crud/test/mocks/container"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	user1 = model.User{ID: 1234567890, Email: "test1@example.com"}
-	user2 = model.User{ID: 1234567891, Email: "test2@example.com"}
+	testContainer = container.NewContainerWithMockRepositories()
+	user1         = model.User{ID: 1234567890, Email: "test1@example.com"}
+	user2         = model.User{ID: 1234567891, Email: "test2@example.com"}
 )
 
 func TestAuthenticateRequest_Success(t *testing.T) {
@@ -29,11 +31,11 @@ func TestAuthenticateRequest_Success(t *testing.T) {
 	validAuthHeader := "Bearer " + createHmacSignedToken(int64Ptr(time.Now().Add(time.Minute*1).Unix()), uintPtr(user1.ID))
 	ctx.Request.Header.Set("Authorization", validAuthHeader)
 	// and
-	authMiddleware := NewAuthMiddleware([]byte("test-secret-key"), mocks.NewMockUserRepository(map[uint]*model.User{
-		user1.ID: &user1,
-	}))
+	userRepository := testContainer.UserRepository
+	userRepository.Create(ctx, &user1)
+	target := middleware.NewAuthMiddleware([]byte("test-secret-key"), userRepository)
 	// when
-	authMiddleware.AuthenticateRequest(ctx)
+	target.AuthenticateRequest(ctx)
 	// then
 	assert.False(t, ctx.IsAborted())
 	assert.Equal(t, http.StatusOK, recorder.Code)
@@ -101,11 +103,11 @@ func TestAuthenticateRequest_Failure(t *testing.T) {
 			ctx.Request = httptest.NewRequest("GET", "/test", nil)
 			ctx.Request.Header.Set("Authorization", test.authHeader)
 			// and
-			authMiddleware := NewAuthMiddleware([]byte("test-secret-key"), mocks.NewMockUserRepository(map[uint]*model.User{
-				user1.ID: &user1,
-			}))
+			userRepository := testContainer.UserRepository
+			userRepository.Create(ctx, &user1)
+			target := middleware.NewAuthMiddleware([]byte("test-secret-key"), userRepository)
 			// when
-			authMiddleware.AuthenticateRequest(ctx)
+			target.AuthenticateRequest(ctx)
 			// then
 			assert.True(t, ctx.IsAborted())
 			assert.Equal(t, test.expectedStatusCode, recorder.Code)

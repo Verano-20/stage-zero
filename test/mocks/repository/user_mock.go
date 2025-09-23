@@ -19,6 +19,7 @@ func NewMockUserRepository(users map[uint]*model.User) repository.UserRepository
 var _ repository.UserRepository = &mockUserRepository{}
 
 func (m *mockUserRepository) Create(ctx *gin.Context, user *model.User) (*model.User, error) {
+	m.users[user.ID] = user
 	return user, nil
 }
 
