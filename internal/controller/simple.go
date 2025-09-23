@@ -10,15 +10,14 @@ import (
 	"github.com/Verano-20/go-crud/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 type SimpleController struct {
 	SimpleService *service.SimpleService
 }
 
-func NewSimpleController(db *gorm.DB) *SimpleController {
-	return &SimpleController{SimpleService: service.NewSimpleService(db)}
+func NewSimpleController(simpleService *service.SimpleService) *SimpleController {
+	return &SimpleController{SimpleService: simpleService}
 }
 
 // Create godoc

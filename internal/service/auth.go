@@ -10,15 +10,14 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type AuthService struct {
 	UserService *UserService
 }
 
-func NewAuthService(db *gorm.DB) *AuthService {
-	return &AuthService{UserService: NewUserService(db)}
+func NewAuthService(userService *UserService) *AuthService {
+	return &AuthService{UserService: userService}
 }
 
 func (s *AuthService) ValidateUserCredentials(ctx *gin.Context, userForm model.UserForm) (user *model.User, err error) {

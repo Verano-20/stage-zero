@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Verano-20/go-crud/internal/config"
+	"github.com/Verano-20/go-crud/internal/container"
 	"github.com/Verano-20/go-crud/internal/database"
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/router"
@@ -47,7 +48,8 @@ func main() {
 	db := database.InitDatabase()
 	defer database.Shutdown(db)
 
-	ginRouter := router.InitRouter(db)
+	container := container.NewContainer(db)
+	ginRouter := router.InitRouter(container)
 
 	server := &http.Server{
 		Addr:    ":" + config.ServicePort,

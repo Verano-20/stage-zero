@@ -6,15 +6,14 @@ import (
 	"github.com/Verano-20/go-crud/internal/repository"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 type SimpleService struct {
-	SimpleRepository *repository.SimpleRepository
+	SimpleRepository repository.SimpleRepository
 }
 
-func NewSimpleService(db *gorm.DB) *SimpleService {
-	return &SimpleService{SimpleRepository: repository.NewSimpleRepository(db)}
+func NewSimpleService(simpleRepository repository.SimpleRepository) *SimpleService {
+	return &SimpleService{SimpleRepository: simpleRepository}
 }
 
 func (s *SimpleService) CreateSimple(ctx *gin.Context, simpleForm model.SimpleForm) (*model.Simple, error) {

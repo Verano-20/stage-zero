@@ -12,7 +12,6 @@ import (
 	"github.com/Verano-20/go-crud/internal/telemetry"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 type AuthController struct {
@@ -20,8 +19,8 @@ type AuthController struct {
 	AuthService *service.AuthService
 }
 
-func NewAuthController(db *gorm.DB) *AuthController {
-	return &AuthController{UserService: service.NewUserService(db), AuthService: service.NewAuthService(db)}
+func NewAuthController(userService *service.UserService, authService *service.AuthService) *AuthController {
+	return &AuthController{UserService: userService, AuthService: authService}
 }
 
 // SignUp godoc

@@ -9,15 +9,25 @@ import (
 	"gorm.io/gorm"
 )
 
-type SimpleRepository struct {
+type SimpleRepository interface {
+	Create(ctx *gin.Context, simple *model.Simple) (*model.Simple, error)
+	GetAll(ctx *gin.Context) (model.Simples, error)
+	GetByID(ctx *gin.Context, id uint) (*model.Simple, error)
+	Update(ctx *gin.Context, simple *model.Simple) (*model.Simple, error)
+	Delete(ctx *gin.Context, id uint) error
+}
+
+type simpleRepository struct {
 	DB *gorm.DB
 }
 
-func NewSimpleRepository(db *gorm.DB) *SimpleRepository {
-	return &SimpleRepository{DB: db}
+var _ SimpleRepository = &simpleRepository{}
+
+func NewSimpleRepository(db *gorm.DB) SimpleRepository {
+	return &simpleRepository{DB: db}
 }
 
-func (r *SimpleRepository) Create(ctx *gin.Context, simple *model.Simple) (*model.Simple, error) {
+func (r simpleRepository) Create(ctx *gin.Context, simple *model.Simple) (*model.Simple, error) {
 	metrics := telemetry.GetMetrics()
 	start := time.Now()
 
@@ -30,7 +40,7 @@ func (r *SimpleRepository) Create(ctx *gin.Context, simple *model.Simple) (*mode
 	return simple, nil
 }
 
-func (r *SimpleRepository) GetAll(ctx *gin.Context) (model.Simples, error) {
+func (r simpleRepository) GetAll(ctx *gin.Context) (model.Simples, error) {
 	metrics := telemetry.GetMetrics()
 	start := time.Now()
 
@@ -43,7 +53,7 @@ func (r *SimpleRepository) GetAll(ctx *gin.Context) (model.Simples, error) {
 	return simples, nil
 }
 
-func (r *SimpleRepository) GetByID(ctx *gin.Context, id uint) (*model.Simple, error) {
+func (r simpleRepository) GetByID(ctx *gin.Context, id uint) (*model.Simple, error) {
 	metrics := telemetry.GetMetrics()
 	start := time.Now()
 
@@ -56,7 +66,7 @@ func (r *SimpleRepository) GetByID(ctx *gin.Context, id uint) (*model.Simple, er
 	return simple, nil
 }
 
-func (r *SimpleRepository) Update(ctx *gin.Context, simple *model.Simple) (*model.Simple, error) {
+func (r simpleRepository) Update(ctx *gin.Context, simple *model.Simple) (*model.Simple, error) {
 	metrics := telemetry.GetMetrics()
 	start := time.Now()
 
@@ -68,7 +78,7 @@ func (r *SimpleRepository) Update(ctx *gin.Context, simple *model.Simple) (*mode
 	return simple, nil
 }
 
-func (r *SimpleRepository) Delete(ctx *gin.Context, id uint) error {
+func (r simpleRepository) Delete(ctx *gin.Context, id uint) error {
 	metrics := telemetry.GetMetrics()
 	start := time.Now()
 

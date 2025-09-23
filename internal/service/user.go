@@ -11,15 +11,14 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type UserService struct {
 	UserRepository repository.UserRepository
 }
 
-func NewUserService(db *gorm.DB) *UserService {
-	return &UserService{UserRepository: repository.NewUserRepository(db)}
+func NewUserService(userRepository repository.UserRepository) *UserService {
+	return &UserService{UserRepository: userRepository}
 }
 
 func (s *UserService) CreateUser(ctx *gin.Context, userForm model.UserForm) (user *model.User, createErr error) {
