@@ -1,4 +1,4 @@
-# Go CRUD API
+# Stage Zero
 
 A modern, production-ready CRUD (Create, Read, Update, Delete) REST API built with Go, featuring:
 - [Gin](https://github.com/gin-gonic/gin) web framework
