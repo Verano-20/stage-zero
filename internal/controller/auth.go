@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/Verano-20/go-crud/internal/config"
 	"github.com/Verano-20/go-crud/internal/err"
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/model"
@@ -83,6 +84,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 func (c *AuthController) Login(ctx *gin.Context) {
 	metrics := telemetry.GetMetrics()
 	log := logger.GetFromContext(ctx)
+	config := config.Get()
 
 	var userForm model.UserForm
 	if err := ctx.ShouldBindJSON(&userForm); err != nil {
@@ -98,7 +100,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	tokenString, err := c.AuthService.GenerateTokenString(ctx, user)
+	tokenString, err := c.AuthService.GenerateTokenString(ctx, user, config.GetJwtSecret())
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to generate token"})
 		return

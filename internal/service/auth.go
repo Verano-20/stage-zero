@@ -1,9 +1,9 @@
 package service
 
 import (
+	"errors"
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/config"
 	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/gin-gonic/gin"
@@ -38,11 +38,15 @@ func (s *AuthService) ValidateUserCredentials(ctx *gin.Context, userForm model.U
 	return user, nil
 }
 
-func (s *AuthService) GenerateTokenString(ctx *gin.Context, user *model.User) (tokenString string, err error) {
-	config := config.Get()
+func (s *AuthService) GenerateTokenString(ctx *gin.Context, user *model.User, jwtSecret []byte) (tokenString string, err error) {
 	log := logger.GetFromContext(ctx)
-
 	log.Debug("Generating JWT token...", zap.Object("user", user))
+
+	if jwtSecret == nil {
+		err = errors.New("jwtSecret is nil")
+		log.Error("JWT secret is nil", zap.Object("user", user), zap.Error(err))
+		return "", err
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
@@ -50,7 +54,7 @@ func (s *AuthService) GenerateTokenString(ctx *gin.Context, user *model.User) (t
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	if tokenString, err = token.SignedString(config.GetJwtSecret()); err != nil {
+	if tokenString, err = token.SignedString(jwtSecret); err != nil {
 		log.Error("Failed to generate JWT token", zap.Object("user", user), zap.Error(err))
 		return "", err
 	}

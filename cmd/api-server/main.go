@@ -48,7 +48,7 @@ func main() {
 	db := database.InitDatabase()
 	defer database.Shutdown(db)
 
-	container := container.NewContainer(db)
+	container := container.NewContainerWithDB(db)
 	ginRouter := router.InitRouter(container)
 
 	server := &http.Server{
