@@ -1,4 +1,4 @@
-package mocks
+package repository
 
 import (
 	"errors"

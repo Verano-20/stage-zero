@@ -14,10 +14,9 @@ import (
 )
 
 var (
-	testContainer = container.NewContainerWithMockRepositories()
-	jwtSecret     = []byte("test-secret-key")
-	user1         = model.UserForm{Email: "test1@example.com", Password: "password1"}
-	user2         = model.UserForm{Email: "test2@example.com", Password: "password2"}
+	jwtSecret = []byte("test-secret-key")
+	user1     = model.UserForm{Email: "test1@example.com", Password: "password1"}
+	user2     = model.UserForm{Email: "test2@example.com", Password: "password2"}
 )
 
 func TestValidateUserCredentials_Success(t *testing.T) {
@@ -28,6 +27,7 @@ func TestValidateUserCredentials_Success(t *testing.T) {
 	ctx.Request = httptest.NewRequest("GET", "/test", nil)
 	// and
 	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(user1.Password), bcrypt.DefaultCost)
+	testContainer := container.GetTestContainer()
 	userRepository := testContainer.UserRepository
 	userRepository.Create(ctx, user1.ToModel(string(passwordHash)))
 	target := testContainer.AuthService
@@ -80,6 +80,7 @@ func TestValidateUserCredentials_Failure(t *testing.T) {
 			ctx.Request = httptest.NewRequest("GET", "/test", nil)
 			// and
 			passwordHash, _ := bcrypt.GenerateFromPassword([]byte(test.passwordToHash), bcrypt.DefaultCost)
+			testContainer := container.GetTestContainer()
 			userRepository := testContainer.UserRepository
 			userRepository.Create(ctx, user1.ToModel(string(passwordHash)))
 			target := testContainer.AuthService
@@ -102,6 +103,7 @@ func TestGenerateTokenString_Success(t *testing.T) {
 	// and
 	user := user1.ToModel(string(user1.Password))
 	user.ID = 1234
+	testContainer := container.GetTestContainer()
 	target := testContainer.AuthService
 	// when
 	tokenString, err := target.GenerateTokenString(ctx, user, jwtSecret)
@@ -130,6 +132,7 @@ func TestGenerateTokenString_Failure_NilJwtSecret(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(recorder)
 	ctx.Request = httptest.NewRequest("GET", "/test", nil)
 	// and
+	testContainer := container.GetTestContainer()
 	target := testContainer.AuthService
 	// when
 	tokenString, err := target.GenerateTokenString(ctx, user1.ToModel(string(user1.Password)), nil)
