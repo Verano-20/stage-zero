@@ -37,6 +37,12 @@ func (simple *Simple) ToDTO() *SimpleDTO {
 	}
 }
 
+func (simple *Simple) ToForm() *SimpleForm {
+	return &SimpleForm{
+		Name: simple.Name,
+	}
+}
+
 func (simpleForm *SimpleForm) ToModel() *Simple {
 	return &Simple{
 		Name: simpleForm.Name,

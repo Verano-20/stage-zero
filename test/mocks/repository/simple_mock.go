@@ -1,57 +1,55 @@
 package repository
 
 import (
-	"errors"
-	"maps"
-	"slices"
-
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/mock"
 )
 
-type mockSimpleRepository struct {
-	simples map[uint]*model.Simple
+type MockSimpleRepository struct {
+	mock.Mock
 }
 
-func NewMockSimpleRepository(simples map[uint]*model.Simple) repository.SimpleRepository {
-	return &mockSimpleRepository{simples: simples}
+var _ repository.SimpleRepository = &MockSimpleRepository{}
+
+func NewMockSimpleRepository() *MockSimpleRepository {
+	return &MockSimpleRepository{}
 }
 
-var _ repository.SimpleRepository = &mockSimpleRepository{}
-
-func (m *mockSimpleRepository) Create(ctx *gin.Context, simple *model.Simple) (*model.Simple, error) {
-	simple.ID = uint(len(m.simples) + 1)
-	m.simples[simple.ID] = simple
-	return simple, nil
-}
-
-func (m *mockSimpleRepository) GetAll(ctx *gin.Context) (model.Simples, error) {
-	return model.Simples(slices.Collect(maps.Values(m.simples))), nil
-}
-
-func (m *mockSimpleRepository) GetByID(ctx *gin.Context, id uint) (*model.Simple, error) {
-	simple, ok := m.simples[id]
-	if !ok {
-		return nil, errors.New("simple not found")
+func (m *MockSimpleRepository) Create(ctx *gin.Context, simple *model.Simple) (*model.Simple, error) {
+	args := m.Called(ctx, simple)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
-	return simple, nil
+	return args.Get(0).(*model.Simple), args.Error(1)
 }
 
-func (m *mockSimpleRepository) Update(ctx *gin.Context, simple *model.Simple) (*model.Simple, error) {
-	_, ok := m.simples[simple.ID]
-	if !ok {
-		return nil, errors.New("simple not found")
+func (m *MockSimpleRepository) GetAll(ctx *gin.Context) (model.Simples, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
-	m.simples[simple.ID] = simple
-	return simple, nil
+	return args.Get(0).(model.Simples), args.Error(1)
 }
 
-func (m *mockSimpleRepository) Delete(ctx *gin.Context, id uint) error {
-	_, ok := m.simples[id]
-	if !ok {
-		return errors.New("simple not found")
+func (m *MockSimpleRepository) GetByID(ctx *gin.Context, id uint) (*model.Simple, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
-	delete(m.simples, id)
-	return nil
+	return args.Get(0).(*model.Simple), args.Error(1)
+}
+
+func (m *MockSimpleRepository) Update(ctx *gin.Context, simple *model.Simple) (*model.Simple, error) {
+	args := m.Called(ctx, simple)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Simple), args.Error(1)
+}
+
+func (m *MockSimpleRepository) Delete(ctx *gin.Context, id uint) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
 }
