@@ -13,10 +13,10 @@ This project serves as a robust foundation for backend applications requiring au
 
 ## TODO
 - Finalise stack & trace dashboards
-- Add unit tests
 - Add Playwright test suite (or other)
 - Ensure goroutines are used where appropriate
 - Probably remove GORM, use sqlc or raw sql instead
+- Add deployment pipeline for CI/CD
 
 ## Features
 
