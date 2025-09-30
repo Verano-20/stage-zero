@@ -15,9 +15,9 @@ type Container struct {
 	SimpleRepository repository.SimpleRepository
 
 	// Services
-	UserService   *service.UserService
-	AuthService   *service.AuthService
-	SimpleService *service.SimpleService
+	UserService   service.UserService
+	AuthService   service.AuthService
+	SimpleService service.SimpleService
 
 	// Controllers
 	AuthController   *controller.AuthController

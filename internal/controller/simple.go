@@ -13,10 +13,10 @@ import (
 )
 
 type SimpleController struct {
-	SimpleService *service.SimpleService
+	SimpleService service.SimpleService
 }
 
-func NewSimpleController(simpleService *service.SimpleService) *SimpleController {
+func NewSimpleController(simpleService service.SimpleService) *SimpleController {
 	return &SimpleController{SimpleService: simpleService}
 }
 
