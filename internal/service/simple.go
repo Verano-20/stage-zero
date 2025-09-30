@@ -8,15 +8,25 @@ import (
 	"go.uber.org/zap"
 )
 
-type SimpleService struct {
+type SimpleService interface {
+	CreateSimple(ctx *gin.Context, simpleForm model.SimpleForm) (*model.Simple, error)
+	GetAllSimples(ctx *gin.Context) (model.Simples, error)
+	GetSimpleByID(ctx *gin.Context, id uint64) (*model.Simple, error)
+	UpdateSimple(ctx *gin.Context, existingSimple *model.Simple, simpleForm model.SimpleForm) (*model.Simple, error)
+	DeleteSimple(ctx *gin.Context, existingSimple *model.Simple) error
+}
+
+type simpleService struct {
 	SimpleRepository repository.SimpleRepository
 }
 
-func NewSimpleService(simpleRepository repository.SimpleRepository) *SimpleService {
-	return &SimpleService{SimpleRepository: simpleRepository}
+var _ SimpleService = &simpleService{}
+
+func NewSimpleService(simpleRepository repository.SimpleRepository) SimpleService {
+	return &simpleService{SimpleRepository: simpleRepository}
 }
 
-func (s *SimpleService) CreateSimple(ctx *gin.Context, simpleForm model.SimpleForm) (*model.Simple, error) {
+func (s *simpleService) CreateSimple(ctx *gin.Context, simpleForm model.SimpleForm) (*model.Simple, error) {
 	log := logger.GetFromContext(ctx)
 
 	log.Debug("Creating Simple...", zap.Object("simple", &simpleForm))
@@ -33,7 +43,7 @@ func (s *SimpleService) CreateSimple(ctx *gin.Context, simpleForm model.SimpleFo
 	return simple, nil
 }
 
-func (s *SimpleService) GetAllSimples(ctx *gin.Context) (model.Simples, error) {
+func (s *simpleService) GetAllSimples(ctx *gin.Context) (model.Simples, error) {
 	log := logger.GetFromContext(ctx)
 
 	log.Debug("Retrieving all Simples")
@@ -48,7 +58,7 @@ func (s *SimpleService) GetAllSimples(ctx *gin.Context) (model.Simples, error) {
 	return simples, nil
 }
 
-func (s *SimpleService) GetSimpleByID(ctx *gin.Context, id uint64) (*model.Simple, error) {
+func (s *simpleService) GetSimpleByID(ctx *gin.Context, id uint64) (*model.Simple, error) {
 	log := logger.GetFromContext(ctx)
 
 	log.Debug("Retrieving Simple by ID", zap.Uint64("id", id))
@@ -63,7 +73,7 @@ func (s *SimpleService) GetSimpleByID(ctx *gin.Context, id uint64) (*model.Simpl
 	return simple, nil
 }
 
-func (s *SimpleService) UpdateSimple(ctx *gin.Context, existingSimple *model.Simple, simpleForm model.SimpleForm) (*model.Simple, error) {
+func (s *simpleService) UpdateSimple(ctx *gin.Context, existingSimple *model.Simple, simpleForm model.SimpleForm) (*model.Simple, error) {
 	log := logger.GetFromContext(ctx)
 
 	log.Debug("Updating Simple",
@@ -85,7 +95,7 @@ func (s *SimpleService) UpdateSimple(ctx *gin.Context, existingSimple *model.Sim
 	return simple, nil
 }
 
-func (s *SimpleService) DeleteSimple(ctx *gin.Context, existingSimple *model.Simple) error {
+func (s *simpleService) DeleteSimple(ctx *gin.Context, existingSimple *model.Simple) error {
 	log := logger.GetFromContext(ctx)
 
 	log.Debug("Deleting Simple", zap.Object("simple", existingSimple))

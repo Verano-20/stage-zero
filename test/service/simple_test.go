@@ -17,7 +17,7 @@ var (
 	simple2 = model.Simple{ID: 2, Name: "Simple 2"}
 )
 
-func createServiceAndMockRepo() (*service.SimpleService, *repository.MockSimpleRepository) {
+func createSimpleServiceAndMockRepo() (service.SimpleService, *repository.MockSimpleRepository) {
 	mockRepo := repository.NewMockSimpleRepository()
 	target := service.NewSimpleService(mockRepo)
 	return target, mockRepo
@@ -30,7 +30,7 @@ func createServiceAndMockRepo() (*service.SimpleService, *repository.MockSimpleR
 func TestCreateSimple_Success(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	// expect
 	simpleRepository.On("Create", ctx, mock.MatchedBy(func(simple *model.Simple) bool {
 		return simple.Name == simple1.Name
@@ -46,7 +46,7 @@ func TestCreateSimple_Success(t *testing.T) {
 func TestCreateSimple_Error(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
 	simpleRepository.On("Create", ctx, mock.MatchedBy(func(simple *model.Simple) bool {
@@ -68,7 +68,7 @@ func TestCreateSimple_Error(t *testing.T) {
 func TestGetAllSimples_Success(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	expectedSimples := model.Simples{&simple1, &simple2}
 	// expect
 	simpleRepository.On("GetAll", ctx).Return(expectedSimples, nil)
@@ -83,7 +83,7 @@ func TestGetAllSimples_Success(t *testing.T) {
 func TestGetAllSimples_Error(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
 	simpleRepository.On("GetAll", ctx).Return(nil, expectedError)
@@ -103,7 +103,7 @@ func TestGetAllSimples_Error(t *testing.T) {
 func TestGetSimpleByID_Success(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	// expect
 	simpleRepository.On("GetByID", ctx, simple1.ID).Return(&simple1, nil)
 	// when
@@ -117,7 +117,7 @@ func TestGetSimpleByID_Success(t *testing.T) {
 func TestGetSimpleByID_Error(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
 	simpleRepository.On("GetByID", ctx, simple1.ID).Return(nil, expectedError)
@@ -137,7 +137,7 @@ func TestGetSimpleByID_Error(t *testing.T) {
 func TestUpdateSimple_Success(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	// expect
 	simpleRepository.On("Update", ctx, &simple1).Return(&simple1, nil)
 	// when
@@ -151,7 +151,7 @@ func TestUpdateSimple_Success(t *testing.T) {
 func TestUpdateSimple_Error(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
 	simpleRepository.On("Update", ctx, &simple1).Return(nil, expectedError)
@@ -171,7 +171,7 @@ func TestUpdateSimple_Error(t *testing.T) {
 func TestDeleteSimple_Success(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	// expect
 	simpleRepository.On("Delete", ctx, simple1.ID).Return(nil)
 	// when
@@ -184,7 +184,7 @@ func TestDeleteSimple_Success(t *testing.T) {
 func TestDeleteSimple_Error(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
-	target, simpleRepository := createServiceAndMockRepo()
+	target, simpleRepository := createSimpleServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
 	simpleRepository.On("Delete", ctx, simple1.ID).Return(expectedError)

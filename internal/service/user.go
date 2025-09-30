@@ -13,15 +13,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct {
+type UserService interface {
+	CreateUser(ctx *gin.Context, userForm model.UserForm) (user *model.User, createErr error)
+	GetUserByEmail(ctx *gin.Context, email string) (user *model.User, err error)
+}
+
+type userService struct {
 	UserRepository repository.UserRepository
 }
 
-func NewUserService(userRepository repository.UserRepository) *UserService {
-	return &UserService{UserRepository: userRepository}
+var _ UserService = &userService{}
+
+func NewUserService(userRepository repository.UserRepository) UserService {
+	return &userService{UserRepository: userRepository}
 }
 
-func (s *UserService) CreateUser(ctx *gin.Context, userForm model.UserForm) (user *model.User, createErr error) {
+func (s *userService) CreateUser(ctx *gin.Context, userForm model.UserForm) (user *model.User, createErr error) {
 	log := logger.GetFromContext(ctx)
 
 	log.Debug("Creating User...", zap.Object("user", &userForm))
@@ -48,7 +55,7 @@ func (s *UserService) CreateUser(ctx *gin.Context, userForm model.UserForm) (use
 	return user, nil
 }
 
-func (s *UserService) GetUserByEmail(ctx *gin.Context, email string) (user *model.User, err error) {
+func (s *userService) GetUserByEmail(ctx *gin.Context, email string) (user *model.User, err error) {
 	log := logger.GetFromContext(ctx)
 
 	log.Debug("Getting User by email...", zap.String("email", email))

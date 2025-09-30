@@ -12,15 +12,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthService struct {
-	UserService *UserService
+type AuthService interface {
+	ValidateUserCredentials(ctx *gin.Context, userForm model.UserForm) (user *model.User, err error)
+	GenerateTokenString(ctx *gin.Context, user *model.User, jwtSecret []byte) (tokenString string, err error)
 }
 
-func NewAuthService(userService *UserService) *AuthService {
-	return &AuthService{UserService: userService}
+type authService struct {
+	UserService UserService
 }
 
-func (s *AuthService) ValidateUserCredentials(ctx *gin.Context, userForm model.UserForm) (user *model.User, err error) {
+var _ AuthService = &authService{}
+
+func NewAuthService(userService UserService) AuthService {
+	return &authService{UserService: userService}
+}
+
+func (s *authService) ValidateUserCredentials(ctx *gin.Context, userForm model.UserForm) (user *model.User, err error) {
 	log := logger.GetFromContext(ctx)
 
 	log.Debug("Validating User credentials...", zap.Object("userForm", &userForm))
@@ -38,7 +45,7 @@ func (s *AuthService) ValidateUserCredentials(ctx *gin.Context, userForm model.U
 	return user, nil
 }
 
-func (s *AuthService) GenerateTokenString(ctx *gin.Context, user *model.User, jwtSecret []byte) (tokenString string, err error) {
+func (s *authService) GenerateTokenString(ctx *gin.Context, user *model.User, jwtSecret []byte) (tokenString string, err error) {
 	log := logger.GetFromContext(ctx)
 	log.Debug("Generating JWT token...", zap.Object("user", user))
 
