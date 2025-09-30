@@ -14,12 +14,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	jwtSecret = []byte("test-secret-key")
-	user1     = model.UserForm{Email: "test1@example.com", Password: "password1"}
-	user2     = model.UserForm{Email: "test2@example.com", Password: "password2"}
-)
-
 func createAuthServiceWithMockDependencies(t *testing.T) (service.AuthService, *mockService.MockUserService) {
 	userService := mockService.NewMockUserService()
 	defer userService.AssertExpectations(t)
@@ -35,14 +29,13 @@ func TestValidateUserCredentials_Success(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
 	target, userService := createAuthServiceWithMockDependencies(t)
-	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(user1.Password), bcrypt.DefaultCost)
 	// expect
-	userService.On("GetUserByEmail", ctx, user1.Email).Return(user1.ToModel(string(passwordHash)), nil).Once()
+	userService.On("GetUserByEmail", ctx, testutils.UserForm1.Email).Return(testutils.GetUserWithPasswordHashFromForm(testutils.UserForm1), nil).Once()
 	// when
-	user, err := target.ValidateUserCredentials(ctx, user1)
+	user, err := target.ValidateUserCredentials(ctx, testutils.UserForm1)
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, user1.Email, user.Email)
+	assert.Equal(t, testutils.UserForm1.Email, user.Email)
 }
 
 func TestValidateUserCredentials_GetUserFailure(t *testing.T) {
@@ -53,12 +46,12 @@ func TestValidateUserCredentials_GetUserFailure(t *testing.T) {
 	}{
 		{
 			testName:      "No Email",
-			userForm:      model.UserForm{Password: user1.Password},
+			userForm:      model.UserForm{Password: testutils.UserForm1.Password},
 			expectedError: "user not found",
 		},
 		{
 			testName:      "Invalid Email",
-			userForm:      user2,
+			userForm:      testutils.UserForm2,
 			expectedError: "user not found",
 		},
 	}
@@ -89,14 +82,14 @@ func TestValidateUserCredentials_PasswordFailure(t *testing.T) {
 	}{
 		{
 			testName:       "No Password",
-			userForm:       model.UserForm{Email: user1.Email},
-			passwordToHash: user1.Password,
+			userForm:       model.UserForm{Email: testutils.UserForm1.Email},
+			passwordToHash: testutils.UserForm1.Password,
 			expectedError:  "hashedPassword is not the hash of the given password",
 		},
 		{
 			testName:       "Invalid Password",
-			userForm:       user1,
-			passwordToHash: user1.Password + "1",
+			userForm:       testutils.UserForm1,
+			passwordToHash: testutils.UserForm1.Password + "1",
 			expectedError:  "hashedPassword is not the hash of the given password",
 		},
 	}
@@ -108,7 +101,7 @@ func TestValidateUserCredentials_PasswordFailure(t *testing.T) {
 			target, userService := createAuthServiceWithMockDependencies(t)
 			passwordHash, _ := bcrypt.GenerateFromPassword([]byte(test.passwordToHash), bcrypt.DefaultCost)
 			// expect
-			userService.On("GetUserByEmail", ctx, test.userForm.Email).Return(user1.ToModel(string(passwordHash)), nil)
+			userService.On("GetUserByEmail", ctx, test.userForm.Email).Return(testutils.UserForm1.ToModel(string(passwordHash)), nil)
 			// when
 			user, err := target.ValidateUserCredentials(ctx, test.userForm)
 			// then
@@ -127,17 +120,17 @@ func TestGenerateTokenString_Success(t *testing.T) {
 	// given
 	ctx, _ := testutils.CreateTestContext()
 	target, _ := createAuthServiceWithMockDependencies(t)
-	user := user1.ToModel(string(user1.Password))
+	user := testutils.GetUserWithPasswordHashFromForm(testutils.UserForm1)
 	user.ID = 1234
 	// when
-	tokenString, err := target.GenerateTokenString(ctx, user, jwtSecret)
+	tokenString, err := target.GenerateTokenString(ctx, user, testutils.JwtSecret)
 	// then
 	assert.NoError(t, err)
 	assert.NotEmpty(t, tokenString)
 	// and
 	parser := jwt.NewParser()
 	token, err := parser.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
+		return testutils.JwtSecret, nil
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, token)
@@ -154,7 +147,7 @@ func TestGenerateTokenString_Failure_NilJwtSecret(t *testing.T) {
 	ctx, _ := testutils.CreateTestContext()
 	target, _ := createAuthServiceWithMockDependencies(t)
 	// when
-	tokenString, err := target.GenerateTokenString(ctx, user1.ToModel(string(user1.Password)), nil)
+	tokenString, err := target.GenerateTokenString(ctx, testutils.GetUserWithPasswordHashFromForm(testutils.UserForm1), nil)
 	// then
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "jwtSecret is nil")
