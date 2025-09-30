@@ -3,37 +3,38 @@ package middleware
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"errors"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/Verano-20/go-crud/internal/middleware"
 	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/test/mocks/container"
-	"github.com/gin-gonic/gin"
+	"github.com/Verano-20/go-crud/test/mocks/repository"
+	"github.com/Verano-20/go-crud/test/testutils"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	testContainer = container.NewContainerWithMockRepositories()
-	user1         = model.User{ID: 1234567890, Email: "test1@example.com"}
-	user2         = model.User{ID: 1234567891, Email: "test2@example.com"}
+	user1 = model.User{ID: 1, Email: "test1@example.com"}
+	user2 = model.User{ID: 2, Email: "test2@example.com"}
 )
+
+func createMiddlewareAndMockRepo(t *testing.T) (*middleware.AuthMiddleware, *repository.MockUserRepository) {
+	userRepository := repository.NewMockUserRepository()
+	defer userRepository.AssertExpectations(t)
+	target := middleware.NewAuthMiddleware([]byte("test-secret-key"), userRepository)
+	return target, userRepository
+}
 
 func TestAuthenticateRequest_Success(t *testing.T) {
 	// given
-	gin.SetMode(gin.TestMode)
-	recorder := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(recorder)
-	ctx.Request = httptest.NewRequest("GET", "/test", nil)
 	validAuthHeader := "Bearer " + createHmacSignedToken(int64Ptr(time.Now().Add(time.Minute*1).Unix()), uintPtr(user1.ID))
-	ctx.Request.Header.Set("Authorization", validAuthHeader)
-	// and
-	userRepository := testContainer.UserRepository
-	userRepository.Create(ctx, &user1)
-	target := middleware.NewAuthMiddleware([]byte("test-secret-key"), userRepository)
+	ctx, recorder := testutils.CreateTestContextWithAuthHeader(validAuthHeader)
+	target, userRepository := createMiddlewareAndMockRepo(t)
+	// expect
+	userRepository.On("GetByID", ctx, user1.ID).Return(&user1, nil).Once()
 	// when
 	target.AuthenticateRequest(ctx)
 	// then
@@ -97,15 +98,11 @@ func TestAuthenticateRequest_Failure(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			// given
-			gin.SetMode(gin.TestMode)
-			recorder := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(recorder)
-			ctx.Request = httptest.NewRequest("GET", "/test", nil)
-			ctx.Request.Header.Set("Authorization", test.authHeader)
-			// and
-			userRepository := testContainer.UserRepository
-			userRepository.Create(ctx, &user1)
-			target := middleware.NewAuthMiddleware([]byte("test-secret-key"), userRepository)
+			ctx, recorder := testutils.CreateTestContextWithAuthHeader(test.authHeader)
+			target, userRepository := createMiddlewareAndMockRepo(t)
+			// expect
+			userRepository.On("GetByID", ctx, user1.ID).Return(&user1, nil).Maybe()
+			userRepository.On("GetByID", ctx, user2.ID).Return(nil, errors.New("user not found")).Maybe()
 			// when
 			target.AuthenticateRequest(ctx)
 			// then

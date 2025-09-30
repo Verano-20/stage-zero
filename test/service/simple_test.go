@@ -2,13 +2,12 @@ package service
 
 import (
 	"errors"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/service"
 	"github.com/Verano-20/go-crud/test/mocks/repository"
-	"github.com/gin-gonic/gin"
+	"github.com/Verano-20/go-crud/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -17,12 +16,6 @@ var (
 	simple1 = model.Simple{ID: 1, Name: "Simple 1"}
 	simple2 = model.Simple{ID: 2, Name: "Simple 2"}
 )
-
-func createTestContext() *gin.Context {
-	gin.SetMode(gin.TestMode)
-	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
-	return ctx
-}
 
 func createServiceAndMockRepo() (*service.SimpleService, *repository.MockSimpleRepository) {
 	mockRepo := repository.NewMockSimpleRepository()
@@ -36,7 +29,7 @@ func createServiceAndMockRepo() (*service.SimpleService, *repository.MockSimpleR
 
 func TestCreateSimple_Success(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	// expect
 	simpleRepository.On("Create", ctx, mock.MatchedBy(func(simple *model.Simple) bool {
@@ -52,7 +45,7 @@ func TestCreateSimple_Success(t *testing.T) {
 
 func TestCreateSimple_Error(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
@@ -74,7 +67,7 @@ func TestCreateSimple_Error(t *testing.T) {
 
 func TestGetAllSimples_Success(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	expectedSimples := model.Simples{&simple1, &simple2}
 	// expect
@@ -89,7 +82,7 @@ func TestGetAllSimples_Success(t *testing.T) {
 
 func TestGetAllSimples_Error(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
@@ -109,7 +102,7 @@ func TestGetAllSimples_Error(t *testing.T) {
 
 func TestGetSimpleByID_Success(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	// expect
 	simpleRepository.On("GetByID", ctx, simple1.ID).Return(&simple1, nil)
@@ -123,7 +116,7 @@ func TestGetSimpleByID_Success(t *testing.T) {
 
 func TestGetSimpleByID_Error(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
@@ -143,7 +136,7 @@ func TestGetSimpleByID_Error(t *testing.T) {
 
 func TestUpdateSimple_Success(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	// expect
 	simpleRepository.On("Update", ctx, &simple1).Return(&simple1, nil)
@@ -157,7 +150,7 @@ func TestUpdateSimple_Success(t *testing.T) {
 
 func TestUpdateSimple_Error(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect
@@ -177,7 +170,7 @@ func TestUpdateSimple_Error(t *testing.T) {
 
 func TestDeleteSimple_Success(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	// expect
 	simpleRepository.On("Delete", ctx, simple1.ID).Return(nil)
@@ -190,7 +183,7 @@ func TestDeleteSimple_Success(t *testing.T) {
 
 func TestDeleteSimple_Error(t *testing.T) {
 	// given
-	ctx := createTestContext()
+	ctx, _ := testutils.CreateTestContext()
 	target, simpleRepository := createServiceAndMockRepo()
 	expectedError := errors.New("database error")
 	// expect

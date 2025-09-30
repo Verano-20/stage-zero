@@ -1,42 +1,43 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/mock"
 )
 
-type mockUserRepository struct {
-	users map[uint]*model.User
+type MockUserRepository struct {
+	mock.Mock
 }
 
-func NewMockUserRepository(users map[uint]*model.User) repository.UserRepository {
-	return &mockUserRepository{users: users}
+var _ repository.UserRepository = &MockUserRepository{}
+
+func NewMockUserRepository() *MockUserRepository {
+	return &MockUserRepository{}
 }
 
-var _ repository.UserRepository = &mockUserRepository{}
-
-func (m *mockUserRepository) Create(ctx *gin.Context, user *model.User) (*model.User, error) {
-	m.users[user.ID] = user
-	return user, nil
+func (m *MockUserRepository) Create(ctx *gin.Context, user *model.User) (*model.User, error) {
+	args := m.Called(ctx, user)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.User), args.Error(1)
 }
 
-func (m *mockUserRepository) GetByID(ctx *gin.Context, id uint) (*model.User, error) {
-	user, ok := m.users[id]
-	if !ok {
-		return nil, errors.New("user not found")
+func (m *MockUserRepository) GetByID(ctx *gin.Context, id uint) (*model.User, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
 
-	return user, nil
+	return args.Get(0).(*model.User), args.Error(1)
 }
 
-func (m *mockUserRepository) GetByEmail(ctx *gin.Context, email string) (*model.User, error) {
-	for _, user := range m.users {
-		if user.Email == email {
-			return user, nil
-		}
+func (m *MockUserRepository) GetByEmail(ctx *gin.Context, email string) (*model.User, error) {
+	args := m.Called(ctx, email)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
-	return nil, errors.New("user not found")
+	return args.Get(0).(*model.User), args.Error(1)
 }
