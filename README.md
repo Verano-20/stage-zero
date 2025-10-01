@@ -17,10 +17,8 @@ This project serves as a robust foundation for backend applications requiring au
 
 ## TODO
 - Finalise stack & trace dashboards
-- Add Playwright test suite (or other)
 - Ensure goroutines are used where appropriate
 - Ensure all swagger docs and tags are up to date
-- Add controller validation
 - Add terraform deployment
 - Add CI/CD pipeline
 

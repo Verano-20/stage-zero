@@ -14,7 +14,7 @@ test.describe('Health Check API', () => {
     const response = await apiClient.healthCheck();
     expect(response.ok()).toBeTruthy();
 
-    const body = await assertResponse(response, 200);
+    const body = await assertResponse(response, 200, false);
     expect(body).toHaveProperty('message', expectedResponses.health.message);
   });
 
