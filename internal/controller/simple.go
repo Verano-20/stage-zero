@@ -8,6 +8,7 @@ import (
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/response"
 	"github.com/Verano-20/go-crud/internal/service"
+	"github.com/Verano-20/go-crud/internal/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -32,12 +33,9 @@ func NewSimpleController(simpleService service.SimpleService) *SimpleController 
 // @Failure 500 {object} response.ErrorResponse "Internal server error during resource creation" example({"error": "Failed to create Simple"})
 // @Router /simple [post]
 func (c *SimpleController) Create(ctx *gin.Context) {
-	log := logger.GetFromContext(ctx)
-
 	var simpleForm model.SimpleForm
 	if err := ctx.ShouldBindJSON(&simpleForm); err != nil {
-		log.Warn("Invalid create request format", zap.Error(err))
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid request format"})
+		utils.HandleBindingErrors(ctx, err, "create")
 		return
 	}
 
@@ -125,8 +123,7 @@ func (c *SimpleController) Update(ctx *gin.Context) {
 
 	var simpleForm model.SimpleForm
 	if err := ctx.ShouldBindJSON(&simpleForm); err != nil {
-		log.Warn("Invalid update request format", zap.Uint64("id", id), zap.Error(err))
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid request format"})
+		utils.HandleBindingErrors(ctx, err, "update")
 		return
 	}
 

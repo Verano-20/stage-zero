@@ -6,13 +6,12 @@ import (
 
 	"github.com/Verano-20/go-crud/internal/config"
 	"github.com/Verano-20/go-crud/internal/err"
-	"github.com/Verano-20/go-crud/internal/logger"
 	"github.com/Verano-20/go-crud/internal/model"
 	"github.com/Verano-20/go-crud/internal/response"
 	"github.com/Verano-20/go-crud/internal/service"
 	"github.com/Verano-20/go-crud/internal/telemetry"
+	"github.com/Verano-20/go-crud/internal/utils"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 type AuthController struct {
@@ -38,12 +37,10 @@ func NewAuthController(userService service.UserService, authService service.Auth
 // @Router /auth/signup [post]
 func (c *AuthController) SignUp(ctx *gin.Context) {
 	metrics := telemetry.GetMetrics()
-	log := logger.GetFromContext(ctx)
 
 	var userForm model.UserForm
 	if formErr := ctx.ShouldBindJSON(&userForm); formErr != nil {
-		log.Warn("Invalid signup request format", zap.Error(formErr))
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid request format"})
+		utils.HandleBindingErrors(ctx, formErr, "signup")
 		return
 	}
 
@@ -83,13 +80,11 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 // @Router /auth/login [post]
 func (c *AuthController) Login(ctx *gin.Context) {
 	metrics := telemetry.GetMetrics()
-	log := logger.GetFromContext(ctx)
 	config := config.Get()
 
 	var userForm model.UserForm
-	if err := ctx.ShouldBindJSON(&userForm); err != nil {
-		log.Warn("Invalid login request format", zap.Error(err))
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid request format"})
+	if formErr := ctx.ShouldBindJSON(&userForm); formErr != nil {
+		utils.HandleBindingErrors(ctx, formErr, "login")
 		return
 	}
 

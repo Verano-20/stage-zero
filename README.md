@@ -19,6 +19,8 @@ This project serves as a robust foundation for backend applications requiring au
 - Finalise stack & trace dashboards
 - Add Playwright test suite (or other)
 - Ensure goroutines are used where appropriate
+- Ensure all GO-CRUD are renamed Stage-Zero
+- Ensure all swagger docs and tags are up to date
 - Add controller validation
 - Add deployment pipeline for CI/CD
 

@@ -23,7 +23,7 @@ type SimpleDTO struct {
 }
 
 type SimpleForm struct {
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required,max=255"`
 }
 
 type Simples []*Simple
