@@ -1,11 +1,10 @@
-// test-helpers.js - Common test utilities and helpers
+import { APIResponse } from '@playwright/test';
+import { UserData, SimpleResourceData, ApiResponse, ApiClient } from './api-client';
 
 /**
  * Generate a unique email for testing
- * @param {string} prefix - Email prefix (default: 'test')
- * @returns {string} Unique email address
  */
-function generateUniqueEmail(prefix = 'test') {
+export function generateUniqueEmail(prefix = 'test'): string {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   return `${prefix}-${timestamp}-${random}@example.com`;
@@ -13,10 +12,8 @@ function generateUniqueEmail(prefix = 'test') {
 
 /**
  * Generate a secure password for testing
- * @param {number} length - Password length (default: 12)
- * @returns {string} Generated password
  */
-function generatePassword(length = 12) {
+export function generatePassword(length = 12): string {
   const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
   let password = '';
   for (let i = 0; i < length; i++) {
@@ -27,10 +24,8 @@ function generatePassword(length = 12) {
 
 /**
  * Generate test user data
- * @param {Object} overrides - Override default values
- * @returns {Object} User data object
  */
-function generateUserData(overrides = {}) {
+export function generateUserData(overrides: Partial<UserData> = {}): UserData {
   return {
     email: generateUniqueEmail(),
     password: generatePassword(),
@@ -40,27 +35,25 @@ function generateUserData(overrides = {}) {
 
 /**
  * Generate test simple resource data
- * @param {Object} overrides - Override default values
- * @returns {Object} Simple resource data object
  */
-function generateSimpleData(overrides = {}) {
+export function generateSimpleData(overrides: Partial<SimpleResourceData> = {}): SimpleResourceData {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   
   return {
-    name: `Test Simple ${timestamp}-${random}`,
+    name: `Test Resource ${timestamp}-${random}`,
     ...overrides
   };
 }
 
 /**
  * Wait for a condition to be true with timeout
- * @param {Function} condition - Function that returns boolean
- * @param {number} timeout - Timeout in milliseconds (default: 5000)
- * @param {number} interval - Check interval in milliseconds (default: 100)
- * @returns {Promise<void>}
  */
-async function waitForCondition(condition, timeout = 5000, interval = 100) {
+export async function waitForCondition(
+  condition: () => Promise<boolean> | boolean,
+  timeout = 5000,
+  interval = 100
+): Promise<void> {
   const startTime = Date.now();
   
   while (Date.now() - startTime < timeout) {
@@ -75,19 +68,19 @@ async function waitForCondition(condition, timeout = 5000, interval = 100) {
 
 /**
  * Retry an operation with exponential backoff
- * @param {Function} operation - Async operation to retry
- * @param {number} maxRetries - Maximum number of retries (default: 3)
- * @param {number} baseDelay - Base delay in milliseconds (default: 1000)
- * @returns {Promise<any>} Result of the operation
  */
-async function retryOperation(operation, maxRetries = 3, baseDelay = 1000) {
-  let lastError;
+export async function retryOperation<T>(
+  operation: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> {
+  let lastError: Error;
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
-      lastError = error;
+      lastError = error as Error;
       
       if (attempt === maxRetries) {
         break;
@@ -98,18 +91,18 @@ async function retryOperation(operation, maxRetries = 3, baseDelay = 1000) {
     }
   }
   
-  throw lastError;
+  throw lastError!;
 }
 
 /**
  * Assert that a response has the expected status and structure
- * @param {Response} response - API response
- * @param {number} expectedStatus - Expected HTTP status code
- * @param {boolean} shouldHaveData - Whether response should have data field
- * @returns {Promise<Object>} Response body
  */
-async function assertResponse(response, expectedStatus = 200, shouldHaveData = true) {
-  const body = await response.json();
+export async function assertResponse<T = any>(
+  response: APIResponse,
+  expectedStatus = 200,
+  shouldHaveData = true
+): Promise<ApiResponse<T>> {
+  const body: ApiResponse<T> = await response.json();
   
   if (response.status() !== expectedStatus) {
     throw new Error(`Expected status ${expectedStatus}, got ${response.status()}. Response: ${JSON.stringify(body, null, 2)}`);
@@ -124,12 +117,12 @@ async function assertResponse(response, expectedStatus = 200, shouldHaveData = t
 
 /**
  * Assert that a response is an error with expected status
- * @param {Response} response - API response
- * @param {number} expectedStatus - Expected HTTP status code
- * @returns {Promise<Object>} Response body
  */
-async function assertErrorResponse(response, expectedStatus) {
-  const body = await response.json();
+export async function assertErrorResponse(
+  response: APIResponse,
+  expectedStatus: number
+): Promise<ApiResponse> {
+  const body: ApiResponse = await response.json();
   
   if (response.status() !== expectedStatus) {
     throw new Error(`Expected error status ${expectedStatus}, got ${response.status()}. Response: ${JSON.stringify(body, null, 2)}`);
@@ -144,23 +137,9 @@ async function assertErrorResponse(response, expectedStatus) {
 
 /**
  * Clean up test data (placeholder for future implementation)
- * @param {ApiClient} apiClient - API client instance
- * @param {Array} resourceIds - Array of resource IDs to clean up
  */
-async function cleanupTestData(apiClient, resourceIds = []) {
+export async function cleanupTestData(apiClient: ApiClient, resourceIds: (string | number)[] = []): Promise<void> {
   // Implementation depends on your cleanup strategy
   // This could involve deleting created resources, clearing database, etc.
   console.log('Cleaning up test data...', resourceIds);
 }
-
-module.exports = {
-  generateUniqueEmail,
-  generatePassword,
-  generateUserData,
-  generateSimpleData,
-  waitForCondition,
-  retryOperation,
-  assertResponse,
-  assertErrorResponse,
-  cleanupTestData
-};

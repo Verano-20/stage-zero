@@ -1,27 +1,60 @@
-// api-client.js - Utility functions for API interactions
+import { APIRequestContext, APIResponse } from '@playwright/test';
 
-class ApiClient {
-  constructor(request, baseURL = 'http://localhost:8080') {
+export interface UserData {
+  email: string;
+  password: string;
+}
+
+export interface SimpleResourceData {
+  name: string;
+}
+
+export interface ApiResponse<T = any> {
+  message: string;
+  data?: T;
+  error?: string;
+}
+
+export interface UserResponse {
+  id: number;
+  email: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LoginResponse {
+  token: string;
+}
+
+export interface SimpleResourceResponse {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export class ApiClient {
+  private request: APIRequestContext;
+  private baseURL: string;
+  private authToken: string | null = null;
+
+  constructor(request: APIRequestContext, baseURL = 'http://localhost:8080') {
     this.request = request;
     this.baseURL = baseURL;
-    this.authToken = null;
   }
 
   /**
    * Set authentication token for subsequent requests
-   * @param {string} token - JWT token
    */
-  setAuthToken(token) {
+  setAuthToken(token: string): void {
     this.authToken = token;
   }
 
   /**
    * Get headers with optional authentication
-   * @param {Object} additionalHeaders - Additional headers to include
-   * @returns {Object} Headers object
    */
-  getHeaders(additionalHeaders = {}) {
-    const headers = {
+  private getHeaders(additionalHeaders: Record<string, string> = {}): Record<string, string> {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...additionalHeaders
     };
@@ -35,20 +68,15 @@ class ApiClient {
 
   /**
    * Health check endpoint
-   * @returns {Promise<Response>} API response
    */
-  async healthCheck() {
+  async healthCheck(): Promise<APIResponse> {
     return await this.request.get(`${this.baseURL}/health`);
   }
 
   /**
    * Sign up a new user
-   * @param {Object} userData - User registration data
-   * @param {string} userData.email - User email
-   * @param {string} userData.password - User password
-   * @returns {Promise<Response>} API response
    */
-  async signUp(userData) {
+  async signUp(userData: UserData): Promise<APIResponse> {
     return await this.request.post(`${this.baseURL}/auth/signup`, {
       headers: this.getHeaders(),
       data: userData
@@ -57,21 +85,16 @@ class ApiClient {
 
   /**
    * Login user and optionally set auth token
-   * @param {Object} credentials - Login credentials
-   * @param {string} credentials.email - User email
-   * @param {string} credentials.password - User password
-   * @param {boolean} setToken - Whether to automatically set the auth token
-   * @returns {Promise<Response>} API response
    */
-  async login(credentials, setToken = true) {
+  async login(credentials: UserData, setToken = true): Promise<APIResponse> {
     const response = await this.request.post(`${this.baseURL}/auth/login`, {
       headers: this.getHeaders(),
       data: credentials
     });
 
     if (setToken && response.ok()) {
-      const responseBody = await response.json();
-      if (responseBody.data && responseBody.data.token) {
+      const responseBody: ApiResponse<LoginResponse> = await response.json();
+      if (responseBody.data?.token) {
         this.setAuthToken(responseBody.data.token);
       }
     }
@@ -81,11 +104,8 @@ class ApiClient {
 
   /**
    * Create a new simple resource
-   * @param {Object} resourceData - Resource data
-   * @param {string} resourceData.name - Resource name
-   * @returns {Promise<Response>} API response
    */
-  async createSimple(resourceData) {
+  async createSimple(resourceData: SimpleResourceData): Promise<APIResponse> {
     return await this.request.post(`${this.baseURL}/simple`, {
       headers: this.getHeaders(),
       data: resourceData
@@ -94,9 +114,8 @@ class ApiClient {
 
   /**
    * Get all simple resources
-   * @returns {Promise<Response>} API response
    */
-  async getAllSimples() {
+  async getAllSimples(): Promise<APIResponse> {
     return await this.request.get(`${this.baseURL}/simple`, {
       headers: this.getHeaders()
     });
@@ -104,10 +123,8 @@ class ApiClient {
 
   /**
    * Get a simple resource by ID
-   * @param {number|string} id - Resource ID
-   * @returns {Promise<Response>} API response
    */
-  async getSimpleById(id) {
+  async getSimpleById(id: number | string): Promise<APIResponse> {
     return await this.request.get(`${this.baseURL}/simple/${id}`, {
       headers: this.getHeaders()
     });
@@ -115,12 +132,8 @@ class ApiClient {
 
   /**
    * Update a simple resource
-   * @param {number|string} id - Resource ID
-   * @param {Object} updateData - Update data
-   * @param {string} updateData.name - Updated resource name
-   * @returns {Promise<Response>} API response
    */
-  async updateSimple(id, updateData) {
+  async updateSimple(id: number | string, updateData: SimpleResourceData): Promise<APIResponse> {
     return await this.request.put(`${this.baseURL}/simple/${id}`, {
       headers: this.getHeaders(),
       data: updateData
@@ -129,10 +142,8 @@ class ApiClient {
 
   /**
    * Delete a simple resource
-   * @param {number|string} id - Resource ID
-   * @returns {Promise<Response>} API response
    */
-  async deleteSimple(id) {
+  async deleteSimple(id: number | string): Promise<APIResponse> {
     return await this.request.delete(`${this.baseURL}/simple/${id}`, {
       headers: this.getHeaders()
     });
@@ -141,9 +152,7 @@ class ApiClient {
   /**
    * Clear authentication token
    */
-  clearAuth() {
+  clearAuth(): void {
     this.authToken = null;
   }
 }
-
-module.exports = { ApiClient };

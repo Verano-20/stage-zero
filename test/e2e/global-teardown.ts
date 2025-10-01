@@ -1,6 +1,6 @@
-// global-teardown.js
+import { FullConfig } from '@playwright/test';
 
-async function globalTeardown() {
+async function globalTeardown(config: FullConfig): Promise<void> {
   console.log('🧹 Starting global teardown for E2E tests...');
   
   // Add any cleanup logic here if needed
@@ -9,4 +9,4 @@ async function globalTeardown() {
   console.log('✅ Global teardown completed');
 }
 
-module.exports = globalTeardown;
+export default globalTeardown;

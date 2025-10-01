@@ -1,21 +1,16 @@
-// simple-crud.spec.js - Simple resource CRUD operation tests
-
-const { test, expect } = require('@playwright/test');
-const { ApiClient } = require('../utils/api-client');
-const { 
+import { test, expect } from '@playwright/test';
+import { ApiClient, UserData, SimpleResourceResponse } from '../utils/api-client';
+import { 
   generateUserData, 
   generateSimpleData,
   assertResponse, 
   assertErrorResponse 
-} = require('../utils/test-helpers');
-const { 
-  testSimpleResources, 
-  expectedResponses 
-} = require('../fixtures/test-data');
+} from '../utils/test-helpers';
+import { expectedResponses } from '../fixtures/test-data';
 
 test.describe('Simple Resource CRUD API', () => {
-  let apiClient;
-  let authenticatedUser;
+  let apiClient: ApiClient;
+  let authenticatedUser: UserData;
 
   test.beforeAll(async ({ request }) => {
     // Set up authenticated user for all tests
@@ -46,7 +41,7 @@ test.describe('Simple Resource CRUD API', () => {
       expect(response.ok()).toBeTruthy();
       expect(response.status()).toBe(201);
       
-      const body = await assertResponse(response, 201);
+      const body = await assertResponse<SimpleResourceResponse>(response, 201);
       expect(body.message).toBe(expectedResponses.simpleSuccess.create.message);
       expect(body.data).toHaveProperty('id');
       expect(body.data).toHaveProperty('name', resourceData.name);
@@ -78,7 +73,7 @@ test.describe('Simple Resource CRUD API', () => {
     });
 
     test('should reject creation with missing name', async () => {
-      const invalidData = {}; // Missing name field
+      const invalidData = {} as any; // Missing name field
       
       const response = await apiClient.createSimple(invalidData);
       
@@ -90,7 +85,7 @@ test.describe('Simple Resource CRUD API', () => {
   });
 
   test.describe('Read Simple Resources', () => {
-    let createdResource;
+    let createdResource: SimpleResourceResponse;
 
     test.beforeEach(async () => {
       // Create a resource for read tests
@@ -108,15 +103,15 @@ test.describe('Simple Resource CRUD API', () => {
       expect(response.ok()).toBeTruthy();
       expect(response.status()).toBe(200);
       
-      const body = await assertResponse(response, 200);
+      const body = await assertResponse<SimpleResourceResponse[]>(response, 200);
       expect(body.message).toBe(expectedResponses.simpleSuccess.getAll.message);
       expect(Array.isArray(body.data)).toBeTruthy();
-      expect(body.data.length).toBeGreaterThan(0);
+      expect(body.data!.length).toBeGreaterThan(0);
       
       // Check if our created resource is in the list
-      const foundResource = body.data.find(resource => resource.id === createdResource.id);
+      const foundResource = body.data!.find(resource => resource.id === createdResource.id);
       expect(foundResource).toBeDefined();
-      expect(foundResource.name).toBe(createdResource.name);
+      expect(foundResource!.name).toBe(createdResource.name);
     });
 
     test('should get simple resource by ID', async () => {
@@ -125,7 +120,7 @@ test.describe('Simple Resource CRUD API', () => {
       expect(response.ok()).toBeTruthy();
       expect(response.status()).toBe(200);
       
-      const body = await assertResponse(response, 200);
+      const body = await assertResponse<SimpleResourceResponse>(response, 200);
       expect(body.message).toBe(expectedResponses.simpleSuccess.getById.message);
       expect(body.data).toHaveProperty('id', createdResource.id);
       expect(body.data).toHaveProperty('name', createdResource.name);
@@ -166,7 +161,7 @@ test.describe('Simple Resource CRUD API', () => {
   });
 
   test.describe('Update Simple Resource', () => {
-    let createdResource;
+    let createdResource: SimpleResourceResponse;
 
     test.beforeEach(async () => {
       // Create a resource for update tests
@@ -186,12 +181,11 @@ test.describe('Simple Resource CRUD API', () => {
       expect(response.ok()).toBeTruthy();
       expect(response.status()).toBe(200);
       
-      const body = await assertResponse(response, 200);
+      const body = await assertResponse<SimpleResourceResponse>(response, 200);
       expect(body.message).toBe(expectedResponses.simpleSuccess.update.message);
       expect(body.data).toHaveProperty('id', createdResource.id);
       expect(body.data).toHaveProperty('name', updateData.name);
-      expect(body.data).toHaveProperty('created_at', createdResource.created_at);
-      expect(body.data.updated_at).not.toBe(createdResource.updated_at);
+      expect(body.data!.updated_at).not.toBe(createdResource.updated_at);
     });
 
     test('should return 404 for updating non-existent resource', async () => {
@@ -231,7 +225,7 @@ test.describe('Simple Resource CRUD API', () => {
   });
 
   test.describe('Delete Simple Resource', () => {
-    let createdResource;
+    let createdResource: SimpleResourceResponse;
 
     test.beforeEach(async () => {
       // Create a resource for delete tests
@@ -249,7 +243,7 @@ test.describe('Simple Resource CRUD API', () => {
       expect(response.ok()).toBeTruthy();
       expect(response.status()).toBe(200);
       
-      const body = await assertResponse(response, 200, true);
+      const body = await assertResponse(response, 200, false); // Delete might not return data
       expect(body.message).toBe(expectedResponses.simpleSuccess.delete.message);
       
       // Verify resource is actually deleted

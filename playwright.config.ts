@@ -1,10 +1,9 @@
-// @ts-check
-const { defineConfig, devices } = require('@playwright/test');
+import { defineConfig, devices } from '@playwright/test';
 
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
-module.exports = defineConfig({
+export default defineConfig({
   testDir: './test/e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -87,8 +86,8 @@ module.exports = defineConfig({
   },
 
   /* Global setup and teardown */
-  globalSetup: require.resolve('./e2e/global-setup.js'),
-  globalTeardown: require.resolve('./e2e/global-teardown.js'),
+  globalSetup: require.resolve('./test/e2e/global-setup.ts'),
+  globalTeardown: require.resolve('./test/e2e/global-teardown.ts'),
 
   /* Test timeout */
   timeout: 30 * 1000,

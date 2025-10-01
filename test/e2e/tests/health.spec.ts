@@ -1,12 +1,10 @@
-// health.spec.js - Health check endpoint tests
-
-const { test, expect } = require('@playwright/test');
-const { ApiClient } = require('../utils/api-client');
-const { assertResponse } = require('../utils/test-helpers');
-const { apiEndpoints, expectedResponses } = require('../fixtures/test-data');
+import { test, expect } from '@playwright/test';
+import { ApiClient } from '../utils/api-client';
+import { assertResponse } from '../utils/test-helpers';
+import { expectedResponses } from '../fixtures/test-data';
 
 test.describe('Health Check API', () => {
-  let apiClient;
+  let apiClient: ApiClient;
 
   test.beforeEach(async ({ request }) => {
     apiClient = new ApiClient(request);

@@ -61,99 +61,101 @@ The E2E test suite covers:
 ## Test Structure
 
 ```
-e2e/
-├── tests/                  # Test specifications
-│   ├── health.spec.js      # Health check tests
-│   ├── auth.spec.js        # Authentication tests
-│   └── simple-crud.spec.js # CRUD operation tests
-├── utils/                  # Test utilities
-│   ├── api-client.js       # API interaction wrapper
-│   └── test-helpers.js     # Common test functions
-├── fixtures/               # Test data and constants
-│   └── test-data.js        # Test fixtures and expected responses
-├── global-setup.js         # Global test setup
-└── global-teardown.js      # Global test cleanup
+test/e2e/
+├── tests/                     # Test specifications
+│   ├── health.spec.ts         # Health check tests
+│   ├── auth.spec.ts           # Authentication tests
+│   └── simple-crud.spec.ts    # CRUD operation tests
+├── utils/                     # Test utilities
+│   ├── api-client.ts          # API interaction wrapper
+│   └── test-helpers.ts        # Common test functions
+├── fixtures/                  # Test data and constants
+│   └── test-data.ts           # Test fixtures and expected responses
+├── global-setup.ts            # Global test setup
+├── global-teardown.ts         # Global test cleanup
+└── README.md                  # This file
+```
+
+## API Client
+
+The `ApiClient` class provides methods for all API endpoints:
+
+```typescript
+const apiClient = new ApiClient(request);
+
+// Authentication
+await apiClient.signUp({ email: 'user@example.com', password: 'password' });
+await apiClient.login({ email: 'user@example.com', password: 'password' });
+
+// CRUD operations
+await apiClient.createSimple({ name: 'Test Resource' });
+await apiClient.getAllSimples();
+await apiClient.getSimpleById(1);
+await apiClient.updateSimple(1, { name: 'Updated Resource' });
+await apiClient.deleteSimple(1);
+```
+
+## Test Helpers
+
+Common utilities for test setup and assertions:
+
+```typescript
+// Generate test data
+const userData = generateUserData();
+const resourceData = generateSimpleData();
+
+// Response assertions
+const body = await assertResponse(response, 200);
+const errorBody = await assertErrorResponse(response, 401);
+
+// Utility functions
+await waitForCondition(() => condition, 5000);
+await retryOperation(() => operation(), 3);
 ```
 
 ## Test Categories
 
-### Health Check Tests (`health.spec.js`)
-- API availability
-- Response time validation
+### Health Check Tests (`health.spec.ts`)
+- API availability and response time
 - Content type verification
 
-### Authentication Tests (`auth.spec.js`)
-- User registration (signup)
-- User login
+### Authentication Tests (`auth.spec.ts`)
+- User registration and login
 - JWT token validation
 - Input validation and error handling
-- Duplicate registration prevention
 
-### CRUD Tests (`simple-crud.spec.js`)
-- Create resources with authentication
-- Read operations (get all, get by ID)
-- Update operations
-- Delete operations
-- Complete CRUD workflow
-- Authorization requirements
+### CRUD Tests (`simple-crud.spec.ts`)
+- Create, read, update, delete operations
+- Authentication requirements
 - Error handling (404, 401, 400)
+- Complete CRUD workflow
 
 ## Configuration
 
 ### Environment Variables
-
-The tests use the following environment variables:
-
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BASE_URL` | `http://localhost:8080` | API base URL |
 | `CI` | `false` | CI environment flag |
 
 ### Docker Configuration
-
 Tests use `docker-compose.test.yml` which provides:
-- Isolated test database (`go_crud_test`)
+- Isolated test database
 - Test-specific environment variables
 - Separate ports to avoid conflicts
-- Automatic cleanup
 
-### Playwright Configuration
+## Development
 
-Key settings in `playwright.config.js`:
-- **Browsers**: Chromium, Firefox, WebKit
-- **Retries**: 2 on CI, 0 locally
-- **Timeout**: 30s per test, 5s for assertions
-- **Artifacts**: Screenshots and videos on failure
-- **Reports**: HTML, JSON, and JUnit formats
+### Adding New Tests
+1. Create `.spec.ts` files in `test/e2e/tests/`
+2. Import utilities from `utils/`
+3. Use fixtures from `fixtures/test-data.ts`
+4. Follow existing patterns for consistency
 
-## API Client
-
-The `ApiClient` class (`utils/api-client.js`) provides:
-- Automatic JWT token management
-- Standardized request/response handling
-- Built-in authentication helpers
-- Type-safe API method wrappers
-
-Example usage:
-```javascript
-const apiClient = new ApiClient(request);
-
-// Login and set token automatically
-await apiClient.login(credentials, true);
-
-// Create a resource (uses stored token)
-const response = await apiClient.createSimple({ name: 'Test Resource' });
-```
-
-## Test Helpers
-
-Common utilities in `test-helpers.js`:
-- `generateUserData()` - Create unique test users
-- `generateSimpleData()` - Create test resources
-- `assertResponse()` - Validate API responses
-- `assertErrorResponse()` - Validate error responses
-- `waitForCondition()` - Polling with timeout
-- `retryOperation()` - Retry with exponential backoff
+### Adding New API Methods
+1. Add method to `ApiClient` class
+2. Update test helpers if needed
+3. Add to test fixtures
 
 ## Debugging
 
@@ -172,20 +174,7 @@ npm run test:e2e:debug --grep "failing test name"
 docker-compose -f docker-compose.test.yml logs app-test
 ```
 
-### Manual API Testing
-The test environment runs on `http://localhost:8080` and includes:
-- Health check: `GET /health`
-- Swagger UI: `GET /swagger/index.html`
-- All API endpoints as documented
-
 ## CI/CD Integration
-
-The test suite is designed for CI/CD with:
-- **Exit codes**: Proper exit codes for pipeline integration
-- **Artifacts**: Test reports in multiple formats
-- **Parallel execution**: Configurable worker count
-- **Retry logic**: Automatic retry on CI environments
-- **Docker isolation**: No dependency on host environment
 
 ### GitHub Actions Example
 ```yaml
@@ -203,10 +192,9 @@ The test suite is designed for CI/CD with:
 ## Troubleshooting
 
 ### Common Issues
-
 1. **Port conflicts**: Ensure ports 8080 and 5433 are available
 2. **Docker issues**: Check Docker is running and has sufficient resources
-3. **Timeout errors**: Increase timeout in `playwright.config.js`
+3. **Timeout errors**: Increase timeout in `playwright.config.ts`
 4. **Database issues**: Check PostgreSQL container logs
 
 ### Clean Reset
@@ -225,5 +213,5 @@ When adding new tests:
 1. Follow existing naming conventions
 2. Use the `ApiClient` for API interactions
 3. Include both positive and negative test cases
-4. Add appropriate test data to `fixtures/test-data.js`
+4. Add appropriate test data to `fixtures/test-data.ts`
 5. Update this README if adding new test categories

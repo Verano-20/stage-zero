@@ -1,7 +1,6 @@
-// global-setup.js
-const { chromium } = require('@playwright/test');
+import { chromium, FullConfig } from '@playwright/test';
 
-async function globalSetup() {
+async function globalSetup(config: FullConfig): Promise<void> {
   console.log('🚀 Starting global setup for E2E tests...');
   
   // Wait for the API to be ready
@@ -34,4 +33,4 @@ async function globalSetup() {
   console.log('✅ Global setup completed');
 }
 
-module.exports = globalSetup;
+export default globalSetup;
