@@ -62,7 +62,7 @@ func InitTelemetry() {
 		log.Fatal("Failed to initialize OTLP telemetry", zap.Error(err))
 	}
 
-	// TODO: enable no exporters or readers
+	// TODO: enable no exporters or readers and disable in e2e tests
 	if len(traceExporters) == 0 {
 		log.Fatal("No trace exporters configured")
 	}

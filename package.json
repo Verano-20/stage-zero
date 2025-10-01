@@ -1,0 +1,23 @@
+{
+  "name": "stage-zero-e2e-tests",
+  "version": "1.0.0",
+  "description": "End-to-end tests for Stage Zero Go API using Playwright",
+  "scripts": {
+    "test:e2e": "sh ./scripts/run-e2e-tests.sh",
+    "test:e2e:headed": "sh ./scripts/run-e2e-tests.sh --headed",
+    "test:e2e:debug": "sh ./scripts/run-e2e-tests.sh --debug",
+    "test:e2e:ui": "sh ./scripts/run-e2e-tests.sh --ui",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:raw": "playwright test",
+    "test:install": "playwright install",
+    "test:install-deps": "playwright install-deps",
+    "test:setup": "npm install && playwright install --with-deps"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.0",
+    "@types/node": "24.0.0"
+  },
+  "engines": {
+    "node": "24"
+  }
+}
