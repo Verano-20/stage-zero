@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/config"
-	"github.com/Verano-20/go-crud/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/config"
+	"github.com/Verano-20/stage-zero/internal/logger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"

@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Verano-20/go-crud/internal/config"
+	"github.com/Verano-20/stage-zero/internal/config"
 	_ "github.com/jackc/pgx/v5/stdlib" // PostgreSQL driver
 	"github.com/pressly/goose/v3"
 )

@@ -3,8 +3,8 @@ package repository
 import (
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/internal/telemetry"
+	"github.com/Verano-20/stage-zero/internal/model"
+	"github.com/Verano-20/stage-zero/internal/telemetry"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

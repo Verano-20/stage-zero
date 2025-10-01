@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
     labels:
       logging: "promtail"
-      service: "go-crud-api"
+      service: "stage-zero-api"
 
   db:
     image: postgres:16-alpine
@@ -43,16 +43,16 @@ services:
     restart: unless-stopped
     labels:
       logging: "promtail"
-      service: "go-crud-db"
+      service: "stage-zero-db"
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.111.0
-    command: ["--config=/etc/otel-collector-config.yaml"]
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "8889:8889"   # Prometheus metrics endpoint
+      - "4317:4317" # OTLP gRPC receiver
+      - "8889:8889" # Prometheus metrics endpoint
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-development}
     restart: unless-stopped

@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/config"
-	"github.com/Verano-20/go-crud/internal/logger"
-	"github.com/Verano-20/go-crud/internal/telemetry"
+	"github.com/Verano-20/stage-zero/internal/config"
+	"github.com/Verano-20/stage-zero/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/telemetry"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

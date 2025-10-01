@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/middleware"
-	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/test/mocks/repository"
-	"github.com/Verano-20/go-crud/test/testutils"
+	"github.com/Verano-20/stage-zero/internal/middleware"
+	"github.com/Verano-20/stage-zero/internal/model"
+	"github.com/Verano-20/stage-zero/test/mocks/repository"
+	"github.com/Verano-20/stage-zero/test/testutils"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 )

@@ -38,7 +38,7 @@ host: localhost:8080
 info:
   contact: {}
   description: This is a CRUD API for a simple application.
-  title: Go-CRUD API
+  title: stage-zero API
   version: "1.0"
 paths:
   /auth/login:

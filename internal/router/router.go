@@ -1,11 +1,11 @@
 package router
 
 import (
-	"github.com/Verano-20/go-crud/internal/config"
-	"github.com/Verano-20/go-crud/internal/container"
-	"github.com/Verano-20/go-crud/internal/controller"
-	"github.com/Verano-20/go-crud/internal/logger"
-	"github.com/Verano-20/go-crud/internal/middleware"
+	"github.com/Verano-20/stage-zero/internal/config"
+	"github.com/Verano-20/stage-zero/internal/container"
+	"github.com/Verano-20/stage-zero/internal/controller"
+	"github.com/Verano-20/stage-zero/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/middleware"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

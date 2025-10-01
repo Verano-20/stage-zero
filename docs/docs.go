@@ -429,7 +429,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Go-CRUD API",
+	Title:            "stage-zero API",
 	Description:      "This is a CRUD API for a simple application.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

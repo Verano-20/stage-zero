@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/Verano-20/go-crud/internal/logger"
-	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/internal/repository"
+	"github.com/Verano-20/stage-zero/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/model"
+	"github.com/Verano-20/stage-zero/internal/repository"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )

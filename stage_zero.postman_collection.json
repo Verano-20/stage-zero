@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "3949a2dd-2f6f-4b91-b84b-8a21086864d9",
-		"name": "Go-CRUD",
-		"description": "Postman suite for all endpoints in the Go-CRUD app API.",
+		"name": "Stage-Zero",
+		"description": "Postman suite for all endpoints in the Stage-Zero app API.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "14035595"
 	},

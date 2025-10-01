@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: 'go-crud-dashboards'
+  - name: 'stage-zero-dashboards'
     orgId: 1
-    folder: 'Go CRUD App'
+    folder: 'Stage-Zero App'
     type: file
     disableDeletion: false
     updateIntervalSeconds: 5

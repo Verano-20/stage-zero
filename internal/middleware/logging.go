@@ -3,7 +3,7 @@ package middleware
 import (
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/logger"
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"

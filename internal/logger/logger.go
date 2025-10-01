@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/Verano-20/go-crud/internal/config"
+	"github.com/Verano-20/stage-zero/internal/config"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

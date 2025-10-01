@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/telemetry"
+	"github.com/Verano-20/stage-zero/internal/telemetry"
 	"github.com/gin-gonic/gin"
 )
 

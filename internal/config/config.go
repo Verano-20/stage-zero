@@ -36,7 +36,7 @@ type TelemetryConfig struct {
 
 func InitConfig() {
 	config := &Config{
-		ServiceName:    getEnvOrDefault("SERVICE_NAME", "go-crud-api"),
+		ServiceName:    getEnvOrDefault("SERVICE_NAME", "stage-zero-api"),
 		ServiceVersion: getEnvOrDefault("SERVICE_VERSION", "1.0.0"),
 		ServicePort:    getEnvOrDefault("SERVICE_PORT", "8080"),
 		Environment:    getEnvOrDefault("ENVIRONMENT", "develop"),

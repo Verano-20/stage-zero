@@ -9,15 +9,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/config"
-	"github.com/Verano-20/go-crud/internal/container"
-	"github.com/Verano-20/go-crud/internal/database"
-	"github.com/Verano-20/go-crud/internal/logger"
-	"github.com/Verano-20/go-crud/internal/router"
-	"github.com/Verano-20/go-crud/internal/telemetry"
+	"github.com/Verano-20/stage-zero/internal/config"
+	"github.com/Verano-20/stage-zero/internal/container"
+	"github.com/Verano-20/stage-zero/internal/database"
+	"github.com/Verano-20/stage-zero/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/router"
+	"github.com/Verano-20/stage-zero/internal/telemetry"
 	"go.uber.org/zap"
 
-	_ "github.com/Verano-20/go-crud/docs"
+	_ "github.com/Verano-20/stage-zero/docs"
 )
 
 func init() {
@@ -25,7 +25,7 @@ func init() {
 	logger.InitLogger()
 }
 
-// @title           Go-CRUD API
+// @title           Stage-Zero API
 // @version         1.0
 // @description     This is a CRUD API for a simple application.
 

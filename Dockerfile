@@ -2,7 +2,7 @@
 FROM golang:1.24-alpine AS builder
 
 # Set working directory
-WORKDIR /go-crud
+WORKDIR /stage-zero
 
 # Install build dependencies
 RUN apk add --no-cache gcc musl-dev
@@ -25,7 +25,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o /bin/migrate ./cmd/migrate/main.go
 # Final stage
 FROM alpine:latest
 
-WORKDIR /go-crud
+WORKDIR /stage-zero
 
 # Install runtime dependencies
 RUN apk add --no-cache postgresql-client

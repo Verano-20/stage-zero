@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/internal/service"
-	"github.com/Verano-20/go-crud/test/mocks/repository"
-	"github.com/Verano-20/go-crud/test/testutils"
+	"github.com/Verano-20/stage-zero/internal/model"
+	"github.com/Verano-20/stage-zero/internal/service"
+	"github.com/Verano-20/stage-zero/test/mocks/repository"
+	"github.com/Verano-20/stage-zero/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

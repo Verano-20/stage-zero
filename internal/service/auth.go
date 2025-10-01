@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Verano-20/go-crud/internal/logger"
-	"github.com/Verano-20/go-crud/internal/model"
+	"github.com/Verano-20/stage-zero/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"

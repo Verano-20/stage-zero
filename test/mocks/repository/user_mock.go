@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/internal/repository"
+	"github.com/Verano-20/stage-zero/internal/model"
+	"github.com/Verano-20/stage-zero/internal/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
 )

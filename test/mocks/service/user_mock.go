@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/internal/service"
+	"github.com/Verano-20/stage-zero/internal/model"
+	"github.com/Verano-20/stage-zero/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
 )

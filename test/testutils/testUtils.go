@@ -3,7 +3,7 @@ package testutils
 import (
 	"net/http/httptest"
 
-	"github.com/Verano-20/go-crud/internal/model"
+	"github.com/Verano-20/stage-zero/internal/model"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )

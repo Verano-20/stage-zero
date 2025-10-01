@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Verano-20/go-crud/internal/logger"
-	"github.com/Verano-20/go-crud/internal/model"
-	"github.com/Verano-20/go-crud/internal/response"
-	"github.com/Verano-20/go-crud/internal/service"
-	"github.com/Verano-20/go-crud/internal/utils"
+	"github.com/Verano-20/stage-zero/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/model"
+	"github.com/Verano-20/stage-zero/internal/response"
+	"github.com/Verano-20/stage-zero/internal/service"
+	"github.com/Verano-20/stage-zero/internal/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )

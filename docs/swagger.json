@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a CRUD API for a simple application.",
-        "title": "Go-CRUD API",
+        "title": "stage-zero API",
         "contact": {},
         "version": "1.0"
     },

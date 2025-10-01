@@ -19,23 +19,23 @@ This project serves as a robust foundation for backend applications requiring au
 - Finalise stack & trace dashboards
 - Add Playwright test suite (or other)
 - Ensure goroutines are used where appropriate
-- Ensure all GO-CRUD are renamed Stage-Zero
 - Ensure all swagger docs and tags are up to date
 - Add controller validation
-- Add deployment pipeline for CI/CD
+- Add terraform deployment
+- Add CI/CD pipeline
 
 ## Packages and Tools
 - [Gin](https://github.com/gin-gonic/gin) web framework
+- [Swagger](https://swagger.io) API documentation
 - [GORM](https://gorm.io) ORM with PostgreSQL
 - [Goose](https://github.com/pressly/goose) database migrations
-- [Swagger](https://swagger.io) API documentation
+- [Zap](https://github.com/uber-go/zap) structured logging
+- [stretchr/testify](https://github.com/stretchr/testify) unit testing and mocking
 - [Docker](https://docker.com/) containerization
 - [OpenTelemetry](https://opentelemetry.io/) comprehensive observability
 - [Grafana](https://grafana.com/) dashboards for metrics, traces, and logs
 - [Playwright](https://playwright.dev/) end to end test suite
 - [Postman](https://www.postman.com/) collection for manual testing
-- [stretchr/testify](https://github.com/stretchr/testify) unit testing and mocking
-- [Zap](https://github.com/uber-go/zap) structured logging
 - JWT authentication with bcrypt password hashing
 
 ## Prerequisites
@@ -792,7 +792,7 @@ swag init -g ./cmd/api-server/main.go
 
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
-| `SERVICE_NAME` | Service name for telemetry | No | go-crud-api |
+| `SERVICE_NAME` | Service name for telemetry | No | stage-zero-api |
 | `SERVICE_VERSION` | Service version | No | 1.0.0 |
 | `SERVICE_PORT` | HTTP server port | No | 8080 |
 | `ENVIRONMENT` | Environment (develop/production) | No | develop |

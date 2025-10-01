@@ -1,4 +1,4 @@
-module github.com/Verano-20/go-crud
+module github.com/Verano-20/stage-zero
 
 go 1.24
 

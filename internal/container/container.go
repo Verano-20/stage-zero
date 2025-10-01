@@ -1,9 +1,9 @@
 package container
 
 import (
-	"github.com/Verano-20/go-crud/internal/controller"
-	"github.com/Verano-20/go-crud/internal/repository"
-	"github.com/Verano-20/go-crud/internal/service"
+	"github.com/Verano-20/stage-zero/internal/controller"
+	"github.com/Verano-20/stage-zero/internal/repository"
+	"github.com/Verano-20/stage-zero/internal/service"
 	"gorm.io/gorm"
 )
 

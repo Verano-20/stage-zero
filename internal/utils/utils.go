@@ -3,9 +3,9 @@ package utils
 import (
 	"net/http"
 
-	"github.com/Verano-20/go-crud/internal/err"
-	"github.com/Verano-20/go-crud/internal/logger"
-	"github.com/Verano-20/go-crud/internal/response"
+	"github.com/Verano-20/stage-zero/internal/err"
+	"github.com/Verano-20/stage-zero/internal/logger"
+	"github.com/Verano-20/stage-zero/internal/response"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
