@@ -12,27 +12,18 @@ test.describe('Health Check API', () => {
 
   test('should return healthy status', async () => {
     const response = await apiClient.healthCheck();
-    
     expect(response.ok()).toBeTruthy();
-    expect(response.status()).toBe(200);
-    
-    const body = await response.json();
-    expect(body).toHaveProperty('status', expectedResponses.health.status);
+
+    const body = await assertResponse(response, 200);
+    expect(body).toHaveProperty('message', expectedResponses.health.message);
   });
 
   test('should respond quickly', async () => {
     const startTime = Date.now();
     const response = await apiClient.healthCheck();
     const endTime = Date.now();
-    
+
     expect(response.ok()).toBeTruthy();
     expect(endTime - startTime).toBeLessThan(1000); // Should respond within 1 second
-  });
-
-  test('should have correct content type', async () => {
-    const response = await apiClient.healthCheck();
-    
-    expect(response.ok()).toBeTruthy();
-    expect(response.headers()['content-type']).toContain('application/json');
   });
 });

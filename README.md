@@ -19,6 +19,7 @@ This project serves as a robust foundation for backend applications requiring au
 - Finalise stack & trace dashboards
 - Add Playwright test suite (or other)
 - Ensure goroutines are used where appropriate
+- Add controller validation
 - Add deployment pipeline for CI/CD
 
 ## Packages and Tools

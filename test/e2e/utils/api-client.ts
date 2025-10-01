@@ -113,6 +113,16 @@ export class ApiClient {
   }
 
   /**
+  * Create a new simple resource with custom payload
+  */
+  async createSimpleWithCustomPayload(resourceData: any): Promise<APIResponse> {
+    return await this.request.post(`${this.baseURL}/simple`, {
+      headers: this.getHeaders(),
+      data: resourceData
+    });
+  }
+
+  /**
    * Get all simple resources
    */
   async getAllSimples(): Promise<APIResponse> {
@@ -134,6 +144,16 @@ export class ApiClient {
    * Update a simple resource
    */
   async updateSimple(id: number | string, updateData: SimpleResourceData): Promise<APIResponse> {
+    return await this.request.put(`${this.baseURL}/simple/${id}`, {
+      headers: this.getHeaders(),
+      data: updateData
+    });
+  }
+
+  /**
+   * Update a simple resource with custom payload
+   */
+  async updateSimpleWithCustomPayload(id: number | string, updateData: any): Promise<APIResponse> {
     return await this.request.put(`${this.baseURL}/simple/${id}`, {
       headers: this.getHeaders(),
       data: updateData

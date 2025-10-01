@@ -28,7 +28,7 @@ export interface ApiEndpoints {
 
 export interface ExpectedResponses {
   health: {
-    status: string;
+    message: string;
   };
   authSuccess: {
     signup: {
@@ -95,12 +95,12 @@ export const testUsers: TestUsers = {
     email: 'valid.user@example.com',
     password: 'SecurePassword123!'
   },
-  
+
   anotherValidUser: {
     email: 'another.user@example.com',
     password: 'AnotherSecure456!'
   },
-  
+
   invalidUser: {
     email: 'invalid-email',
     password: '123'
@@ -111,15 +111,15 @@ export const testSimpleResources: TestSimpleResources = {
   validResource: {
     name: 'Test Simple Resource'
   },
-  
+
   anotherValidResource: {
     name: 'Another Test Resource'
   },
-  
+
   updatedResource: {
     name: 'Updated Test Resource'
   },
-  
+
   invalidResource: {
     name: '' // Invalid empty name
   }
@@ -140,9 +140,9 @@ export const apiEndpoints: ApiEndpoints = {
 
 export const expectedResponses: ExpectedResponses = {
   health: {
-    status: 'OK'
+    message: 'OK'
   },
-  
+
   authSuccess: {
     signup: {
       message: 'User created successfully'
@@ -151,7 +151,7 @@ export const expectedResponses: ExpectedResponses = {
       message: 'Login successful'
     }
   },
-  
+
   simpleSuccess: {
     create: {
       message: 'Simple created successfully'
@@ -169,7 +169,7 @@ export const expectedResponses: ExpectedResponses = {
       message: 'Simple deleted successfully'
     }
   },
-  
+
   errors: {
     unauthorized: {
       status: 401,
@@ -194,12 +194,12 @@ export const testConfig: TestConfig = {
     medium: 10000,
     long: 30000
   },
-  
+
   retries: {
     default: 3,
     network: 5
   },
-  
+
   delays: {
     short: 100,
     medium: 500,

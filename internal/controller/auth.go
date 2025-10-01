@@ -66,7 +66,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 	}
 
 	metrics.RecordAuthAttempt(ctx, true, "signup")
-	ctx.JSON(http.StatusCreated, user.ToDTO())
+	ctx.JSON(http.StatusCreated, response.ApiResponse{Message: "User created successfully", Data: user.ToDTO()})
 }
 
 // Login godoc
