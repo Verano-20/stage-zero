@@ -9,3 +9,14 @@ variable "pvt_key" {
     type = string
     sensitive = true
 }
+
+variable "github_token" {
+    description = "GitHub token for container registry access"
+    type = string
+    sensitive = true
+}
+
+variable "github_username" {
+    description = "GitHub username for container registry"
+    type = string
+}

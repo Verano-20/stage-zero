@@ -1,6 +1,6 @@
 services:
   migrate:
-    image: ghcr.io/verano-20/stage-zero:latest
+    image: ghcr.io/verano-20/stage-zero:deployment
     env_file:
       - .env.docker.deployment
     depends_on:
@@ -10,7 +10,7 @@ services:
     restart: "no"
 
   app:
-    image: ghcr.io/verano-20/stage-zero:latest
+    image: ghcr.io/verano-20/stage-zero:deployment
     ports:
       - "8080:8080"
     env_file:

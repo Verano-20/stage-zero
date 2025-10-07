@@ -13,10 +13,12 @@ resource "digitalocean_droplet" "stage-zero" {
 
   user_data = templatefile("../scripts/user-data.sh", {
     droplet_name = local.droplet_name
+    github_token = var.github_token
+    github_username = var.github_username
   })
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
     ignore_changes = [user_data]  # Prevent recreation on user_data changes
   }
 }
