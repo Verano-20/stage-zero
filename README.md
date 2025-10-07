@@ -19,8 +19,15 @@ This project serves as a robust foundation for backend applications requiring au
 - Finalise stack & trace dashboards
 - Ensure goroutines are used where appropriate
 - Ensure all swagger docs and tags are up to date
-- Add terraform deployment
-- Add CI/CD pipeline
+
+For CI/CD:
+set up env variables in git repo
+fix env file being created in the script
+make sure containers are published and tagged correctly, and the right tag used to pull in the user data script
+add terraform deployment as a step in git workflow
+add testing as a step in git workflow for deployment and main
+rename main -> develop
+
 
 ## Packages and Tools
 - [Gin](https://github.com/gin-gonic/gin) web framework
