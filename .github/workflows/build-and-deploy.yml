@@ -84,7 +84,6 @@ jobs:
           do_token = "${{ secrets.DO_TOKEN }}"
           pvt_key = "${{ secrets.PVT_KEY }}"
           github_token = "${{ secrets.GITHUB_TOKEN }}"
-          github_username = "${{ secrets.GITHUB_USERNAME }}"
           jwt_secret = "${{ secrets.JWT_SECRET }}"
           postgres_password = "${{ secrets.POSTGRES_PASSWORD }}"
           db_password = "${{ secrets.DB_PASSWORD }}"

@@ -21,12 +21,17 @@ This project serves as a robust foundation for backend applications requiring au
 - Ensure all swagger docs and tags are up to date
 
 For CI/CD:
+
+tidy up github workflow outputs
+add swagger generation step
+
 set up env variables in git repo
 fix env file being created in the script
 make sure containers are published and tagged correctly, and the right tag used to pull in the user data script
 add terraform deployment as a step in git workflow
 add testing as a step in git workflow for deployment and main
 rename main -> develop
+figure out redeployment when droplet exists
 
 
 ## Packages and Tools

@@ -144,11 +144,11 @@ echo "Grafana configuration completed"
 
 # Login to GitHub Container Registry
 echo "=== Logging into GitHub Container Registry ==="
-if [ -n "$GITHUB_TOKEN" ] && [ -n "$GITHUB_USERNAME" ]; then
-    echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_USERNAME" --password-stdin
+if [ -n "$GITHUB_TOKEN" ]; then
+    echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_TOKEN" --password-stdin
     echo "GitHub Container Registry login successful"
 else
-    echo "ERROR: GitHub credentials not provided"
+    echo "ERROR: GitHub token not provided"
     exit 1
 fi
 
