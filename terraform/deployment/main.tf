@@ -31,7 +31,7 @@ resource "digitalocean_droplet" "stage-zero" {
   ssh_keys = [data.digitalocean_ssh_key.terraform.id]
   tags   = ["terraform", local.droplet_name]
 
-  user_data = templatefile("../scripts/user-data.sh", {
+  user_data = templatefile("../../scripts/user-data.sh", {
     # Sensitive
     github_token = var.github_token
     github_username = var.github_username
