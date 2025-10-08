@@ -12,10 +12,14 @@ env:
 jobs:
   update-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Setup Go
@@ -39,10 +43,15 @@ jobs:
             echo "Documentation updated - committing changes"
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
-            git checkout -B ${{ github.head_ref }}
+            
+            BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
+            echo "Working on branch: $BRANCH_NAME"
+            
             git add docs/
-            git commit -m "docs: auto-update Swagger documentation"
-            git push origin ${{ github.head_ref }}
+            git commit -m "docs: auto-update Swagger documentation [skip ci]"
+            
+            # Push to the branch
+            git push origin HEAD:$BRANCH_NAME
             
             echo "## Swagger Documentation Update" >> $GITHUB_STEP_SUMMARY
             echo "✅ Documentation updated and committed" >> $GITHUB_STEP_SUMMARY
