@@ -1,0 +1,7 @@
+do_token = "your-digitalocean-token"
+pvt_key = "~/.ssh/your-key"
+github_token = "your-github-token"
+github_username = "your-github-username"
+jwt_secret = "your-jwt-secret-minimum-32-characters"
+postgres_password = "your-postgres-password"
+db_password = "your-db-password"

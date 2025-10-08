@@ -20,3 +20,21 @@ variable "github_username" {
     description = "GitHub username for container registry"
     type = string
 }
+
+variable "jwt_secret" {
+    description = "JWT secret for authentication"
+    type = string
+    sensitive = true
+}
+
+variable "postgres_password" {
+    description = "PostgreSQL container password"
+    type = string
+    sensitive = true
+}
+
+variable "db_password" {
+    description = "Database password"
+    type = string
+    sensitive = true
+}
