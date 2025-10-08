@@ -368,7 +368,7 @@
                 },
                 "email": {
                     "type": "string",
-                    "example": "user@example.com"
+                    "example": "user1@example.com"
                 },
                 "id": {
                     "type": "integer",
@@ -389,7 +389,7 @@
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "user@example.com"
+                    "example": "user1@example.com"
                 },
                 "password": {
                     "type": "string",
