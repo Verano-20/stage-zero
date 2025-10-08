@@ -376,7 +376,7 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string",
-                    "example": "user1@example.com"
+                    "example": "user@example.com"
                 },
                 "id": {
                     "type": "integer",
@@ -397,7 +397,7 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "user1@example.com"
+                    "example": "user@example.com"
                 },
                 "password": {
                     "type": "string",
