@@ -1,45 +1,64 @@
-basePath: /
 definitions:
   model.SimpleForm:
     properties:
       name:
+        example: My Simple
+        maxLength: 255
         type: string
+    required:
+    - name
     type: object
   model.UserDTO:
     properties:
       created_at:
+        example: "2025-01-01T00:00:00Z"
         type: string
       email:
+        example: user@example.com
         type: string
       id:
+        example: 1
         type: integer
       updated_at:
+        example: "2025-01-01T00:00:00Z"
         type: string
     type: object
   model.UserForm:
     properties:
       email:
+        example: user@example.com
         type: string
       password:
+        example: securePassword123
+        maxLength: 72
+        minLength: 8
         type: string
+    required:
+    - email
+    - password
     type: object
   response.ApiResponse:
     properties:
       data: {}
       message:
+        example: Operation successful
         type: string
     type: object
   response.ErrorResponse:
     properties:
+      details:
+        additionalProperties:
+          type: string
+        type: object
       error:
+        example: An error occurred
         type: string
     type: object
-host: localhost:8080
 info:
   contact: {}
-  description: This is a CRUD API for a simple application.
-  title: stage-zero API
-  version: "1.0"
+  description: This is a CRUD API base application.
+  title: Stage-Zero API
+  version: 1.0.0
 paths:
   /auth/login:
     post:
@@ -59,22 +78,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'Authentication successful, returns JWT token" example({"message":
-            "Login successful", "data": {"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}})'
+          description: Authentication successful, returns JWT token
           schema:
             $ref: '#/definitions/response.ApiResponse'
         "400":
-          description: 'Invalid request format" example({"error": "Invalid request
-            format"})'
+          description: Invalid request format or validation failed
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "401":
-          description: 'Invalid email or password" example({"error": "Invalid credentials"})'
+          description: Invalid credentials
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "500":
-          description: 'Internal server error during authentication" example({"error":
-            "Failed to generate token"})'
+          description: Internal server error during authentication
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Authenticate user and generate JWT token
@@ -85,6 +101,7 @@ paths:
       consumes:
       - application/json
       description: Create a new user with email and password. The email must be unique.
+        The password must be at least 8 characters long.
       parameters:
       - description: User details
         in: body
@@ -96,22 +113,19 @@ paths:
       - application/json
       responses:
         "201":
-          description: User account created successfully
+          description: User created successfully
           schema:
             $ref: '#/definitions/model.UserDTO'
         "400":
-          description: 'Invalid request format or validation failed" example({"error":
-            "Invalid request format"})'
+          description: Invalid request format or validation failed
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "409":
-          description: 'Email address already exists" example({"error": "Email already
-            exists"})'
+          description: User already exists
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "500":
-          description: 'Internal server error during user creation" example({"error":
-            "Failed to create user"})'
+          description: Internal server error during user creation
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Sign up a new user
@@ -124,8 +138,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'Server is healthy and operational" example({"message": "OK",
-            "data": null})'
+          description: Server is healthy and operational
           schema:
             $ref: '#/definitions/response.ApiResponse'
       summary: Get health
@@ -139,14 +152,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'Simples retrieved successfully" example({"message": "Simples
-            retrieved successfully", "data": [{"id": 1, "name": "Simple 1"}, {"id":
-            2, "name": "Simple 2"}]})'
+          description: Simples retrieved successfully
           schema:
             $ref: '#/definitions/response.ApiResponse'
         "500":
-          description: 'Internal server error while retrieving Simples" example({"error":
-            "Failed to retrieve Simples"})'
+          description: Internal server error while retrieving Simples
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Get all Simples
@@ -168,18 +178,15 @@ paths:
       - application/json
       responses:
         "201":
-          description: 'Simple created successfully" example({"message": "Simple created
-            successfully", "data": {"id": 1, "name": "My Simple"}})'
+          description: Simple created successfully
           schema:
             $ref: '#/definitions/response.ApiResponse'
         "400":
-          description: 'Invalid request format" example({"error": "Invalid request
-            format"})'
+          description: Invalid request format
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "500":
-          description: 'Internal server error during resource creation" example({"error":
-            "Failed to create Simple"})'
+          description: Internal server error during resource creation
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Create a new Simple
@@ -201,21 +208,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'Simple deleted successfully" example({"message": "Simple deleted
-            successfully", "data": null})'
+          description: Simple deleted successfully
           schema:
             $ref: '#/definitions/response.ApiResponse'
         "400":
-          description: 'Invalid ID format or value" example({"error": "Invalid ID"})'
+          description: Invalid ID format or value
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "404":
-          description: 'Simple not found" example({"error": "Simple not found"})'
+          description: Simple not found
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "500":
-          description: 'Internal server error during deletion" example({"error": "Failed
-            to delete Simple"})'
+          description: Internal server error during deletion
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Delete a Simple
@@ -240,16 +245,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'Simple retrieved successfully" example({"message": "Simple
-            retrieved successfully", "data": {"id": 1, "name": "My Simple"}})'
+          description: Simple retrieved successfully
           schema:
             $ref: '#/definitions/response.ApiResponse'
         "400":
-          description: 'Invalid ID format or value" example({"error": "Invalid ID"})'
+          description: Invalid ID format or value
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "404":
-          description: 'Simple not found" example({"error": "Simple not found"})'
+          description: Simple not found
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Get Simple by ID
@@ -278,22 +282,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'Simple updated successfully" example({"message": "Simple updated
-            successfully", "data": {"id": 1, "name": "Updated Simple"}})'
+          description: Simple updated successfully
           schema:
             $ref: '#/definitions/response.ApiResponse'
         "400":
-          description: 'Invalid ID or request body format" example({"error": "Invalid
-            request format"})'
+          description: Invalid ID or request body format
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "404":
-          description: 'Simple not found" example({"error": "Simple not found"})'
+          description: Simple not found
           schema:
             $ref: '#/definitions/response.ErrorResponse'
         "500":
-          description: 'Internal server error during update operation" example({"error":
-            "Failed to update Simple"})'
+          description: Internal server error during update operation
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Update an existing Simple

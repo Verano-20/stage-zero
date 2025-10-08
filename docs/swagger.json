@@ -1,13 +1,11 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a CRUD API for a simple application.",
-        "title": "stage-zero API",
+        "description": "This is a CRUD API base application.",
+        "title": "Stage-Zero API",
         "contact": {},
-        "version": "1.0"
+        "version": "1.0.0"
     },
-    "host": "localhost:8080",
-    "basePath": "/",
     "paths": {
         "/auth/login": {
             "post": {
@@ -35,25 +33,25 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Authentication successful, returns JWT token\" example({\"message\": \"Login successful\", \"data\": {\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}})",
+                        "description": "Authentication successful, returns JWT token",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid request format\" example({\"error\": \"Invalid request format\"})",
+                        "description": "Invalid request format or validation failed",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Invalid email or password\" example({\"error\": \"Invalid credentials\"})",
+                        "description": "Invalid credentials",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during authentication\" example({\"error\": \"Failed to generate token\"})",
+                        "description": "Internal server error during authentication",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -63,7 +61,7 @@
         },
         "/auth/signup": {
             "post": {
-                "description": "Create a new user with email and password. The email must be unique.",
+                "description": "Create a new user with email and password. The email must be unique. The password must be at least 8 characters long.",
                 "consumes": [
                     "application/json"
                 ],
@@ -87,25 +85,25 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "User account created successfully",
+                        "description": "User created successfully",
                         "schema": {
                             "$ref": "#/definitions/model.UserDTO"
                         }
                     },
                     "400": {
-                        "description": "Invalid request format or validation failed\" example({\"error\": \"Invalid request format\"})",
+                        "description": "Invalid request format or validation failed",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "409": {
-                        "description": "Email address already exists\" example({\"error\": \"Email already exists\"})",
+                        "description": "User already exists",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during user creation\" example({\"error\": \"Failed to create user\"})",
+                        "description": "Internal server error during user creation",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -125,7 +123,7 @@
                 "summary": "Get health",
                 "responses": {
                     "200": {
-                        "description": "Server is healthy and operational\" example({\"message\": \"OK\", \"data\": null})",
+                        "description": "Server is healthy and operational",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
@@ -145,13 +143,13 @@
                 "summary": "Get all Simples",
                 "responses": {
                     "200": {
-                        "description": "Simples retrieved successfully\" example({\"message\": \"Simples retrieved successfully\", \"data\": [{\"id\": 1, \"name\": \"Simple 1\"}, {\"id\": 2, \"name\": \"Simple 2\"}]})",
+                        "description": "Simples retrieved successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error while retrieving Simples\" example({\"error\": \"Failed to retrieve Simples\"})",
+                        "description": "Internal server error while retrieving Simples",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -183,19 +181,19 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Simple created successfully\" example({\"message\": \"Simple created successfully\", \"data\": {\"id\": 1, \"name\": \"My Simple\"}})",
+                        "description": "Simple created successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid request format\" example({\"error\": \"Invalid request format\"})",
+                        "description": "Invalid request format",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during resource creation\" example({\"error\": \"Failed to create Simple\"})",
+                        "description": "Internal server error during resource creation",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -233,19 +231,19 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Simple retrieved successfully\" example({\"message\": \"Simple retrieved successfully\", \"data\": {\"id\": 1, \"name\": \"My Simple\"}})",
+                        "description": "Simple retrieved successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid ID format or value\" example({\"error\": \"Invalid ID\"})",
+                        "description": "Invalid ID format or value",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "description": "Simple not found",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -286,25 +284,25 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Simple updated successfully\" example({\"message\": \"Simple updated successfully\", \"data\": {\"id\": 1, \"name\": \"Updated Simple\"}})",
+                        "description": "Simple updated successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid ID or request body format\" example({\"error\": \"Invalid request format\"})",
+                        "description": "Invalid ID or request body format",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "description": "Simple not found",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during update operation\" example({\"error\": \"Failed to update Simple\"})",
+                        "description": "Internal server error during update operation",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -333,25 +331,25 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Simple deleted successfully\" example({\"message\": \"Simple deleted successfully\", \"data\": null})",
+                        "description": "Simple deleted successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid ID format or value\" example({\"error\": \"Invalid ID\"})",
+                        "description": "Invalid ID format or value",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "description": "Simple not found",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during deletion\" example({\"error\": \"Failed to delete Simple\"})",
+                        "description": "Internal server error during deletion",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -363,9 +361,14 @@
     "definitions": {
         "model.SimpleForm": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255,
+                    "example": "My Simple"
                 }
             }
         },
@@ -373,27 +376,39 @@
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "updated_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
                 }
             }
         },
         "model.UserForm": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "securePassword123"
                 }
             }
         },
@@ -402,15 +417,23 @@
             "properties": {
                 "data": {},
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Operation successful"
                 }
             }
         },
         "response.ErrorResponse": {
             "type": "object",
             "properties": {
+                "details": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "error": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "An error occurred"
                 }
             }
         }
