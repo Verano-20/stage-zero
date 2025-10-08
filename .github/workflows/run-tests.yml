@@ -63,32 +63,6 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start test environment with Docker Compose
-        run: |
-          echo "🚀 Starting test environment..."
-          docker compose -f docker-compose.test.yml up -d --build
-          
-          echo "⏳ Waiting for services to be ready..."
-          timeout=120
-          counter=0
-          
-          while [ $counter -lt $timeout ]; do
-            if curl -f http://localhost:8080/health > /dev/null 2>&1; then
-              echo "✅ API is ready!"
-              break
-            fi
-            echo "Waiting for API... ($counter/$timeout)"
-            sleep 2
-            counter=$((counter + 2))
-          done
-          
-          if [ $counter -ge $timeout ]; then
-            echo "❌ API failed to start within ${timeout} seconds"
-            echo "📋 Container logs:"
-            docker compose -f docker-compose.test.yml logs app-test
-            exit 1
-          fi
-
       - name: Run Playwright E2E tests
         run: npx playwright test
         env:
@@ -109,12 +83,6 @@ jobs:
         with:
           name: playwright-traces
           path: test-results/
-
-      - name: Cleanup test environment
-        if: always()
-        run: |
-          echo "🧹 Cleaning up test environment..."
-          docker compose -f docker-compose.test.yml down -v --remove-orphans
 
   # Job 3: Integration test summary
   test-summary:
