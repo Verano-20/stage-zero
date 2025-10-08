@@ -1,0 +1,95 @@
+# Git
+.git
+.gitignore
+.gitattributes
+.github
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Node.js (for Playwright tests)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+package.json
+tsconfig.json
+playwright.config.ts
+playwright-report/
+test-results/
+
+# Test files
+test/
+*_test.go
+*_test.go.bak
+
+# Postman
+*postman_collection.json
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Terraform
+terraform/
+*.tf
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfvars.example
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/
+scripts/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Build artifacts (if any)
+bin/
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Coverage reports
+coverage.out
+coverage.html
+*.cover
+
+# Profiling
+*.prof
+*.pprof
+
+# Dependencies (Go modules are handled by go mod download)
+vendor/

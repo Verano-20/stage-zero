@@ -11,9 +11,9 @@ env:
   NODE_VERSION: '24'
 
 jobs:
-  # Job 1: Build application and run tests
-  go-build-and-test:
-    name: Build and Run Application Tests
+  # Job 1: Run application tests
+  run-application-tests:
+    name: Run Application Tests
     runs-on: ubuntu-latest
     
     steps:
@@ -32,20 +32,14 @@ jobs:
       - name: Verify dependencies
         run: go mod verify
 
-      - name: Build application
-        run: |
-          go build -v -o bin/api-server ./cmd/api-server
-          go build -v -o bin/migrate ./cmd/migrate
-
       - name: Run Go tests
         run: |
-          go test -v ./...
+          go test -v -race -timeout=30s ./...
 
   # Job 2: Run Playwright E2E tests
-  e2e-tests:
-    name: E2E Tests (Playwright)
+  run-e2e-tests:
+    name: Run Playwright E2E Tests
     runs-on: ubuntu-latest
-    needs: go-build-and-test
 
     steps:
       - name: Checkout repository
@@ -59,6 +53,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -88,7 +88,7 @@ jobs:
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [go-build-and-test, e2e-tests]
+    needs: [run-application-tests, run-e2e-tests]
     if: always()
     
     steps:
@@ -97,22 +97,20 @@ jobs:
           echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ needs.go-build-and-test.result }}" == "success" ]; then
-            echo "✅ **Go Build & Tests**: PASSED" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.run-application-tests.result }}" == "success" ]; then
+            echo "✅ **Run Application Tests**: PASSED" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **Go Build & Tests**: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Run Application Tests**: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
           
-          if [ "${{ needs.e2e-tests.result }}" == "success" ]; then
-            echo "✅ **E2E Tests**: PASSED" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.run-e2e-tests.result }}" == "success" ]; then
+            echo "✅ **Run Playwright E2E Tests**: PASSED" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **E2E Tests**: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Run Playwright E2E Tests**: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Artifacts Generated:" >> $GITHUB_STEP_SUMMARY
-          echo "- Go coverage report" >> $GITHUB_STEP_SUMMARY
-          echo "- Go build binaries" >> $GITHUB_STEP_SUMMARY
           echo "- Playwright test report" >> $GITHUB_STEP_SUMMARY
           echo "- Playwright traces (on failure)" >> $GITHUB_STEP_SUMMARY
 
