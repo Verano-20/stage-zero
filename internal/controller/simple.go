@@ -27,10 +27,10 @@ func NewSimpleController(simpleService service.SimpleService) *SimpleController 
 // @Tags Simple
 // @Accept json
 // @Produce json
-// @Param simple body model.SimpleForm true "Simple details" example({"name": "My Simple"})
-// @Success 201 {object} response.ApiResponse "Simple created successfully" example({"message": "Simple created successfully", "data": {"id": 1, "name": "My Simple"}})
-// @Failure 400 {object} response.ErrorResponse "Invalid request format" example({"error": "Invalid request format"})
-// @Failure 500 {object} response.ErrorResponse "Internal server error during resource creation" example({"error": "Failed to create Simple"})
+// @Param simple body model.SimpleForm true "Simple details"
+// @Success 201 {object} response.ApiResponse "Simple created successfully"
+// @Failure 400 {object} response.ErrorResponse "Invalid request format"
+// @Failure 500 {object} response.ErrorResponse "Internal server error during resource creation"
 // @Router /simple [post]
 func (c *SimpleController) Create(ctx *gin.Context) {
 	var simpleForm model.SimpleForm
@@ -53,8 +53,8 @@ func (c *SimpleController) Create(ctx *gin.Context) {
 // @Description Get all Simples. Returns an array of Simple objects. Returns an empty array if none exist.
 // @Tags Simple
 // @Produce json
-// @Success 200 {object} response.ApiResponse "Simples retrieved successfully" example({"message": "Simples retrieved successfully", "data": [{"id": 1, "name": "Simple 1"}, {"id": 2, "name": "Simple 2"}]})
-// @Failure 500 {object} response.ErrorResponse "Internal server error while retrieving Simples" example({"error": "Failed to retrieve Simples"})
+// @Success 200 {object} response.ApiResponse "Simples retrieved successfully"
+// @Failure 500 {object} response.ErrorResponse "Internal server error while retrieving Simples"
 // @Router /simple [get]
 func (c *SimpleController) GetAll(ctx *gin.Context) {
 	simples, err := c.SimpleService.GetAllSimples(ctx)
@@ -72,10 +72,9 @@ func (c *SimpleController) GetAll(ctx *gin.Context) {
 // @Tags Simple
 // @Param id path int true "Simple ID"
 // @Produce json
-// @Param id path int true "Simple ID" minimum(1) example(1)
-// @Success 200 {object} response.ApiResponse "Simple retrieved successfully" example({"message": "Simple retrieved successfully", "data": {"id": 1, "name": "My Simple"}})
-// @Failure 400 {object} response.ErrorResponse "Invalid ID format or value" example({"error": "Invalid ID"})
-// @Failure 404 {object} response.ErrorResponse "Simple not found" example({"error": "Simple not found"})
+// @Success 200 {object} response.ApiResponse "Simple retrieved successfully"
+// @Failure 400 {object} response.ErrorResponse "Invalid ID format or value"
+// @Failure 404 {object} response.ErrorResponse "Simple not found"
 // @Router /simple/{id} [get]
 func (c *SimpleController) GetByID(ctx *gin.Context) {
 	log := logger.GetFromContext(ctx)
@@ -103,12 +102,12 @@ func (c *SimpleController) GetByID(ctx *gin.Context) {
 // @Tags Simple
 // @Accept json
 // @Produce json
-// @Param id path int true "Simple ID to update" minimum(1) example(1)
-// @Param simple body model.SimpleForm true "Updated Simple details" example({"name": "Updated Simple"})
-// @Success 200 {object} response.ApiResponse "Simple updated successfully" example({"message": "Simple updated successfully", "data": {"id": 1, "name": "Updated Simple"}})
-// @Failure 400 {object} response.ErrorResponse "Invalid ID or request body format" example({"error": "Invalid request format"})
-// @Failure 404 {object} response.ErrorResponse "Simple not found" example({"error": "Simple not found"})
-// @Failure 500 {object} response.ErrorResponse "Internal server error during update operation" example({"error": "Failed to update Simple"})
+// @Param id path int true "Simple ID to update"
+// @Param simple body model.SimpleForm true "Updated Simple details"
+// @Success 200 {object} response.ApiResponse "Simple updated successfully"
+// @Failure 400 {object} response.ErrorResponse "Invalid ID or request body format"
+// @Failure 404 {object} response.ErrorResponse "Simple not found"
+// @Failure 500 {object} response.ErrorResponse "Internal server error during update operation"
 // @Router /simple/{id} [put]
 func (c *SimpleController) Update(ctx *gin.Context) {
 	log := logger.GetFromContext(ctx)
@@ -147,11 +146,11 @@ func (c *SimpleController) Update(ctx *gin.Context) {
 // @Description Permanently delete a Simple identified by its ID. This operation cannot be undone.
 // @Tags Simple
 // @Produce json
-// @Param id path int true "Simple ID to delete" minimum(1) example(1)
-// @Success 200 {object} response.ApiResponse "Simple deleted successfully" example({"message": "Simple deleted successfully", "data": null})
-// @Failure 400 {object} response.ErrorResponse "Invalid ID format or value" example({"error": "Invalid ID"})
-// @Failure 404 {object} response.ErrorResponse "Simple not found" example({"error": "Simple not found"})
-// @Failure 500 {object} response.ErrorResponse "Internal server error during deletion" example({"error": "Failed to delete Simple"})
+// @Param id path int true "Simple ID to delete"
+// @Success 200 {object} response.ApiResponse "Simple deleted successfully"
+// @Failure 400 {object} response.ErrorResponse "Invalid ID format or value"
+// @Failure 404 {object} response.ErrorResponse "Simple not found"
+// @Failure 500 {object} response.ErrorResponse "Internal server error during deletion"
 // @Router /simple/{id} [delete]
 func (c *SimpleController) Delete(ctx *gin.Context) {
 	log := logger.GetFromContext(ctx)
