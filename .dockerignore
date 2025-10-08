@@ -6,7 +6,6 @@
 
 # Documentation
 README.md
-docs/
 *.md
 
 # Node.js (for Playwright tests)
