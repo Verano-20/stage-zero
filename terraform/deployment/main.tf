@@ -23,7 +23,9 @@ locals {
     METRIC_INTERVAL="30s"
 }
 
+# Only create a new droplet if none exists with the same name
 resource "digitalocean_droplet" "stage-zero" {
+  count  = length(data.digitalocean_droplets.existing.droplets) == 0 ? 1 : 0
   name   = local.DROPLET_NAME
   image  = "ubuntu-25-04-x64"
   size   = "s-1vcpu-1gb"
@@ -60,4 +62,10 @@ resource "digitalocean_droplet" "stage-zero" {
     prevent_destroy = true
     ignore_changes = [user_data]  # Prevent recreation on user_data changes
   }
+}
+
+# Reference to the existing droplet if it exists
+locals {
+  existing_droplet = length(data.digitalocean_droplets.existing.droplets) > 0 ? data.digitalocean_droplets.existing.droplets[0] : null
+  current_droplet = length(digitalocean_droplet.stage-zero) > 0 ? digitalocean_droplet.stage-zero[0] : local.existing_droplet
 }

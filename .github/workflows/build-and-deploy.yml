@@ -124,19 +124,11 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Terraform Init
+      - name: Deploy Infrastructure
         run: |
           cd terraform/deployment
           terraform init
-
-      - name: Terraform Plan
-        run: |
-          cd terraform/deployment
           terraform plan -out=tfplan
-
-      - name: Terraform Apply
-        run: |
-          cd terraform/deployment
           terraform apply -auto-approve tfplan
 
       - name: Get deployment outputs
@@ -144,58 +136,74 @@ jobs:
         run: |
           cd terraform/deployment
           echo "droplet_ip=$(terraform output -raw droplet_ip)" >> $GITHUB_OUTPUT
-          echo "application_url=$(terraform output -raw application_url)" >> $GITHUB_OUTPUT
-          echo "grafana_url=$(terraform output -raw grafana_url)" >> $GITHUB_OUTPUT
-          echo "prometheus_url=$(terraform output -raw prometheus_url)" >> $GITHUB_OUTPUT
 
-      - name: Wait for deployment to be ready
+      - name: Wait for infrastructure to be ready
         run: |
-          echo "⏳ Waiting for application to be ready..."
+          echo "⏳ Waiting for infrastructure to be ready..."
           timeout=300  # 5 minutes
           counter=0
           
           while [ $counter -lt $timeout ]; do
             if curl -f ${{ steps.terraform-outputs.outputs.application_url }}/health > /dev/null 2>&1; then
-              echo "✅ Application is ready!"
+              echo "✅ Infrastructure is ready!"
               break
             fi
-            echo "Waiting for application... ($counter/$timeout)"
+            echo "Waiting for infrastructure... ($counter/$timeout)"
             sleep 10
             counter=$((counter + 10))
           done
           
           if [ $counter -ge $timeout ]; then
-            echo "❌ Application failed to start within ${timeout} seconds"
+            echo "❌ Infrastructure failed to start within ${timeout} seconds"
             exit 1
           fi
 
-      - name: Run health checks
+      - name: Update Application
         run: |
-          echo "Running health checks..."
+          DROPLET_IP="${{ steps.terraform-outputs.outputs.droplet_ip }}"
+          
+          echo "🚀 Updating application on droplet: $DROPLET_IP"
+          
+          # Execute the update script on the droplet
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "cd /opt/stage-zero && GITHUB_TOKEN='${{ secrets.GITHUB_TOKEN }}' ./update-application.sh"
+          
+          echo "✅ Application update completed successfully"
+
+      - name: Health Check
+        run: |
+          DROPLET_IP="${{ steps.terraform-outputs.outputs.droplet_ip }}"
+          APPLICATION_URL="http://$DROPLET_IP:8080"
+          GRAFANA_URL="http://$DROPLET_IP:3000"
+          PROMETHEUS_URL="http://$DROPLET_IP:9090"
+          
+          echo "🔍 Running final health checks..."
           echo "Checking application..."
-          curl -s -f -o /dev/null ${{ steps.terraform-outputs.outputs.application_url }}/health && echo "✅ Application healthy"
+          curl -f $APPLICATION_URL/health && echo "✅ Application healthy"
           echo "Checking Grafana..."
-          curl -s -f -o /dev/null ${{ steps.terraform-outputs.outputs.grafana_url }}/api/health && echo "✅ Grafana healthy"
+          curl -f $GRAFANA_URL/api/health && echo "✅ Grafana healthy"
           echo "Checking Prometheus..."
-          curl -s -f -o /dev/null ${{ steps.terraform-outputs.outputs.prometheus_url }}/-/healthy && echo "✅ Prometheus healthy"
-          echo "✅ All health checks passed!"
+          curl -f $PROMETHEUS_URL/-/healthy && echo "✅ Prometheus healthy"
+          
+          echo "🎉 Deployment completed successfully!"
 
       - name: Generate deployment summary
         run: |
-          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          DROPLET_IP="${{ steps.terraform-outputs.outputs.droplet_ip }}"
+          
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 Deployment Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Docker Image**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:deployment\`" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Deployment Time**: $(date -u)" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Docker Image**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:deployment\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🌐 Service URLs" >> $GITHUB_STEP_SUMMARY
-          echo "- **Application**: [${{ steps.terraform-outputs.outputs.application_url }}](${{ steps.terraform-outputs.outputs.application_url }})" >> $GITHUB_STEP_SUMMARY
-          echo "- **Grafana Dashboard**: [${{ steps.terraform-outputs.outputs.grafana_url }}](${{ steps.terraform-outputs.outputs.grafana_url }}) (admin/admin)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Prometheus**: [${{ steps.terraform-outputs.outputs.prometheus_url }}](${{ steps.terraform-outputs.outputs.prometheus_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "### Production URLs" >> $GITHUB_STEP_SUMMARY
+          echo "- **Application**: [http://$DROPLET_IP:8080](http://$DROPLET_IP:8080)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Grafana Dashboard**: [http://$DROPLET_IP:3000](http://$DROPLET_IP:3000) (admin/admin)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Prometheus**: [http://$DROPLET_IP:9090](http://$DROPLET_IP:9090)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔧 Infrastructure Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Droplet Name**: \`${{ steps.terraform-outputs.outputs.droplet_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Droplet IP**: \`${{ steps.terraform-outputs.outputs.droplet_ip }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Region**: \`${{ steps.terraform-outputs.outputs.droplet_region }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Size**: \`${{ steps.terraform-outputs.outputs.droplet_size }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Successfully deployed to production" >> $GITHUB_STEP_SUMMARY
+          echo "- **Health Checks**: All services healthy" >> $GITHUB_STEP_SUMMARY
+          echo "- **Infrastructure**: Updated via Terraform" >> $GITHUB_STEP_SUMMARY
+          echo "- **Containers**: Updated via Docker Compose" >> $GITHUB_STEP_SUMMARY
