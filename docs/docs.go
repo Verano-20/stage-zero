@@ -31,7 +31,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "User login credentials",
-                        "name": "credentials",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -226,15 +226,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "example": 1,
-                        "description": "Simple ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -272,9 +263,7 @@ const docTemplate = `{
                 "summary": "Update an existing Simple",
                 "parameters": [
                     {
-                        "minimum": 1,
                         "type": "integer",
-                        "example": 1,
                         "description": "Simple ID to update",
                         "name": "id",
                         "in": "path",
@@ -328,9 +317,7 @@ const docTemplate = `{
                 "summary": "Delete a Simple",
                 "parameters": [
                     {
-                        "minimum": 1,
                         "type": "integer",
-                        "example": 1,
                         "description": "Simple ID to delete",
                         "name": "id",
                         "in": "path",
