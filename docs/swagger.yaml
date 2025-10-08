@@ -70,7 +70,7 @@ paths:
       parameters:
       - description: User login credentials
         in: body
-        name: credentials
+        name: user
         required: true
         schema:
           $ref: '#/definitions/model.UserForm'
@@ -198,9 +198,7 @@ paths:
         cannot be undone.
       parameters:
       - description: Simple ID to delete
-        example: 1
         in: path
-        minimum: 1
         name: id
         required: true
         type: integer
@@ -234,13 +232,6 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Simple ID
-        example: 1
-        in: path
-        minimum: 1
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
@@ -266,9 +257,7 @@ paths:
         exist and the request body must contain valid data.
       parameters:
       - description: Simple ID to update
-        example: 1
         in: path
-        minimum: 1
         name: id
         required: true
         type: integer
