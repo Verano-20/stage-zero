@@ -18,10 +18,8 @@ This project serves as a robust foundation for backend applications requiring au
 ## TODO
 - Finalise README, include fork instructions
 - Finalise stack & trace dashboards
-- improve swagger response examples
 
 For CI/CD:
-- add swagger generation step
 - rename main -> develop
 - figure out redeployment when droplet exists
 

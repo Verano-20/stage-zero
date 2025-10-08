@@ -10,6 +10,11 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   TF_VERSION: '1.13.3'
+  TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+  TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
+  TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+  TF_VAR_postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
+  TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
 
 jobs:
   build-and-push:
@@ -107,12 +112,6 @@ jobs:
     if: always() && (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
     permissions:
       contents: read
-    env:
-      TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
-      TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
-      TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
-      TF_VAR_postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
-      TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - name: Checkout repository

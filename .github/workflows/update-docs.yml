@@ -1,0 +1,51 @@
+name: Update Swagger Docs
+
+on:
+  pull_request:
+    branches:
+      - main
+      - deployment
+
+env:
+  GO_VERSION: '1.24'
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Swag
+        run: go install github.com/swaggo/swag/cmd/swag@v1.16.6
+
+      - name: Generate docs
+        run: swag init -g cmd/api-server/main.go -o docs
+
+      - name: Check for changes and commit
+        run: |
+          if git diff --quiet docs/; then
+            echo "No doc changes needed"
+            echo "## Swagger Documentation Update" >> $GITHUB_STEP_SUMMARY
+            echo "✅ No documentation changes required" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Documentation updated - committing changes"
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add docs/
+            git commit -m "docs: auto-update Swagger documentation"
+            git push
+            
+            echo "## Swagger Documentation Update" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Documentation updated and committed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Changes:" >> $GITHUB_STEP_SUMMARY
+            echo '```diff' >> $GITHUB_STEP_SUMMARY
+            git diff HEAD~1 docs/ >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
