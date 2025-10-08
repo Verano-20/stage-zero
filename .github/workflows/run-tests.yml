@@ -11,9 +11,9 @@ env:
   NODE_VERSION: '24'
 
 jobs:
-  # Job 1: Build Go application and run Go tests
+  # Job 1: Build application and run tests
   go-build-and-test:
-    name: Build Go App & Run Tests
+    name: Build and Run Application Tests
     runs-on: ubuntu-latest
     
     steps:
@@ -34,32 +34,12 @@ jobs:
 
       - name: Build application
         run: |
-          go build -v -o bin/api-server ./cmd/api-server
-          go build -v -o bin/migrate ./cmd/migrate
+          go build -v ./cmd/api-server
+          go build -v ./cmd/migrate
 
       - name: Run Go tests
         run: |
-          go test -v -race -coverprofile=coverage.out ./...
-
-      - name: Generate test coverage report
-        run: |
-          go tool cover -html=coverage.out -o coverage.html
-
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: go-coverage-report
-          path: |
-            coverage.out
-            coverage.html
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: go-binaries
-          path: |
-            bin/api-server
-            bin/migrate
+          go test -v
 
   # Job 2: Run Playwright E2E tests
   e2e-tests:
@@ -86,7 +66,7 @@ jobs:
       - name: Start test environment with Docker Compose
         run: |
           echo "🚀 Starting test environment..."
-          docker-compose -f docker-compose.test.yml up -d --build
+          docker compose -f docker-compose.test.yml up -d --build
           
           echo "⏳ Waiting for services to be ready..."
           timeout=120
@@ -105,7 +85,7 @@ jobs:
           if [ $counter -ge $timeout ]; then
             echo "❌ API failed to start within ${timeout} seconds"
             echo "📋 Container logs:"
-            docker-compose -f docker-compose.test.yml logs app-test
+            docker compose -f docker-compose.test.yml logs app-test
             exit 1
           fi
 
@@ -134,7 +114,7 @@ jobs:
         if: always()
         run: |
           echo "🧹 Cleaning up test environment..."
-          docker-compose -f docker-compose.test.yml down -v --remove-orphans
+          docker compose -f docker-compose.test.yml down -v --remove-orphans
 
   # Job 3: Integration test summary
   test-summary:
