@@ -1,7 +1,7 @@
 locals {
     # Droplet Configuration
-    droplet_name = "stage-zero-tf"
-    region = "lon1"
+    DROPLET_NAME = "stage-zero-tf"
+    REGION = "lon1"
     # Database Configuration
     POSTGRES_DB="stage_zero"
     POSTGRES_USER="postgres"
@@ -24,31 +24,31 @@ locals {
 }
 
 resource "digitalocean_droplet" "stage-zero" {
-  name   = local.droplet_name
+  name   = local.DROPLET_NAME
   image  = "ubuntu-25-04-x64"
   size   = "s-1vcpu-1gb"
-  region = local.region
+  region = local.REGION
   ssh_keys = [data.digitalocean_ssh_key.terraform.id]
-  tags   = ["terraform", local.droplet_name]
+  tags   = ["terraform", local.DROPLET_NAME]
 
   user_data = templatefile("../../scripts/user-data.sh", {
     # Sensitive
-    github_token = var.github_token
+    GITHUB_TOKEN = var.github_token
     JWT_SECRET = var.jwt_secret
-    DB_PASSWORD = var.db_password
     POSTGRES_PASSWORD = var.postgres_password
+    DB_PASSWORD = var.db_password
     # Not sensitive
-    droplet_name = local.droplet_name
+    ENVIRONMENT = local.ENVIRONMENT
+    DROPLET_NAME = local.DROPLET_NAME
     SERVICE_NAME = local.SERVICE_NAME
     SERVICE_VERSION = local.SERVICE_VERSION
     SERVICE_PORT = local.SERVICE_PORT
-    ENVIRONMENT = local.ENVIRONMENT
+    POSTGRES_DB = local.POSTGRES_DB
+    POSTGRES_USER = local.POSTGRES_USER
     DB_HOST = local.DB_HOST
     DB_USER = local.DB_USER
     DB_NAME = local.DB_NAME
     DB_PORT = local.DB_PORT
-    POSTGRES_USER = local.POSTGRES_USER
-    POSTGRES_DB = local.POSTGRES_DB
     ENABLE_STDOUT = local.ENABLE_STDOUT
     ENABLE_OTLP = local.ENABLE_OTLP
     OTLP_ENDPOINT = local.OTLP_ENDPOINT
