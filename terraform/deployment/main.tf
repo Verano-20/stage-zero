@@ -34,7 +34,6 @@ resource "digitalocean_droplet" "stage-zero" {
   user_data = templatefile("../../scripts/user-data.sh", {
     # Sensitive
     github_token = var.github_token
-    github_username = var.github_username
     JWT_SECRET = var.jwt_secret
     DB_PASSWORD = var.db_password
     POSTGRES_PASSWORD = var.postgres_password
