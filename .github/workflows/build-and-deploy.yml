@@ -65,6 +65,8 @@ jobs:
             type=ref,event=pr
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         if: steps.changes.outputs.docker == 'true'
