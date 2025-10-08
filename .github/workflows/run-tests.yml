@@ -34,12 +34,12 @@ jobs:
 
       - name: Build application
         run: |
-          go build -v ./cmd/api-server
-          go build -v ./cmd/migrate
+          go build -v -o bin/api-server ./cmd/api-server
+          go build -v -o bin/migrate ./cmd/migrate
 
       - name: Run Go tests
         run: |
-          go test -v
+          go test -v ./...
 
   # Job 2: Run Playwright E2E tests
   e2e-tests:
