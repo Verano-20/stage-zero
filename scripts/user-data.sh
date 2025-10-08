@@ -141,6 +141,12 @@ curl -o grafana/dashboards/metrics.json https://raw.githubusercontent.com/Verano
 curl -o grafana/dashboards/tracing.json https://raw.githubusercontent.com/Verano-20/stage-zero/main/grafana/dashboards/tracing.json
 echo "Grafana configuration completed"
 
+# Download the update script
+echo "=== Downloading update script ==="
+curl -o update-application.sh https://raw.githubusercontent.com/Verano-20/stage-zero/main/scripts/update-application.sh
+chmod +x update-application.sh
+echo "Update script downloaded and made executable"
+
 # Login to GitHub Container Registry
 echo "=== Logging into GitHub Container Registry ==="
 if [ -n "$GITHUB_TOKEN" ]; then

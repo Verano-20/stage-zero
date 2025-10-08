@@ -808,6 +808,140 @@ swag init -g ./cmd/api-server/main.go
 | `OTLP_INSECURE` | Use insecure OTLP connection | No | true |
 | `METRIC_INTERVAL` | Metrics collection interval | No | 30s |
 
+## 🚀 Production Deployment
+
+Stage Zero features a **production-grade, zero-downtime deployment system** that automatically deploys to DigitalOcean when you push to the `deployment` branch.
+
+### **Deployment Architecture**
+
+- **Infrastructure**: DigitalOcean Droplet (Ubuntu 25.04, 1GB RAM)
+- **Containerization**: Docker Compose with multi-service stack
+- **CI/CD**: GitHub Actions with Terraform-native infrastructure management
+- **Monitoring**: Grafana, Prometheus, OpenTelemetry, Loki, Tempo
+- **Zero Downtime**: Rolling container updates without infrastructure changes
+
+### **Complete E2E Deployment Flow**
+
+#### **Phase 1: Build & Push Docker Image**
+```bash
+# Trigger: Push to deployment branch
+1. Change Detection: Monitors Dockerfile, Go source, go.mod/go.sum
+2. Docker Build: Multi-platform build (linux/amd64, linux/arm64)
+3. Registry Push: ghcr.io/verano-20/stage-zero:deployment
+4. Layer Caching: Optimized builds with GitHub Actions cache
+```
+
+#### **Phase 2: Infrastructure Deployment**
+```bash
+# Terraform-native approach with automatic import
+1. Data Source Query: Finds existing droplets named "stage-zero-tf"
+2. Automatic Import: Imports existing droplet into Terraform state
+3. Plan/Apply: Creates droplet only if none exists
+4. User-Data Execution: Runs initialization script on droplet
+```
+
+#### **Phase 3: Droplet Initialization (First Time Only)**
+```bash
+# user-data.sh runs on droplet:
+1. System Updates: apt-get update/upgrade
+2. Docker Installation: Docker + Docker Compose
+3. Configuration Download: All service configs and scripts
+4. Service Startup: Complete monitoring stack
+5. Health Verification: Ensures all services are ready
+```
+
+#### **Phase 4: Application Update**
+```bash
+# update-application.sh runs via SSH:
+1. Registry Login: Authenticate with GitHub Container Registry
+2. Image Pull: Download latest container images
+3. Rolling Update: Stop app services, start updated containers
+4. Health Check Loop: Verify application health (5s intervals, 60s timeout)
+5. Service Status: Report final deployment status
+```
+
+#### **Phase 5: Health Verification**
+```bash
+# Final production health checks:
+✅ Application: http://droplet-ip:8080/health
+✅ Grafana: http://droplet-ip:3000/api/health
+✅ Prometheus: http://droplet-ip:9090/-/healthy
+```
+
+### **Deployment Timeline**
+
+```
+Push to deployment branch
+    ↓
+Build & Push Image (2-3 min)
+    ↓
+Terraform Plan/Apply (1-2 min)
+    ↓
+Infrastructure Health Check (0-5 min)
+    ↓
+Container Update (1-2 min)
+    ↓
+Final Health Checks (30 sec)
+    ↓
+Deployment Complete! 🎉
+```
+
+**Total Time**: ~5-12 minutes (depending on infrastructure state)
+
+### **Key Features**
+
+- **🔄 Zero Downtime**: Only application containers restart, database persists
+- **📊 Data Persistence**: Database and volumes survive deployments
+- **🛡️ No Duplicates**: Terraform import prevents duplicate droplets
+- **⚡ Fast Updates**: ~2-3 minutes for container updates vs 5+ minutes for full deployment
+- **🔙 Rollback Ready**: Easy deployment of previous image tags
+- **📈 Full Observability**: Complete monitoring stack with Grafana dashboards
+
+### **Service Stack**
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| **Application** | 8080 | Main REST API |
+| **PostgreSQL** | 5432 | Database |
+| **Grafana** | 3000 | Dashboards (admin/admin) |
+| **Prometheus** | 9090 | Metrics collection |
+| **OpenTelemetry** | 4317 | Telemetry collection |
+| **Tempo** | - | Distributed tracing |
+| **Loki** | - | Log aggregation |
+| **Promtail** | - | Log collection |
+
+### **Deployment Commands**
+
+```bash
+# Manual deployment (if needed)
+git checkout deployment
+git merge main
+git push origin deployment
+
+# Check deployment status
+gh run list --workflow="build-and-deploy.yml"
+
+# View deployment logs
+gh run view <run-id> --log
+```
+
+### **Environment Variables**
+
+The deployment system uses these GitHub Secrets:
+- `DO_TOKEN`: DigitalOcean API token
+- `GITHUB_TOKEN`: GitHub Container Registry access
+- `JWT_SECRET`: Application JWT signing secret
+- `POSTGRES_PASSWORD`: Database password
+- `DB_PASSWORD`: Application database password
+
+### **Monitoring & Debugging**
+
+- **Application Health**: `http://droplet-ip:8080/health`
+- **Grafana Dashboards**: `http://droplet-ip:3000` (admin/admin)
+- **Prometheus Metrics**: `http://droplet-ip:9090`
+- **Deployment Logs**: GitHub Actions workflow logs
+- **Service Logs**: `docker-compose logs <service>` on droplet
+
 ## Contributing
 
 1. Fork the repository
