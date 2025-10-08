@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -37,9 +39,10 @@ jobs:
             echo "Documentation updated - committing changes"
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
+            git checkout -B ${{ github.head_ref }}
             git add docs/
             git commit -m "docs: auto-update Swagger documentation"
-            git push
+            git push origin ${{ github.head_ref }}
             
             echo "## Swagger Documentation Update" >> $GITHUB_STEP_SUMMARY
             echo "✅ Documentation updated and committed" >> $GITHUB_STEP_SUMMARY
