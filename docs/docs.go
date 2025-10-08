@@ -31,7 +31,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "User login credentials",
-                        "name": "credentials",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -41,25 +41,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Authentication successful, returns JWT token\" example({\"message\": \"Login successful\", \"data\": {\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}})",
+                        "description": "Authentication successful, returns JWT token",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid request format\" example({\"error\": \"Invalid request format\"})",
+                        "description": "Invalid request format or validation failed",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Invalid email or password\" example({\"error\": \"Invalid credentials\"})",
+                        "description": "Invalid credentials",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during authentication\" example({\"error\": \"Failed to generate token\"})",
+                        "description": "Internal server error during authentication",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -69,7 +69,7 @@ const docTemplate = `{
         },
         "/auth/signup": {
             "post": {
-                "description": "Create a new user with email and password. The email must be unique.",
+                "description": "Create a new user with email and password. The email must be unique. The password must be at least 8 characters long.",
                 "consumes": [
                     "application/json"
                 ],
@@ -93,25 +93,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User account created successfully",
+                        "description": "User created successfully",
                         "schema": {
                             "$ref": "#/definitions/model.UserDTO"
                         }
                     },
                     "400": {
-                        "description": "Invalid request format or validation failed\" example({\"error\": \"Invalid request format\"})",
+                        "description": "Invalid request format or validation failed",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "409": {
-                        "description": "Email address already exists\" example({\"error\": \"Email already exists\"})",
+                        "description": "User already exists",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during user creation\" example({\"error\": \"Failed to create user\"})",
+                        "description": "Internal server error during user creation",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -131,7 +131,7 @@ const docTemplate = `{
                 "summary": "Get health",
                 "responses": {
                     "200": {
-                        "description": "Server is healthy and operational\" example({\"message\": \"OK\", \"data\": null})",
+                        "description": "Server is healthy and operational",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
@@ -151,13 +151,13 @@ const docTemplate = `{
                 "summary": "Get all Simples",
                 "responses": {
                     "200": {
-                        "description": "Simples retrieved successfully\" example({\"message\": \"Simples retrieved successfully\", \"data\": [{\"id\": 1, \"name\": \"Simple 1\"}, {\"id\": 2, \"name\": \"Simple 2\"}]})",
+                        "description": "Simples retrieved successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error while retrieving Simples\" example({\"error\": \"Failed to retrieve Simples\"})",
+                        "description": "Internal server error while retrieving Simples",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -189,19 +189,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Simple created successfully\" example({\"message\": \"Simple created successfully\", \"data\": {\"id\": 1, \"name\": \"My Simple\"}})",
+                        "description": "Simple created successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid request format\" example({\"error\": \"Invalid request format\"})",
+                        "description": "Invalid request format",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during resource creation\" example({\"error\": \"Failed to create Simple\"})",
+                        "description": "Internal server error during resource creation",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -226,32 +226,23 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "example": 1,
-                        "description": "Simple ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Simple retrieved successfully\" example({\"message\": \"Simple retrieved successfully\", \"data\": {\"id\": 1, \"name\": \"My Simple\"}})",
+                        "description": "Simple retrieved successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid ID format or value\" example({\"error\": \"Invalid ID\"})",
+                        "description": "Invalid ID format or value",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "description": "Simple not found",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -272,9 +263,7 @@ const docTemplate = `{
                 "summary": "Update an existing Simple",
                 "parameters": [
                     {
-                        "minimum": 1,
                         "type": "integer",
-                        "example": 1,
                         "description": "Simple ID to update",
                         "name": "id",
                         "in": "path",
@@ -292,25 +281,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Simple updated successfully\" example({\"message\": \"Simple updated successfully\", \"data\": {\"id\": 1, \"name\": \"Updated Simple\"}})",
+                        "description": "Simple updated successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid ID or request body format\" example({\"error\": \"Invalid request format\"})",
+                        "description": "Invalid ID or request body format",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "description": "Simple not found",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during update operation\" example({\"error\": \"Failed to update Simple\"})",
+                        "description": "Internal server error during update operation",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -328,9 +317,7 @@ const docTemplate = `{
                 "summary": "Delete a Simple",
                 "parameters": [
                     {
-                        "minimum": 1,
                         "type": "integer",
-                        "example": 1,
                         "description": "Simple ID to delete",
                         "name": "id",
                         "in": "path",
@@ -339,25 +326,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Simple deleted successfully\" example({\"message\": \"Simple deleted successfully\", \"data\": null})",
+                        "description": "Simple deleted successfully",
                         "schema": {
                             "$ref": "#/definitions/response.ApiResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid ID format or value\" example({\"error\": \"Invalid ID\"})",
+                        "description": "Invalid ID format or value",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Simple not found\" example({\"error\": \"Simple not found\"})",
+                        "description": "Simple not found",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error during deletion\" example({\"error\": \"Failed to delete Simple\"})",
+                        "description": "Internal server error during deletion",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -369,9 +356,14 @@ const docTemplate = `{
     "definitions": {
         "model.SimpleForm": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255,
+                    "example": "My Simple"
                 }
             }
         },
@@ -379,27 +371,39 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "updated_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
                 }
             }
         },
         "model.UserForm": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "securePassword123"
                 }
             }
         },
@@ -408,15 +412,23 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Operation successful"
                 }
             }
         },
         "response.ErrorResponse": {
             "type": "object",
             "properties": {
+                "details": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "error": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "An error occurred"
                 }
             }
         }
@@ -425,14 +437,16 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/",
+	Version:          "1.0.0",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "stage-zero API",
-	Description:      "This is a CRUD API for a simple application.",
+	Title:            "Stage-Zero API",
+	Description:      "This is a CRUD API base application.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

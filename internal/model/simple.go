@@ -16,14 +16,14 @@ type Simple struct {
 }
 
 type SimpleDTO struct {
-	ID        uint      `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uint      `json:"id" example:"1"`
+	Name      string    `json:"name" example:"My Simple"`
+	CreatedAt time.Time `json:"created_at" example:"2025-01-01T00:00:00Z"`
+	UpdatedAt time.Time `json:"updated_at" example:"2025-01-01T00:00:00Z"`
 }
 
 type SimpleForm struct {
-	Name string `json:"name" binding:"required,max=255"`
+	Name string `json:"name" binding:"required,max=255" example:"My Simple"`
 }
 
 type Simples []*Simple

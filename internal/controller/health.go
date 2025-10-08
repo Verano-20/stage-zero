@@ -13,7 +13,7 @@ import (
 // @Description Get health of the server
 // @Tags Health
 // @Produce json
-// @Success 200 {object} response.ApiResponse "Server is healthy and operational" example({"message": "OK", "data": null})
+// @Success 200 {object} response.ApiResponse "Server is healthy and operational"
 // @Router /health [get]
 func GetHealth(ctx *gin.Context) {
 	log := logger.GetFromContext(ctx)
