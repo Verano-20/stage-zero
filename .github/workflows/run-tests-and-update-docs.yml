@@ -177,5 +177,4 @@ jobs:
           echo "### Artifacts Generated:" >> $GITHUB_STEP_SUMMARY
           echo "- Playwright test report" >> $GITHUB_STEP_SUMMARY
           echo "- Playwright traces (on failure)" >> $GITHUB_STEP_SUMMARY
-          echo "- Updated Swagger documentation" >> $GITHUB_STEP_SUMMARY
 
