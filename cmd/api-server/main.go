@@ -26,11 +26,8 @@ func init() {
 }
 
 // @title           Stage-Zero API
-// @version         1.0
-// @description     This is a CRUD API for a simple application.
-
-// @host      localhost:8080
-// @BasePath  /
+// @version         1.0.0
+// @description     This is a CRUD API base application.
 func main() {
 	config := config.Get()
 	log := logger.Get()

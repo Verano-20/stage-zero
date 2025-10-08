@@ -12,10 +12,9 @@ import (
 )
 
 // Handles binding errors and sets a Bad Request response with validation errors or a generic error message.
-//
-// @param ctx *gin.Context - The Gin context containing the request and response.
-// @param formErr error - The error returned by the binding process.
-// @param action string - The action being performed (e.g., "signup", "login", "create", "update", "delete").
+// ctx *gin.Context - The Gin context containing the request and response.
+// formErr error - The error returned by the binding process.
+// action string - The action being performed (e.g., "signup", "login", "create", "update", "delete").
 func HandleBindingErrors(ctx *gin.Context, formErr error, action string) {
 	log := logger.GetFromContext(ctx)
 	log.Warn("Invalid request payload", zap.String("action", action), zap.Error(formErr))
