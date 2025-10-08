@@ -48,7 +48,7 @@ jobs:
             echo "Working on branch: $BRANCH_NAME"
             
             git add docs/
-            git commit -m "docs: auto-update Swagger documentation [skip ci]"
+            git commit -m "docs: auto-update Swagger documentation"
             
             # Push to the branch
             git push origin HEAD:$BRANCH_NAME
