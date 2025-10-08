@@ -25,15 +25,15 @@ func NewAuthController(userService service.UserService, authService service.Auth
 
 // SignUp godoc
 // @Summary Sign up a new user
-// @Description Create a new user with email and password. The email must be unique.
+// @Description Create a new user with email and password. The email must be unique. The password must be at least 8 characters long.
 // @Tags Authentication
 // @Accept json
 // @Produce json
-// @Param user body model.UserForm true "User details" example({"email": "user@example.com", "password": "securePassword123"})
-// @Success 201 {object} model.UserDTO "User account created successfully"
-// @Failure 400 {object} response.ErrorResponse "Invalid request format or validation failed" example({"error": "Invalid request format"})
-// @Failure 409 {object} response.ErrorResponse "Email address already exists" example({"error": "Email already exists"})
-// @Failure 500 {object} response.ErrorResponse "Internal server error during user creation" example({"error": "Failed to create user"})
+// @Param user body model.UserForm true "User details"
+// @Success 201 {object} model.UserDTO "User created successfully"
+// @Failure 400 {object} response.ErrorResponse "Invalid request format or validation failed"
+// @Failure 409 {object} response.ErrorResponse "User already exists"
+// @Failure 500 {object} response.ErrorResponse "Internal server error during user creation"
 // @Router /auth/signup [post]
 func (c *AuthController) SignUp(ctx *gin.Context) {
 	metrics := telemetry.GetMetrics()
@@ -72,11 +72,11 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 // @Tags Authentication
 // @Accept json
 // @Produce json
-// @Param credentials body model.UserForm true "User login credentials" example({"email": "user@example.com", "password": "securePassword123"})
-// @Success 200 {object} response.ApiResponse "Authentication successful, returns JWT token" example({"message": "Login successful", "data": {"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}})
-// @Failure 400 {object} response.ErrorResponse "Invalid request format" example({"error": "Invalid request format"})
-// @Failure 401 {object} response.ErrorResponse "Invalid email or password" example({"error": "Invalid credentials"})
-// @Failure 500 {object} response.ErrorResponse "Internal server error during authentication" example({"error": "Failed to generate token"})
+// @Param user body model.UserForm true "User login credentials"
+// @Success 200 {object} response.ApiResponse "Authentication successful, returns JWT token"
+// @Failure 400 {object} response.ErrorResponse "Invalid request format or validation failed"
+// @Failure 401 {object} response.ErrorResponse "Invalid credentials"
+// @Failure 500 {object} response.ErrorResponse "Internal server error during authentication"
 // @Router /auth/login [post]
 func (c *AuthController) Login(ctx *gin.Context) {
 	metrics := telemetry.GetMetrics()
