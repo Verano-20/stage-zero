@@ -300,7 +300,7 @@ jobs:
               echo "Failure details:"
               ssh -i ~/.ssh/digital_ocean -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "cat /var/log/deploy-containers-failed" 2>/dev/null || echo "Could not retrieve failure details"
               echo "Deployment log:"
-              ssh -i ~/.ssh/digital_ocean -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "tail -20 /var/log/deploy-containers.log" 2>/dev/null || echo "Could not retrieve deployment log"
+              ssh -i ~/.ssh/digital_ocean -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "tail -20 /var/log/deploy-output.log" 2>/dev/null || echo "Could not retrieve deployment log"
               exit 1
             fi
             
@@ -312,7 +312,7 @@ jobs:
               echo "Checking deployment script status..."
               ssh -i ~/.ssh/digital_ocean -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "ps aux | grep deploy-containers.sh || echo 'Deployment script not running'" 2>/dev/null
               echo "Deployment log:"
-              ssh -i ~/.ssh/digital_ocean -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "tail -20 /var/log/deploy-containers.log" 2>/dev/null || echo "Could not retrieve deployment log"
+              ssh -i ~/.ssh/digital_ocean -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "tail -20 /var/log/deploy-output.log" 2>/dev/null || echo "Could not retrieve deployment log"
               exit 1
             fi
           done
