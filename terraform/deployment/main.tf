@@ -30,7 +30,7 @@ resource "digitalocean_droplet" "stage-zero" {
   image  = "ubuntu-25-04-x64"
   size   = "s-1vcpu-1gb"
   region = local.REGION
-  ssh_keys = [data.digitalocean_ssh_key.terraform.id]
+  ssh_keys = [data.digitalocean_ssh_key.github_actions.id] # Public SSH key for GitHub Actions to access the droplet
   tags   = ["terraform", local.DROPLET_NAME]
 
   user_data = templatefile("../../scripts/user-data.sh", {

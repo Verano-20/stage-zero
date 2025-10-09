@@ -1,5 +1,5 @@
-data "digitalocean_ssh_key" "terraform" {
-    name = "terraform"
+data "digitalocean_ssh_key" "github_actions" {
+    name = "github_actions"
 }
 
 # Find existing droplet by name
