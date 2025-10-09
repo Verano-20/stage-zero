@@ -74,8 +74,9 @@ docker-compose --version
 
 # Create application directory
 echo "=== Creating application directory ==="
-mkdir -p /opt/stage-zero
-cd /opt/stage-zero
+WORK_DIR="/opt/stage-zero"
+mkdir -p $WORK_DIR
+cd $WORK_DIR
 echo "Working directory: $(pwd)"
 
 # Create environment file for deployment
@@ -142,47 +143,22 @@ curl -o grafana/dashboards/tracing.json https://raw.githubusercontent.com/Verano
 echo "Grafana configuration completed"
 
 # Download the update script
-echo "=== Downloading update script ==="
-curl -o update-application.sh https://raw.githubusercontent.com/Verano-20/stage-zero/main/scripts/update-application.sh
-chmod +x update-application.sh
+echo "=== Downloading container deployment script ==="
+curl -o deploy-containers.sh https://raw.githubusercontent.com/Verano-20/stage-zero/main/scripts/deploy-containers.sh
+chmod +x deploy-containers.sh
 echo "Update script downloaded and made executable"
 
-# Login to GitHub Container Registry
-echo "=== Logging into GitHub Container Registry ==="
-if [ -n "$GITHUB_TOKEN" ]; then
-    echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_TOKEN" --password-stdin
-    echo "GitHub Container Registry login successful"
-else
-    echo "ERROR: GitHub token not provided"
-    exit 1
-fi
+# Infrastructure setup complete
+echo "=== Infrastructure setup completed ==="
+echo "Docker and Docker Compose installed"
+echo "Application directory created: $WORK_DIR"
+echo "Configuration files downloaded"
+echo "Environment file created"
+echo "Container deployment script downloaded and made executable"
+echo ""
+echo "Next step: Run deploy-containers.sh to deploy containers"
 
-# Pull the latest images
-echo "=== Pulling container images ==="
-docker-compose -f docker-compose.deployment.yml pull
-echo "Image pull completed"
-
-# Start the application
-echo "=== Starting application services ==="
-docker-compose -f docker-compose.deployment.yml up -d
-echo "Services started"
-
-# Wait for services to be healthy
-echo "=== Waiting for services to start ==="
-sleep 30
-
-# Check if services are running
-echo "=== Checking service status ==="
-docker-compose -f docker-compose.deployment.yml ps
-
-# Get droplet IP
-DROPLET_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
-
-# Log completion
-echo "=== Deployment completed at $(date) ==="
-echo "Docker setup completed at $(date)" >> /var/log/setup.log
-echo "Application should be available at http://$DROPLET_IP:8080" >> /var/log/setup.log
-echo "Grafana available at http://$DROPLET_IP:3000" >> /var/log/setup.log
-echo "Prometheus available at http://$DROPLET_IP:9090" >> /var/log/setup.log
+echo "Infrastructure setup completed at $(date)" >> /var/log/setup.log
+echo "Ready for application deployment" >> /var/log/setup.log
 
 echo "=== User-data script completed successfully ==="
