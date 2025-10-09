@@ -140,13 +140,13 @@ jobs:
           cd terraform/deployment
          
           echo "Planning infrastructure changes..."
-          terraform plan -out=tfplan -detailed-exitcode
-          PLAN_EXIT_CODE=$?
-          echo "Terraform plan exit code: $PLAN_EXIT_CODE"
           
-          if [ $PLAN_EXIT_CODE -eq 0 ]; then
+          # Plan output used due to a bug in Github Actions that causes the exit code to be 0 even when there are changes
+          PLAN_OUTPUT=$(terraform plan -out=tfplan 2>&1)
+          
+          if echo "$PLAN_OUTPUT" | grep -q "No changes"; then
             echo "✅ Infrastructure already exists - no changes needed"
-          elif [ $PLAN_EXIT_CODE -eq 2 ]; then
+          elif echo "$PLAN_OUTPUT" | grep -q "Plan:.*to add\|Plan:.*to change\|Plan:.*to destroy"; then
             echo "🔄 Infrastructure changes detected - applying..."
             terraform apply -auto-approve tfplan
           else
