@@ -161,4 +161,8 @@ echo "Next step: Run deploy-containers.sh to deploy containers"
 echo "Infrastructure setup completed at $(date)" >> /var/log/setup.log
 echo "Ready for application deployment" >> /var/log/setup.log
 
+# Create a completion marker file for the GitHub Actions workflow
+touch /var/log/user-data-complete
+echo "User-data script completed at $(date)" > /var/log/user-data-complete
+
 echo "=== User-data script completed successfully ==="
