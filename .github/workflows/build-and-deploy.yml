@@ -142,6 +142,7 @@ jobs:
           echo "Planning infrastructure changes..."
           terraform plan -out=tfplan -detailed-exitcode
           PLAN_EXIT_CODE=$?
+          echo "Terraform plan exit code: $PLAN_EXIT_CODE"
           
           if [ $PLAN_EXIT_CODE -eq 0 ]; then
             echo "✅ Infrastructure already exists - no changes needed"
