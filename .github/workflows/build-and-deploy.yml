@@ -9,6 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   TF_VERSION: '1.13.3'
+
   TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
   TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
   TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
@@ -144,14 +145,18 @@ jobs:
           # Plan output used due to a bug in Github Actions that causes the exit code to be 0 even when there are changes
           PLAN_OUTPUT=$(terraform plan -out=tfplan 2>&1)
           echo "$PLAN_OUTPUT"
-          
-          if echo "$PLAN_OUTPUT" | grep -q "No changes"; then
+
+          if echo "$PLAN_OUTPUT" | grep -q "No changes. Your infrastructure matches the configuration"; then
             echo "✅ Infrastructure already exists - no changes needed"
+          # Output changes will be detected most times because the tf state is empty for every workflow runner.
+          elif echo "$PLAN_OUTPUT" | grep -q "Changes to Outputs:" && ! echo "$PLAN_OUTPUT" | grep -q "Plan:.*to add\|Plan:.*to change\|Plan:.*to destroy"; then
+            echo "✅ Only output changes detected - applying to update outputs..."
+            terraform apply -auto-approve tfplan
           elif echo "$PLAN_OUTPUT" | grep -q "Plan:.*to add\|Plan:.*to change\|Plan:.*to destroy"; then
             echo "🔄 Infrastructure changes detected - applying..."
             terraform apply -auto-approve tfplan
           else
-            echo "❌ Terraform plan failed with exit code $PLAN_EXIT_CODE"
+            echo "❌ Terraform plan failed or unexpected output"
             exit 1
           fi
 
@@ -326,11 +331,11 @@ jobs:
           
           echo "Running final health checks..."
           echo "Checking application..."
-          curl -f $APPLICATION_URL/health && echo "✅ Application healthy"
+          curl -s -f $APPLICATION_URL/health && echo "✅ Application healthy"
           echo "Checking Grafana..."
-          curl -f $GRAFANA_URL/api/health && echo "✅ Grafana healthy"
+          curl -s -f $GRAFANA_URL/api/health && echo "✅ Grafana healthy"
           echo "Checking Prometheus..."
-          curl -f $PROMETHEUS_URL/-/healthy && echo "✅ Prometheus healthy"
+          curl -s -f $PROMETHEUS_URL/-/healthy && echo "✅ Prometheus healthy"
           
           echo "🎉 Deployment completed successfully!"
 
@@ -348,12 +353,12 @@ jobs:
           echo "- **Deployment Time**: $(date -u)" >> $GITHUB_STEP_SUMMARY
           echo "- **Deployment Type**: $DEPLOYMENT_TYPE" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Docker Image**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:deployment\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Docker Image**: \`${{ env.REGISTRY }}/${{ github.repository }}:deployment\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Production URLs" >> $GITHUB_STEP_SUMMARY
-          echo "- **Application**: [$APPLICATION_URL]($APPLICATION_URL)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Grafana Dashboard**: [$GRAFANA_URL]($GRAFANA_URL) (admin/admin)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Prometheus**: [$PROMETHEUS_URL]($PROMETHEUS_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Application**: <a href=\"$APPLICATION_URL\" target=\"_blank\">$APPLICATION_URL</a>" >> $GITHUB_STEP_SUMMARY
+          echo "- **Grafana Dashboard**: <a href=\"$GRAFANA_URL\" target=\"_blank\">$GRAFANA_URL</a> (admin/admin)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Prometheus**: <a href=\"$PROMETHEUS_URL\" target=\"_blank\">$PROMETHEUS_URL</a>" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: Successfully deployed to production" >> $GITHUB_STEP_SUMMARY
