@@ -15,14 +15,75 @@ A modern, production-ready CRUD (Create, Read, Update, Delete) REST API built wi
 
 This project serves as a robust foundation for backend applications requiring authentication and CRUD operations.
 
+## Table of Contents
+
+- [TODO](#todo)
+- [Packages and Tools](#packages-and-tools)
+- [Prerequisites](#prerequisites)
+- [Environment Setup](#environment-setup)
+- [Setup](#setup)
+  - [Option 1: Local Setup](#option-1-local-setup)
+  - [Option 2: Docker Setup](#option-2-docker-setup)
+- [Database Migrations](#database-migrations)
+- [Project Structure](#project-structure)
+- [API Documentation](#api-documentation)
+  - [Swagger Documentation](#swagger-documentation)
+  - [Postman Collection](#postman-collection)
+- [API Endpoints](#api-endpoints)
+  - [System Health](#system-health)
+  - [Authentication](#authentication)
+  - [Simple Resource](#simple-resource)
+- [Response Format](#response-format)
+- [API Usage Examples](#api-usage-examples)
+  - [Authentication](#authentication-1)
+  - [Simple Resource Management](#simple-resource-management)
+- [Observability](#observability)
+  - [Architecture](#architecture-1)
+  - [Quick Start](#quick-start)
+  - [Pre-configured Dashboards](#pre-configured-dashboards)
+  - [Available Metrics](#available-metrics)
+- [Testing](#testing)
+  - [Test Architecture](#test-architecture)
+  - [Unit Tests](#unit-tests)
+  - [End-to-End Tests](#end-to-end-tests)
+  - [Test Configuration](#test-configuration)
+  - [Continuous Integration](#continuous-integration)
+  - [Test Data Management](#test-data-management)
+  - [Debugging Tests](#debugging-tests)
+- [Architecture](#architecture)
+  - [Architectural Layers](#architectural-layers)
+  - [Dependency Injection](#dependency-injection)
+  - [Layer Responsibilities](#layer-responsibilities)
+  - [Request Flow](#request-flow)
+  - [Key Design Patterns](#key-design-patterns)
+  - [Configuration Management](#configuration-management)
+  - [Error Handling](#error-handling)
+- [Development](#development)
+  - [Generating Swagger Documentation](#generating-swagger-documentation)
+  - [Code Structure Guidelines](#code-structure-guidelines)
+- [Security Features](#security-features)
+  - [Environment Variables](#environment-variables)
+- [🚀 Production Deployment](#-production-deployment)
+  - [Deployment Architecture](#deployment-architecture)
+  - [Complete E2E Deployment Flow](#complete-e2e-deployment-flow)
+  - [Deployment Timeline](#deployment-timeline)
+  - [Key Features](#key-features)
+  - [Service Stack](#service-stack)
+  - [Deployment Commands](#deployment-commands)
+  - [Environment Variables](#environment-variables-1)
+  - [Monitoring & Debugging](#monitoring--debugging)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
+
 ## TODO
 - Finalise README, include fork instructions
 - Finalise stack & trace dashboards
+- Verify all CI/CD flows
 
 For CI/CD:
 - rename main -> develop
 - figure out redeployment when droplet exists
-
 
 ## Packages and Tools
 - [Gin](https://github.com/gin-gonic/gin) web framework
@@ -820,9 +881,9 @@ Stage Zero features a **production-grade, zero-downtime deployment system** that
 - **Monitoring**: Grafana, Prometheus, OpenTelemetry, Loki, Tempo
 - **Zero Downtime**: Rolling container updates without infrastructure changes
 
-### **Complete E2E Deployment Flow**
+### **Streamlined 3-Step Deployment Process**
 
-#### **Phase 1: Build & Push Docker Image**
+#### **Step 1: Build & Push Container**
 ```bash
 # Trigger: Push to deployment branch
 1. Change Detection: Monitors Dockerfile, Go source, go.mod/go.sum
@@ -831,41 +892,39 @@ Stage Zero features a **production-grade, zero-downtime deployment system** that
 4. Layer Caching: Optimized builds with GitHub Actions cache
 ```
 
-#### **Phase 2: Infrastructure Deployment**
+#### **Step 2: Setup Infrastructure**
 ```bash
-# Terraform-native approach with automatic import
-1. Data Source Query: Finds existing droplets named "stage-zero-tf"
-2. Automatic Import: Imports existing droplet into Terraform state
-3. Plan/Apply: Creates droplet only if none exists
-4. User-Data Execution: Runs initialization script on droplet
+# Infrastructure job handles:
+1. Terraform Planning: Detects existing vs new infrastructure
+2. Droplet Creation: Creates droplet only if none exists
+3. Infrastructure Setup: user-data.sh runs on droplet
+   - System updates & Docker installation
+   - Configuration file downloads
+   - Environment setup
+   - NO container operations
+4. SSH Readiness: Waits for infrastructure to be accessible
 ```
 
-#### **Phase 3: Droplet Initialization (First Time Only)**
+#### **Step 3: Deploy Application**
 ```bash
-# user-data.sh runs on droplet:
-1. System Updates: apt-get update/upgrade
-2. Docker Installation: Docker + Docker Compose
-3. Configuration Download: All service configs and scripts
-4. Service Startup: Complete monitoring stack
-5. Health Verification: Ensures all services are ready
+# Application job handles all Docker operations:
+1. Container Deployment: deploy-containers.sh runs via SSH
+2. Registry Login: Authenticate with GitHub Container Registry
+3. Image Pull: Download latest container images
+4. Smart Deployment: Detects initial vs update deployment
+   - Initial: Start all services
+   - Update: Restart only app & migrate containers
+5. Health Verification: Comprehensive service status checks
+6. Migration Validation: Ensures database migrations completed successfully
 ```
 
-#### **Phase 4: Application Update**
+#### **Final Health Checks**
 ```bash
-# update-application.sh runs via SSH:
-1. Registry Login: Authenticate with GitHub Container Registry
-2. Image Pull: Download latest container images
-3. Rolling Update: Stop app services, start updated containers
-4. Health Check Loop: Verify application health (5s intervals, 60s timeout)
-5. Service Status: Report final deployment status
-```
-
-#### **Phase 5: Health Verification**
-```bash
-# Final production health checks:
+# Comprehensive production health checks:
 ✅ Application: http://droplet-ip:8080/health
 ✅ Grafana: http://droplet-ip:3000/api/health
 ✅ Prometheus: http://droplet-ip:9090/-/healthy
+✅ All Services: Docker Compose service status validation
 ```
 
 ### **Deployment Timeline**
@@ -873,29 +932,30 @@ Stage Zero features a **production-grade, zero-downtime deployment system** that
 ```
 Push to deployment branch
     ↓
-Build & Push Image (2-3 min)
+Step 1: Build & Push Container (2-3 min)
     ↓
-Terraform Plan/Apply (1-2 min)
+Step 2: Setup Infrastructure (1-3 min)
     ↓
-Infrastructure Health Check (0-5 min)
-    ↓
-Container Update (1-2 min)
+Step 3: Deploy Application (1-2 min)
     ↓
 Final Health Checks (30 sec)
     ↓
 Deployment Complete! 🎉
 ```
 
-**Total Time**: ~5-12 minutes (depending on infrastructure state)
+**Total Time**: ~4-8 minutes (depending on infrastructure state)
 
 ### **Key Features**
 
 - **🔄 Zero Downtime**: Only application containers restart, database persists
 - **📊 Data Persistence**: Database and volumes survive deployments
 - **🛡️ No Duplicates**: Terraform import prevents duplicate droplets
-- **⚡ Fast Updates**: ~2-3 minutes for container updates vs 5+ minutes for full deployment
+- **⚡ Fast Updates**: ~1-2 minutes for container updates vs 4+ minutes for full deployment
 - **🔙 Rollback Ready**: Easy deployment of previous image tags
 - **📈 Full Observability**: Complete monitoring stack with Grafana dashboards
+- **🎯 Smart Deployment**: Automatically detects initial vs update deployments
+- **🔍 Comprehensive Health Checks**: Validates all services including migrate container
+- **🏗️ Separation of Concerns**: Clean infrastructure vs application deployment jobs
 
 ### **Service Stack**
 
