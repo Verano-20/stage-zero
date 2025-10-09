@@ -1,4 +1,4 @@
-name: Build, Push, and Deploy Docker Image
+name: Build, Setup Infrastructure, and Deploy Containers
 
 on:
   push:
@@ -124,17 +124,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
+      - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Setup Infrastructure
+      - name: Initialize Terraform
         run: |
           cd terraform/deployment
-          echo "Initializing Terraform..."
           terraform init
-          
+
+      - name: Plan and Apply Infrastructure
+        run: |
+          cd terraform/deployment
+         
           echo "Planning infrastructure changes..."
           terraform plan -out=tfplan -detailed-exitcode
           PLAN_EXIT_CODE=$?
@@ -170,9 +173,6 @@ jobs:
           echo "Application URL: $APPLICATION_URL"
           echo "application_url=$APPLICATION_URL" >> $GITHUB_OUTPUT
           
-          echo "Debug information:"
-          terraform output debug_info
-              
           echo "Verifying droplet accessibility..."
           if ! ping -c 3 $DROPLET_IP > /dev/null 2>&1; then
             echo "⚠️ Warning: Droplet not responding to ping"
@@ -204,7 +204,7 @@ jobs:
             exit 1
           fi
 
-  application:
+  deploy-containers:
     name: Deploy Containers
     runs-on: ubuntu-latest
     needs: setup-infrastructure
