@@ -37,3 +37,13 @@ output "prometheus_url" {
   value = "http://${local.current_droplet.ipv4_address}:9090"
   description = "URL to access Prometheus"
 }
+
+output "debug_info" {
+  value = {
+    droplet_name = local.DROPLET_NAME
+    existing_droplets_count = length(data.digitalocean_droplets.existing.droplets)
+    current_droplet_exists = local.current_droplet != null
+    current_droplet_id = local.current_droplet != null ? local.current_droplet.id : "none"
+  }
+  description = "Debug information about droplet detection"
+}
