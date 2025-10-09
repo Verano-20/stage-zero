@@ -66,18 +66,15 @@ timeout=120  # 120 seconds
 counter=0
 
 while [ $counter -lt $timeout ]; do
-    # Check for failed services, excluding migrate (which exits after completion)
-    FAILED_SERVICES=$(docker-compose -f docker-compose.deployment.yml ps | grep -v "migrate" | grep -E "(Exit|Restarting|Created|Starting)" | wc -l)
+    # Check for not ready services
+    NOT_READY_SERVICES=$(docker-compose -f docker-compose.deployment.yml ps | grep -E "(Exit|Restarting|Created|Starting)" | wc -l)
     
-    # Check if migrate completed successfully (should be "Exit 0")
-    MIGRATE_STATUS=$(docker-compose -f docker-compose.deployment.yml ps migrate | grep migrate | awk '{print $3}')
-    
-    if [ "$FAILED_SERVICES" -eq 0 ] && [ "$MIGRATE_STATUS" = "Exit" ]; then
+    if [ "$NOT_READY_SERVICES" -eq 0 ]; then
         echo "✅ All services are ready!"
         break
     fi
-    
-    echo "Waiting for services... ($counter/$timeout) - $FAILED_SERVICES services not ready, migrate: $MIGRATE_STATUS"
+
+    echo "Waiting for services... ($counter/$timeout) - $NOT_READY_SERVICES services not ready"
     sleep 5
     counter=$((counter + 5))
 done
@@ -102,7 +99,7 @@ docker-compose -f docker-compose.deployment.yml ps
 
 # Completion
 echo "=== Container deployment completed successfully at $(date) ==="
-echo "Container deployment completed successfully at $(date)" >> /var/log/deploy-containers.log
+echo "Container deployment completed successfully at $(date)" >> /var/log/deploy-output.log
 
 # Create completion marker for GitHub Actions workflow
 touch /var/log/deploy-containers-complete
