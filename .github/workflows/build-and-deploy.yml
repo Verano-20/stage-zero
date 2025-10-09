@@ -356,9 +356,9 @@ jobs:
           echo "- **Docker Image**: \`${{ env.REGISTRY }}/${{ github.repository }}:deployment\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Production URLs" >> $GITHUB_STEP_SUMMARY
-          echo "- **Application**: <a href=\"$APPLICATION_URL\" target=\"_blank\">$APPLICATION_URL</a>" >> $GITHUB_STEP_SUMMARY
-          echo "- **Grafana Dashboard**: <a href=\"$GRAFANA_URL\" target=\"_blank\">$GRAFANA_URL</a> (admin/admin)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Prometheus**: <a href=\"$PROMETHEUS_URL\" target=\"_blank\">$PROMETHEUS_URL</a>" >> $GITHUB_STEP_SUMMARY
+          echo "- **Application**: [$APPLICATION_URL]($APPLICATION_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Grafana Dashboard**: [$GRAFANA_URL]($GRAFANA_URL) (admin/admin)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Prometheus**: [$PROMETHEUS_URL]($PROMETHEUS_URL)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: Successfully deployed to production" >> $GITHUB_STEP_SUMMARY
