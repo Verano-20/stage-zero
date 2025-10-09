@@ -10,6 +10,7 @@ env:
   REGISTRY: ghcr.io
   TF_VERSION: '1.13.3'
   TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+  TF_VAR_do_pvt_key: ${{ secrets.DO_SSH_PRIVATE_KEY }}
   TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
   TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
   TF_VAR_postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
@@ -174,13 +175,20 @@ jobs:
           APPLICATION_URL=$(terraform output -raw application_url)
           echo "Application URL: $APPLICATION_URL"
           echo "application_url=$APPLICATION_URL" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH key
+        run: |
+          echo "Setting up SSH key for DigitalOcean..."
+          DROPLET_IP="${{ steps.terraform-outputs.outputs.droplet_ip }}"
           
-          echo "Verifying droplet accessibility..."
-          if ! ping -c 3 $DROPLET_IP > /dev/null 2>&1; then
-            echo "⚠️ Warning: Droplet not responding to ping"
-          else
-            echo "✅ Droplet is accessible"
-          fi
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ env.DO_SSH_PRIVATE_KEY }}" > ~/.ssh/digitalocean
+          chmod 600 ~/.ssh/digitalocean
+
+          ssh-keyscan -H $DROPLET_IP >> ~/.ssh/known_hosts 2>/dev/null || true
+          
+          echo "SSH key setup completed successfully"
 
       - name: Wait for infrastructure setup
         run: |
