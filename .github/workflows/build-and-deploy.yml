@@ -10,7 +10,6 @@ env:
   REGISTRY: ghcr.io
   TF_VERSION: '1.13.3'
   TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
-  TF_VAR_do_pvt_key: ${{ secrets.DO_SSH_PRIVATE_KEY }}
   TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
   TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
   TF_VAR_postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
@@ -178,13 +177,13 @@ jobs:
 
       - name: Setup SSH key
         run: |
-          echo "Setting up SSH key for DigitalOcean..."
+          echo "Setting up SSH key for connecting to the droplet..."
           DROPLET_IP="${{ steps.terraform-outputs.outputs.droplet_ip }}"
           
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          echo "${{ env.DO_SSH_PRIVATE_KEY }}" > ~/.ssh/digitalocean
-          chmod 600 ~/.ssh/digitalocean
+          echo "${{ secrets.DO_SSH_PRIVATE_KEY }}" > ~/.ssh/digital_ocean
+          chmod 600 ~/.ssh/digital_ocean
 
           ssh-keyscan -H $DROPLET_IP >> ~/.ssh/known_hosts 2>/dev/null || true
           
@@ -200,7 +199,7 @@ jobs:
           counter=0
           
           while [ $counter -lt $timeout ]; do
-            if ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 root@$DROPLET_IP "echo 'Infrastructure ready'" > /dev/null 2>&1; then
+            if ssh -i ~/.ssh/digital_ocean -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 root@$DROPLET_IP "echo 'Infrastructure ready'" > /dev/null 2>&1; then
               echo "✅ Infrastructure setup completed!"
               break
             fi
@@ -230,7 +229,7 @@ jobs:
           
           # Execute the container deployment script and capture output
           echo "Executing container deployment script..."
-          DEPLOYMENT_OUTPUT=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "cd /opt/stage-zero && GITHUB_TOKEN='${{ secrets.GITHUB_TOKEN }}' ./deploy-containers.sh")
+          DEPLOYMENT_OUTPUT=$(ssh -i ~/.ssh/digital_ocean -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$DROPLET_IP "cd /opt/stage-zero && GITHUB_TOKEN='${{ secrets.GITHUB_TOKEN }}' ./deploy-containers.sh")
           
           # Extract deployment type from output
           DEPLOYMENT_TYPE=$(echo "$DEPLOYMENT_OUTPUT" | grep "DEPLOYMENT_TYPE=" | cut -d'=' -f2)
