@@ -8,7 +8,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   TF_VERSION: '1.13.3'
   TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
   TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -27,6 +26,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set lowercase repository name
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Check for changes
         id: changes
@@ -66,8 +68,6 @@ jobs:
             type=ref,event=pr
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
-          registry: ${{ env.REGISTRY }}
-          repository: ${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         if: steps.changes.outputs.docker == 'true'
@@ -86,8 +86,6 @@ jobs:
             type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-          registry: ${{ env.REGISTRY }}
-          repository: ${{ env.IMAGE_NAME }}
 
       - name: Generate deployment info
         if: steps.changes.outputs.docker == 'true'
