@@ -86,6 +86,14 @@ if [ $counter -ge $timeout ]; then
     echo "❌ Services failed to start within ${timeout} seconds"
     echo "Service status:"
     docker-compose -f docker-compose.deployment.yml ps
+    
+    # Create failure marker for GitHub Actions workflow
+    touch /var/log/deploy-containers-failed
+    echo "Container deployment failed at $(date)" > /var/log/deploy-containers-failed
+    echo "Services failed to start within ${timeout} seconds" >> /var/log/deploy-containers-failed
+    echo "DEPLOYMENT_TYPE=failed" >> /var/log/deploy-containers-failed
+    
+    exit 1
 fi
 
 # Show final service status
@@ -95,3 +103,8 @@ docker-compose -f docker-compose.deployment.yml ps
 # Completion
 echo "=== Container deployment completed successfully at $(date) ==="
 echo "Container deployment completed successfully at $(date)" >> /var/log/deploy-containers.log
+
+# Create completion marker for GitHub Actions workflow
+touch /var/log/deploy-containers-complete
+echo "Container deployment completed successfully at $(date)" > /var/log/deploy-containers-complete
+echo "DEPLOYMENT_TYPE=$DEPLOYMENT_TYPE" >> /var/log/deploy-containers-complete
