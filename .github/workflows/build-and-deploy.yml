@@ -196,7 +196,7 @@ jobs:
           DROPLET_IP="${{ steps.terraform-outputs.outputs.droplet_ip }}"
           
           # Wait for SSH to be available (indicates infrastructure setup is complete)
-          timeout=120  # 2 minutes
+          timeout=300  # 5 minutes
           counter=0
           
           while [ $counter -lt $timeout ]; do
