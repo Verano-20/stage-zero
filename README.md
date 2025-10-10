@@ -61,12 +61,12 @@ A production-ready Go REST API showcasing enterprise-grade backend engineering p
 
 ### Key Value Propositions
 
-- **🏗️ Clean Architecture**: Implements dependency injection, repository pattern, and clear separation of concerns
-- **🔒 Production Security**: JWT authentication, password hashing, input validation, and secure configuration management
-- **📊 Complete Observability**: Metrics, tracing, logging, and pre-configured Grafana dashboards
-- **🚀 Automated Deployment**: Infrastructure as Code with Terraform and GitHub Actions
-- **🧪 Comprehensive Testing**: Unit tests with mocks and E2E tests with Playwright
-- **📖 Developer Experience**: Auto-generated Swagger docs, Postman collection
+- **🔒 Production Ready**: Build fully secured enterprise-grade applications from day 1.
+- **🚀 Automated Deployments**: Focus on building value, not configuring servers.
+- **📊 Complete Observability**: Full visibility at every level of your application, always.
+- **🧪 Fully Tested**: Validate every new flow with the simple yet comprehensive test architecture.
+- **📖 AI Agent Friendly**: Clear guidelines and project structure to keep AI Agents on the right track.
+- **🏗️ Clean Architecture**: Avoid spaghetti code as your project grows with modern architecture patterns.
 
 ## Features
 
@@ -84,21 +84,20 @@ A production-ready Go REST API showcasing enterprise-grade backend engineering p
 
 ### 📊 Complete Observability Stack
 - **Metrics**: Prometheus integration with custom application metrics
-- **Tracing**: OpenTelemetry distributed tracing
+- **Tracing**: OpenTelemetry distributed tracing for every request
 - **Logging**: Structured JSON logging with Zap
 - **Dashboards**: Pre-configured Grafana dashboards for monitoring
 
 ### 🧪 Comprehensive Testing
 - **Unit Tests**: Go tests with dependency injection mocks
-- **E2E Tests**: Playwright-based integration testing
-- **Test Coverage**: Comprehensive test suites for all layers
+- **E2E Tests**: Playwright end-to-end test suite
 - **CI Integration**: Automated testing on pull requests
 
 ### 🚀 Production Deployment
 - **Infrastructure as Code**: Terraform for DigitalOcean provisioning
-- **Container Orchestration**: Docker Compose for local and production
-- **CI/CD Pipeline**: GitHub Actions for automated deployment
-- **Zero Downtime**: Rolling updates with health checks
+- **Container Orchestration**: Docker Compose for local and production environments
+- **CI/CD Pipeline**: GitHub Actions for automated testing and deployment
+- **Bootstrap Friendly**: Start with a single VM for minimal infrastructure costs
 
 ### 🗄️ Database Management
 - **Migrations**: Version-controlled schema changes with Goose
@@ -128,7 +127,7 @@ Stage Zero follows **Clean Architecture** principles with clear separation of co
 │        (Repositories, Models)           │
 ├─────────────────────────────────────────┤
 │          Infrastructure Layer           │
-│    (Database, External Services)        │
+│    (Database, IaC, External Services)   │
 └─────────────────────────────────────────┘
 ```
 
@@ -162,13 +161,6 @@ type Container struct {
 - **Observability**: OpenTelemetry, Prometheus, Grafana
 - **Testing**: Go testing + Playwright
 - **Deployment**: Docker, Terraform, GitHub Actions
-
-### Key Design Patterns
-
-- **Repository Pattern**: Abstract data access layer
-- **Service Layer**: Business logic encapsulation
-- **Dependency Injection**: Container-based DI for testability
-- **Middleware Pipeline**: Cross-cutting concerns (auth, logging, metrics)
 
 ## Project Structure
 
@@ -412,29 +404,29 @@ Terraform configuration for DigitalOcean:
 ### Deployment Process
 
 1. **Build**: Container image creation and registry push
-2. **Infrastructure**: Terraform plan and apply
+2. **Infrastructure**: Terraform plan and apply - smart handling of existing resources
 3. **Deploy**: Container deployment with health checks
 
 ### Environment Management
 
 - **Development**: Local Docker Compose setup with .env.docker file
 - **Production**: DigitalOcean with automated deployment
-- **Secrets**: GitHub Secrets for sensitive configuration
+- **Secrets**: GitHub Secrets for sensitive deployment configuration
 
 ### Deployment Setup
 
 Some configuration is needed to enable the CD pipelines in a fresh project.
 
-1. Create an ssh key pair that will be used to enable the Github workflows to access the DigitalOcean droplets and deploy containers.
+1. Create an ssh key pair that will be used to enable the Github Actions runner to access the DigitalOcean droplets.
 2. In DigitalOcean, add the public key to your account with the name 'github_actions'.
-3. In your Github repository, add the following repository secrets in the 'actions' tab:
+3. In your Github repository, add the following repository secrets (settings -> secrets and variables -> actions):
   a. DB_PASSWORD (database password)
   b. POSTGRES_PASSWORD (container password)
   c. JWT_SECRET (for application)
   d. DO_TOKEN (DigitalOcean token)
-  e. DO_SSH_PRIVATE_KEY (private key from pair generated earlier)
+  e. DO_SSH_PRIVATE_KEY (private key from pair generated in step 1)
 
-These secrets will enable the Github workflow to fully automate deployment to a DigitalOcean droplet. The remainder of the application environment variables are defined directly in the main.tf file.
+These secrets will enable the Github workflow to fully automate deployment to a DigitalOcean droplet. The non-sensitive application environment variables are defined directly in main.tf.
 
 ## Security
 
@@ -450,6 +442,7 @@ These secrets will enable the Github workflow to fully automate deployment to a 
 
 - **Request Validation**: Gin binding with validation tags
 - **SQL Injection Prevention**: GORM ORM with parameterized queries
+- **Comprehensive Responses**: Standard HTTP error response format listing all validation failures
 
 ---
 
