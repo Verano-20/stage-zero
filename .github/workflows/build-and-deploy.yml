@@ -33,8 +33,10 @@ jobs:
 
       - name: Check for changes
         id: changes
-        uses: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v3
         with:
+          base: deployment # Checks against the most recent commit before the push to deployment branch.
+          list-files: 'json'
           filters: |
             docker:
               - 'Dockerfile'
