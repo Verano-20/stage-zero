@@ -18,14 +18,14 @@ type User struct {
 
 type UserDTO struct {
 	ID        uint      `json:"id" example:"1"`
-	Email     string    `json:"email" example:"user@example.com"`
+	Email     string    `json:"email" example:"user1@example.com"`
 	CreatedAt time.Time `json:"created_at" example:"2025-01-01T00:00:00Z"`
 	UpdatedAt time.Time `json:"updated_at" example:"2025-01-01T00:00:00Z"`
 }
 
 type UserForm struct {
-	Email    string `json:"email" binding:"required,email" example:"user@example.com"`
-	Password string `json:"password" binding:"required,min=8,max=72" example:"securePassword123"`
+	Email    string `json:"email" binding:"required,email" example:"user1@example.com"`
+	Password string `json:"password" binding:"required,min=8,max=72" example:"securePassword1234"`
 }
 
 type Users []*User
