@@ -55,10 +55,6 @@ A production-ready Go REST API showcasing enterprise-grade backend engineering p
 - [License](#license)
 - [Support](#support)
 
-## TODO
-- Finalise README and GUIDELINES
-- Finalise stack & trace dashboards
-
 ### Key Value Propositions
 
 - **🔒 Production Ready**: Build fully secured enterprise-grade applications from day 1.
