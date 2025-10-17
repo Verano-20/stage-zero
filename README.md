@@ -427,11 +427,11 @@ Some configuration is needed to enable the CD pipelines in a fresh project.
 
 1. Create an ssh key pair that will be used to enable the Github workflows to access the DigitalOcean droplets and deploy containers.
 2. In DigitalOcean, add the public key to your account with the name 'github_actions'.
-3. In your Github repository, add the following repository secrets in the 'actions' tab:
-  a. DB_PASSWORD (database password)
-  b. POSTGRES_PASSWORD (container password)
-  c. JWT_SECRET (for application)
-  d. DO_TOKEN (DigitalOcean token)
+3. In your Github repository, add the following repository secrets in the 'actions' tab:  
+  a. DB_PASSWORD (database password)  
+  b. POSTGRES_PASSWORD (container password)  
+  c. JWT_SECRET (for application)  
+  d. DO_TOKEN (DigitalOcean token)  
   e. DO_SSH_PRIVATE_KEY (private key from pair generated earlier)
 
 These secrets will enable the Github workflow to fully automate deployment to a DigitalOcean droplet. The remainder of the application environment variables are defined directly in the main.tf file.
